@@ -1,0 +1,423 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 02</span>
+    <h1>Fundamentals of Networking</h1>
+    <p class="section-description">Client-server architecture, the OSI model, and host-to-host communication</p>
+  </div>
+
+  <!-- ==================== LESSON 1 ==================== -->
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 1</span>
+      <h2>Client-Server Architecture</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">The revolution that started it all — separating server and client into different locations where different pieces of code can live and execute remotely.</p>
+
+      <!-- Client-Server Animated Visual (GSAP) -->
+      <app-hero-client-server />
+
+      <div class="highlight-box">
+        <h3>The Problem It Solves</h3>
+        <ul>
+          <li>Machines are expensive</li>
+          <li>Applications are complex</li>
+          <li>Running everything on a single mainframe is inefficient</li>
+        </ul>
+        <p><strong>Solution:</strong> Break the application into multiple components that can call each other.</p>
+      </div>
+
+      <h3>Benefits</h3>
+      <div class="benefits-grid">
+        <div class="benefit-card">
+          <h4>Centralized Servers</h4>
+          <p>Servers have dedicated resources; clients use commodity hardware</p>
+        </div>
+        <div class="benefit-card">
+          <h4>Better Scaling</h4>
+          <p>Many lightweight clients can call a single powerful server</p>
+        </div>
+        <div class="benefit-card">
+          <h4>Faster Startup</h4>
+          <p>Clients don't carry heavy application logic; binaries are smaller</p>
+        </div>
+        <div class="benefit-card">
+          <h4>Fewer Dependencies</h4>
+          <p>Server handles dependencies (DB drivers, libs); client just makes calls</p>
+        </div>
+      </div>
+
+      <!-- Multi-Client Scaling Visual (GSAP) -->
+      <app-multi-client-scaling />
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> Microservices inherited this same model — breaking a monolith into smaller services that call each other.
+      </div>
+
+      <h3>Remote Procedure Call (RPC)</h3>
+      <p>Born from client-server architecture in the 1960s-70s. The idea of making a call to a remote machine. Initially no standards — just send data across the wire. Standards evolved over time, leading to <strong>gRPC</strong> (Google Remote Procedure Call) as a modern universal standard.</p>
+
+      <!-- RPC Timeline Animation (GSAP) -->
+      <app-rpc-timeline />
+
+      <h3>Three-Tier Architecture</h3>
+      <!-- Three-Tier Flow Animation (GSAP) -->
+      <app-three-tier-flow />
+    </div>
+  </article>
+
+  <!-- ==================== LESSON 2 ==================== -->
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 2</span>
+      <h2>OSI Model</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">A standard communication model with seven layers, each describing a specific networking component.</p>
+
+      <h3>Why We Need a Communication Model</h3>
+      <div class="reasons-grid">
+        <div class="reason-card">
+          <div class="reason-num">01</div>
+          <h4>Agnostic Applications</h4>
+          <p>Without a standard, apps must know the underlying network medium</p>
+        </div>
+        <div class="reason-card">
+          <div class="reason-num">02</div>
+          <h4>Medium Independence</h4>
+          <p>Same app works on Wi-Fi, Ethernet, LTE, fiber, satellite</p>
+        </div>
+        <div class="reason-card">
+          <div class="reason-num">03</div>
+          <h4>Equipment Management</h4>
+          <p>Devices communicate regardless of manufacturer</p>
+        </div>
+        <div class="reason-card">
+          <div class="reason-num">04</div>
+          <h4>Layer Independence</h4>
+          <p>Each layer can be improved separately without affecting others</p>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> We take this for granted. A Node.js app sends requests without caring if it goes through Wi-Fi, fiber, or satellite.
+      </div>
+
+      <h3>The Seven Layers</h3>
+      <p>Click on any layer to explore its details.</p>
+
+      <div class="osi-stack">
+        @for (layer of osiLayers; track layer.num) {
+          <div
+            class="osi-layer"
+            [class.active]="activeOsiLayer() === layer.num"
+            [style.--layer-color]="layer.color"
+            (click)="setActiveLayer(layer.num)"
+          >
+            <div class="osi-layer-header">
+              <span class="osi-num">{{ layer.num }}</span>
+              <span class="osi-name">{{ layer.name }}</span>
+              <span class="osi-unit">{{ layer.unit }}</span>
+              <span class="osi-toggle">{{ activeOsiLayer() === layer.num ? '−' : '+' }}</span>
+            </div>
+            @if (activeOsiLayer() === layer.num) {
+              <div class="osi-details">
+                <div class="osi-protocols">
+                  <span class="osi-proto-label">Protocols: </span>{{ layer.protocols }}
+                </div>
+                <p>{{ layer.description }}</p>
+                <div class="osi-layer-insight">{{ layer.insight }}</div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <h3>The Encapsulation Model</h3>
+      <p>Data is wrapped layer by layer — like a Russian Matryoshka doll. Each layer adds its headers around the data from the layer above.</p>
+
+      <div class="encap-visual">
+        <div class="encap-layer encap-frame">
+          <span class="encap-tag">Frame <span class="encap-ln">L2</span></span>
+          <div class="encap-headers">Dst MAC | Src MAC</div>
+          <div class="encap-layer encap-packet">
+            <span class="encap-tag">Packet <span class="encap-ln">L3</span></span>
+            <div class="encap-headers">Dst IP | Src IP</div>
+            <div class="encap-layer encap-segment">
+              <span class="encap-tag">Segment <span class="encap-ln">L4</span></span>
+              <div class="encap-headers">Dst Port | Src Port</div>
+              <div class="encap-layer encap-data">
+                <span class="encap-tag">Data <span class="encap-ln">L7</span></span>
+                <div class="encap-payload">Hello World!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Network Devices &amp; Their Layers</h3>
+      <div class="devices-visual">
+        <div class="device-row" style="--dc: #6366f1">
+          <span class="device-layer">Layer 7</span>
+          <span class="device-bar"></span>
+          <div class="device-info">
+            <span class="device-name">CDN / Reverse Proxy / L7 LB</span>
+            <span class="device-detail">Full app data (must decrypt TLS)</span>
+          </div>
+        </div>
+        <div class="device-row" style="--dc: #22d3ee">
+          <span class="device-layer">Layer 4</span>
+          <span class="device-bar"></span>
+          <div class="device-info">
+            <span class="device-name">L4 Proxy / Load Balancer</span>
+            <span class="device-detail">Ports, can rewrite packets</span>
+          </div>
+        </div>
+        <div class="device-row" style="--dc: #10b981">
+          <span class="device-layer">Layer 3-4</span>
+          <span class="device-bar"></span>
+          <div class="device-info">
+            <span class="device-name">Firewall</span>
+            <span class="device-detail">IP addresses + ports</span>
+          </div>
+        </div>
+        <div class="device-row" style="--dc: #f59e0b">
+          <span class="device-layer">Layer 3</span>
+          <span class="device-bar"></span>
+          <div class="device-info">
+            <span class="device-name">Router</span>
+            <span class="device-detail">IP addresses</span>
+          </div>
+        </div>
+        <div class="device-row" style="--dc: #ef4444">
+          <span class="device-layer">Layer 2</span>
+          <span class="device-bar"></span>
+          <div class="device-info">
+            <span class="device-name">Switch</span>
+            <span class="device-detail">MAC addresses only</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>Transparent vs Application Proxies</h3>
+      <div class="proxy-compare">
+        <div class="proxy-card proxy-transparent">
+          <h4>Transparent Proxy (L3-4)</h4>
+          <ul>
+            <li>Sees IP addresses and ports (always unencrypted)</li>
+            <li>Cannot see encrypted application data</li>
+            <li>ISPs use these to block websites by IP</li>
+            <li>Governments use these for censorship</li>
+          </ul>
+        </div>
+        <div class="proxy-card proxy-application">
+          <h4>Application Proxy (L7)</h4>
+          <ul>
+            <li>Must decrypt TLS to see content</li>
+            <li>CDNs (Cloudflare, Fastly) are L7 reverse proxies</li>
+            <li>Slower — must process all layers up and down</li>
+            <li>Creates two sessions: client&#8596;proxy, proxy&#8596;server</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>VPN: A Layer 3 Protocol</h3>
+      <div class="vpn-visual">
+        <div class="vpn-outer">
+          <span class="vpn-label">Outer Packet</span>
+          <div class="vpn-header">Your IP &rarr; VPN Server IP</div>
+          <div class="vpn-inner">
+            <span class="vpn-label">Inner Packet (encrypted)</span>
+            <div class="vpn-header">Your IP &rarr; Real Destination</div>
+          </div>
+        </div>
+        <p class="vpn-note">ISP only sees the VPN server address — not your real destination</p>
+      </div>
+
+      <h3>OSI vs TCP/IP Model</h3>
+      <div class="model-compare">
+        <div class="model-col">
+          <div class="model-title">OSI Model</div>
+          <div class="model-layer" style="--mc: #6366f1">7. Application</div>
+          <div class="model-layer" style="--mc: #8b5cf6">6. Presentation</div>
+          <div class="model-layer" style="--mc: #a855f7">5. Session</div>
+          <div class="model-layer" style="--mc: #22d3ee">4. Transport</div>
+          <div class="model-layer" style="--mc: #10b981">3. Network</div>
+          <div class="model-layer" style="--mc: #f59e0b">2. Data Link</div>
+          <div class="model-layer" style="--mc: #ef4444">1. Physical</div>
+        </div>
+        <div class="model-arrow">
+          <div class="model-map map-app">&rarr;</div>
+          <div class="model-map map-transport">&rarr;</div>
+          <div class="model-map map-internet">&rarr;</div>
+          <div class="model-map map-access">&rarr;</div>
+        </div>
+        <div class="model-col">
+          <div class="model-title">TCP/IP Model</div>
+          <div class="model-layer model-tall-3" style="--mc: #8b5cf6">Application</div>
+          <div class="model-layer" style="--mc: #22d3ee">Transport</div>
+          <div class="model-layer" style="--mc: #10b981">Internet</div>
+          <div class="model-layer model-tall-2" style="--mc: #f59e0b">Network Access</div>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <h3>Key Takeaways</h3>
+        <ul>
+          <li>Know where your application sits in the model</li>
+          <li>Layer 4 and Layer 7 are where backend engineers spend most time</li>
+          <li>Lower layers = faster processing (less to parse)</li>
+          <li>Higher layers = more information but more overhead</li>
+          <li>Everything below Layer 5 (IP, ports) is <strong>public and unencrypted</strong> — anyone in the path can see it</li>
+        </ul>
+      </div>
+    </div>
+  </article>
+
+  <!-- ==================== LESSON 3 ==================== -->
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 3</span>
+      <h2>Host-to-Host Communication</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">How messages are sent between hosts at the lowest level — Layer 2 and Layer 3.</p>
+
+      <h3>MAC Address (Media Access Control)</h3>
+      <p>Every network card has a unique MAC address: <code>00:1A:2B:3C:4D:5E</code> (6 bytes, 48 bits). This is the lowest level of addressing.</p>
+
+      <h3>The Broadcast Problem</h3>
+      <p>On a shared network, when Host A sends to Host B:</p>
+
+      <app-broadcast-problem />
+
+      <p class="note">Everyone receives the frame. Only the intended recipient processes it — others drop it. This is how public Wi-Fi sniffing worked.</p>
+
+      <div class="highlight-box">
+        <h3>Why MAC Addresses Aren't Enough</h3>
+        <div class="problems-grid">
+          <div class="problem-item">
+            <h4>No Routability</h4>
+            <p>MAC addresses are random — no location info</p>
+          </div>
+          <div class="problem-item">
+            <h4>No Segmentation</h4>
+            <p>Cannot divide into smaller networks</p>
+          </div>
+          <div class="problem-item">
+            <h4>Global Scanning</h4>
+            <p>Finding a MAC globally means scanning everything</p>
+          </div>
+        </div>
+        <div class="key-insight">
+          <strong>Key insight:</strong> MAC addresses are globally unique but provide no location information — like having a unique name but no address.
+        </div>
+      </div>
+
+      <h3>Enter: IP Addresses</h3>
+      <p>IP addresses solve the routability problem by having two parts:</p>
+
+      <div class="ip-breakdown">
+        <div class="ip-octets">
+          <div class="ip-octet network">192</div>
+          <span class="ip-dot">.</span>
+          <div class="ip-octet network">168</div>
+          <span class="ip-dot">.</span>
+          <div class="ip-octet network">1</div>
+          <span class="ip-dot">.</span>
+          <div class="ip-octet host">5</div>
+          <span class="ip-cidr">/24</span>
+        </div>
+        <div class="ip-labels">
+          <div class="ip-label ip-net-label">
+            <span class="ip-label-line"></span>
+            Network Portion (24 bits)
+          </div>
+          <div class="ip-label ip-host-label">
+            <span class="ip-label-line"></span>
+            Host (8 bits)
+          </div>
+        </div>
+      </div>
+
+      <h3>Subnet Mask</h3>
+      <p>Determines which part is network vs host:</p>
+      <div class="subnet-table">
+        <div class="subnet-row subnet-hdr">
+          <span>CIDR</span><span>Subnet Mask</span><span>Network Bits</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">/24</span><span class="mono">255.255.255.0</span><span>First 3 bytes</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">/16</span><span class="mono">255.255.0.0</span><span>First 2 bytes</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">/8</span><span class="mono">255.0.0.0</span><span>First 1 byte</span>
+        </div>
+      </div>
+
+      <h3>Routers: Connecting Networks</h3>
+      <app-router-visual />
+
+      <h3>Ports: Addressing Applications</h3>
+      <p>IP identifies the machine, but which app should receive the data? <strong>Ports</strong> (Layer 4) solve this.</p>
+      <div class="ports-grid">
+        <div class="port-item"><span class="port-num">80</span><span class="port-svc">HTTP</span></div>
+        <div class="port-item"><span class="port-num">443</span><span class="port-svc">HTTPS</span></div>
+        <div class="port-item"><span class="port-num">22</span><span class="port-svc">SSH</span></div>
+        <div class="port-item"><span class="port-num">53</span><span class="port-svc">DNS</span></div>
+        <div class="port-item"><span class="port-num">5432</span><span class="port-svc">PostgreSQL</span></div>
+      </div>
+
+      <h3>The Complete Addressing Stack</h3>
+      <div class="addr-stack">
+        <div class="addr-level" style="--ac: #f59e0b">
+          <div class="addr-tag">Layer 2</div>
+          <div class="addr-info">
+            <div class="addr-type">MAC Address</div>
+            <code>00:1A:2B:3C:4D:5E</code>
+          </div>
+          <div class="addr-target">Physical NIC</div>
+        </div>
+        <div class="addr-arrow-down"></div>
+        <div class="addr-level" style="--ac: #10b981">
+          <div class="addr-tag">Layer 3</div>
+          <div class="addr-info">
+            <div class="addr-type">IP Address</div>
+            <code>192.168.1.5</code>
+          </div>
+          <div class="addr-target">Host on Network</div>
+        </div>
+        <div class="addr-arrow-down"></div>
+        <div class="addr-level" style="--ac: #22d3ee">
+          <div class="addr-tag">Layer 4</div>
+          <div class="addr-info">
+            <div class="addr-type">Port Number</div>
+            <code>:443</code>
+          </div>
+          <div class="addr-target">Application</div>
+        </div>
+      </div>
+
+      <div class="key-insight" style="margin-top: 1.5rem">
+        <strong>Full path:</strong> Frame (MAC) &rarr; Packet (IP) &rarr; Segment (Port) &rarr; Application
+      </div>
+    </div>
+  </article>
+
+  <!-- Navigation -->
+  <div class="section-nav">
+    <a routerLink="/section/1" class="nav-btn prev">
+      <span class="nav-btn-label">Previous</span>
+      <span class="nav-btn-title">&larr; Introduction</span>
+    </a>
+    <a routerLink="/section/3" class="nav-btn next">
+      <span class="nav-btn-label">Next Section</span>
+      <span class="nav-btn-title">Internet Protocol &rarr;</span>
+    </a>
+  </div>
+</div>

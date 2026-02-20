@@ -1,0 +1,205 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 01</span>
+    <h1>Introduction</h1>
+    <p class="section-description">Welcome to the Fundamentals of Network Engineering course</p>
+  </div>
+
+  <!-- Lesson 1: Welcome -->
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 1</span>
+      <h2>Welcome</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        This course is designed for backend engineers, software engineers, and frontend developers
+        who build network applications but lack a deep understanding of networking fundamentals.
+      </p>
+
+      <div class="highlight-box">
+        <h3>Why This Course Exists</h3>
+        <p>Many developers spend years building software without truly understanding:</p>
+        <ul>
+          <li>What network stacks are and how they work</li>
+          <li>Current network limitations</li>
+          <li>TCP handshakes and acknowledgements</li>
+          <li>Why connections vary in speed</li>
+        </ul>
+        <p class="note">
+          Traditional university courses often present networking concepts in isolation,
+          without connecting them to real-world software development.
+        </p>
+      </div>
+
+      <div class="goal-box">
+        <div class="goal-marker"></div>
+        <div>
+          <h3>Course Goal</h3>
+          <p>
+            Bridge the gap between software engineering and network engineering
+            by teaching first-principle building blocks.
+          </p>
+        </div>
+      </div>
+
+      <h3>Topics Covered</h3>
+      <div class="topics-grid">
+        <div class="topic-item">TCP/IP stack</div>
+        <div class="topic-item">UDP and TCP protocols</div>
+        <div class="topic-item">OSI layers (Layer 3, 4, 6, 7)</div>
+        <div class="topic-item">Essential concepts for backend &amp; DevOps</div>
+      </div>
+    </div>
+  </article>
+
+  <!-- Lesson 2: Who Is This Course For? -->
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 2</span>
+      <h2>Who Is This Course For?</h2>
+    </div>
+
+    <div class="lesson-content">
+      <div class="audience-cards">
+        <div class="audience-card backend">
+          <h3>Backend Engineers</h3>
+          <p>Those building backend applications that clients consume, but don't fully understand:</p>
+          <ul>
+            <li>What happens when a segment arrives at their application</li>
+            <li>What the operating system does with incoming data</li>
+            <li>What the application is listening on</li>
+            <li>Why a segment goes to a certain process and not another</li>
+          </ul>
+          <div class="key-insight">
+            <strong>Key insight:</strong> The frontend consumes the backend, and the medium
+            connecting them is networking — understanding this is fundamental.
+          </div>
+        </div>
+
+        <div class="audience-card frontend">
+          <h3>Frontend Engineers</h3>
+          <p>Those making API calls to backend services benefit from understanding:</p>
+          <ul>
+            <li>How a request travels from client to server</li>
+            <li>Why slowdowns may not be the backend's fault</li>
+            <li>Low-level client-side network configurations</li>
+          </ul>
+          <div class="key-insight">
+            <strong>Key insight:</strong> When you understand networking, you know what to do.
+            Without understanding, it becomes a black box.
+          </div>
+        </div>
+
+        <div class="audience-card network">
+          <h3>Network Engineers</h3>
+          <p>
+            Those interested in building backend/frontend applications,
+            or wanting to refresh their knowledge.
+          </p>
+          <div class="key-insight">
+            <strong>Key insight:</strong> There's a significant gap between network engineers
+            and application developers. This course bridges that gap.
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- Lesson 3: Course Outline -->
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 3</span>
+      <h2>Course Outline</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        The course is divided into six major sections, building from fundamentals to hands-on analysis.
+      </p>
+
+      <div class="roadmap">
+        <div class="roadmap-item">
+          <div class="roadmap-marker" style="--marker-color: #6366f1">1</div>
+          <div class="roadmap-content">
+            <h3>Fundamentals of Networking</h3>
+            <p>
+              Why networking was invented, client-server architecture,
+              host-to-host communication, and basic networking concepts from scratch.
+            </p>
+          </div>
+        </div>
+
+        <div class="roadmap-item">
+          <div class="roadmap-marker" style="--marker-color: #22d3ee">2</div>
+          <div class="roadmap-content">
+            <h3>Internet Protocol (IP)</h3>
+            <p>
+              IP address structure, packet routing, routing protocols, ARP, ICMP,
+              and IP packet headers.
+              <em>"Don't memorize headers — understand what each does."</em>
+            </p>
+          </div>
+        </div>
+
+        <div class="roadmap-item">
+          <div class="roadmap-marker" style="--marker-color: #10b981">3</div>
+          <div class="roadmap-content">
+            <h3>UDP (User Datagram Protocol)</h3>
+            <p>
+              UDP datagram structure, pros and cons, when to use and when not to use UDP.
+              Starting with UDP because it's simpler than TCP.
+            </p>
+          </div>
+        </div>
+
+        <div class="roadmap-item">
+          <div class="roadmap-marker" style="--marker-color: #f59e0b">4</div>
+          <div class="roadmap-content">
+            <h3>TCP (Transmission Control Protocol)</h3>
+            <p>
+              TCP segments, three-way handshake, flow control, congestion control,
+              slow start, TCP Fast Open, and connection states.
+              <em>"Anything exists because of a problem it solves."</em>
+            </p>
+          </div>
+        </div>
+
+        <div class="roadmap-item">
+          <div class="roadmap-marker" style="--marker-color: #ec4899">5</div>
+          <div class="roadmap-content">
+            <h3>Networking &amp; Backend Performance</h3>
+            <p>
+              The bridge section — linking network engineering to backend/frontend performance.
+              MSS, MTU, packet sizes, and HTTP request behavior.
+            </p>
+          </div>
+        </div>
+
+        <div class="roadmap-item">
+          <div class="roadmap-marker" style="--marker-color: #ef4444">6</div>
+          <div class="roadmap-content">
+            <h3>Wireshark Analysis</h3>
+            <p>
+              Hands-on packet analysis: sniffing packets, analyzing TCP/UDP/TLS protocols,
+              and decrypting TLS handshakes.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- Navigation -->
+  <div class="section-nav">
+    <a routerLink="/" class="nav-btn prev">
+      <span class="nav-btn-label">Home</span>
+      <span class="nav-btn-title">Back to Overview</span>
+    </a>
+    <a routerLink="/section/2" class="nav-btn next">
+      <span class="nav-btn-label">Next Section</span>
+      <span class="nav-btn-title">Fundamentals &rarr;</span>
+    </a>
+  </div>
+</div>

@@ -1,0 +1,452 @@
+/* ===== Benefits Grid ===== */
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.benefit-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1.25rem;
+}
+
+.benefit-card h4 { font-size: 0.9375rem; font-weight: 600; margin-bottom: 0.375rem; color: var(--text-primary); }
+.benefit-card p { font-size: 0.8125rem; color: var(--text-secondary); margin: 0; }
+
+/* ===== OSI Interactive Stack ===== */
+.osi-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 1.5rem 0;
+}
+
+.osi-layer {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--layer-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.osi-layer:hover { border-color: var(--layer-color); background: rgba(255, 255, 255, 0.03); }
+.osi-layer.active { border-color: var(--layer-color); background: rgba(255, 255, 255, 0.05); }
+
+.osi-layer-header {
+  display: flex;
+  align-items: center;
+  padding: 0.875rem 1rem;
+  gap: 0.75rem;
+}
+
+.osi-num {
+  width: 28px;
+  height: 28px;
+  background: var(--layer-color);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.osi-name { font-weight: 600; flex: 1; }
+
+.osi-unit {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+}
+
+.osi-toggle { color: var(--text-muted); font-size: 1.25rem; width: 24px; text-align: center; }
+
+.osi-details {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid var(--border-color);
+  padding-top: 0.875rem;
+}
+
+.osi-protocols { font-size: 0.8125rem; color: var(--accent-secondary); margin-bottom: 0.5rem; }
+.osi-proto-label { color: var(--text-muted); }
+.osi-details p { font-size: 0.9375rem; margin-bottom: 0.75rem; }
+.osi-layer-insight {
+  font-size: 0.875rem;
+  padding: 0.75rem;
+  background: rgba(99, 102, 241, 0.08);
+  border-radius: 6px;
+  color: var(--text-secondary);
+}
+
+/* ===== Encapsulation Visual ===== */
+.encap-visual {
+  margin: 1.5rem 0;
+  padding: 2rem;
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  overflow-x: auto;
+}
+
+.encap-layer {
+  padding: 1rem;
+  border: 2px solid;
+  border-radius: 10px;
+  position: relative;
+}
+
+.encap-frame { border-color: #f59e0b; background: rgba(245, 158, 11, 0.03); }
+.encap-packet { border-color: #10b981; background: rgba(16, 185, 129, 0.03); margin-top: 0.75rem; }
+.encap-segment { border-color: #22d3ee; background: rgba(34, 211, 238, 0.03); margin-top: 0.75rem; }
+.encap-data { border-color: #6366f1; background: rgba(99, 102, 241, 0.08); margin-top: 0.75rem; text-align: center; }
+
+.encap-tag {
+  position: absolute;
+  top: -0.625rem;
+  left: 1rem;
+  background: var(--bg-card);
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.encap-ln { font-family: var(--font-mono); color: var(--text-muted); font-weight: 400; }
+.encap-headers { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); }
+.encap-payload { font-family: var(--font-mono); font-weight: 500; color: var(--accent-primary); padding: 0.5rem; }
+
+/* ===== Devices Visual ===== */
+.devices-visual {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.device-row {
+  display: grid;
+  grid-template-columns: 80px 4px 1fr;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-card);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.device-layer { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); }
+.device-bar { width: 4px; height: 100%; min-height: 24px; background: var(--dc); border-radius: 2px; }
+.device-info { display: flex; flex-direction: column; gap: 0.25rem; }
+.device-name { font-weight: 600; font-size: 0.9375rem; }
+.device-detail { font-size: 0.8125rem; color: var(--text-muted); }
+
+/* ===== Proxy Comparison ===== */
+.proxy-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.proxy-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1.25rem;
+  border-top: 3px solid;
+}
+
+.proxy-transparent { border-top-color: #f59e0b; }
+.proxy-application { border-top-color: #6366f1; }
+.proxy-card h4 { font-size: 1rem; margin-bottom: 0.75rem; }
+.proxy-card ul { padding-left: 1.25rem; margin: 0; }
+.proxy-card li { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.375rem; }
+
+/* ===== VPN Visual ===== */
+.vpn-visual {
+  margin: 1rem 0;
+  padding: 1.5rem;
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.vpn-outer {
+  border: 2px dashed #10b981;
+  border-radius: 10px;
+  padding: 1rem;
+  position: relative;
+}
+
+.vpn-inner {
+  border: 2px solid #6366f1;
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  position: relative;
+}
+
+.vpn-label {
+  position: absolute;
+  top: -0.5rem;
+  left: 1rem;
+  background: var(--bg-card);
+  padding: 0 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vpn-outer > .vpn-label { color: #10b981; }
+.vpn-inner > .vpn-label { color: #6366f1; }
+.vpn-header { font-family: var(--font-mono); font-size: 0.8125rem; color: var(--text-muted); }
+.vpn-note { font-size: 0.875rem; color: var(--text-muted); margin-top: 1rem; font-style: italic; }
+
+/* ===== Model Comparison ===== */
+.model-compare {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: start;
+  margin: 1.5rem 0;
+  padding: 2rem;
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.model-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 150px;
+  flex: 1;
+  max-width: 200px;
+}
+
+.model-title { font-weight: 600; text-align: center; margin-bottom: 0.5rem; font-size: 0.9375rem; }
+
+.model-layer {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: 1px solid var(--mc);
+  background: color-mix(in srgb, var(--mc) 10%, transparent);
+}
+
+.model-tall-3 { flex: 3; display: flex; align-items: center; justify-content: center; }
+.model-tall-2 { flex: 2; display: flex; align-items: center; justify-content: center; }
+
+.model-arrow {
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  padding-top: 2rem;
+  flex: 0;
+  min-width: 30px;
+}
+
+.model-map {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.map-app { flex: 3; }
+.map-transport { flex: 1; }
+.map-internet { flex: 1; }
+.map-access { flex: 2; }
+
+/* ===== Reasons Grid ===== */
+.reasons-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.reason-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1.25rem;
+}
+
+.reason-num { font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-primary); margin-bottom: 0.5rem; }
+.reason-card h4 { font-size: 0.9375rem; margin-bottom: 0.375rem; }
+.reason-card p { font-size: 0.8125rem; color: var(--text-secondary); margin: 0; }
+
+/* ===== Broadcast Visual ===== */
+
+/* ===== Problems Grid ===== */
+.problems-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.problem-item { padding: 1rem; background: rgba(255, 255, 255, 0.02); border-radius: 8px; }
+.problem-item h4 { font-size: 0.875rem; margin-bottom: 0.25rem; }
+.problem-item p { font-size: 0.8125rem; color: var(--text-muted); margin: 0; }
+
+/* ===== IP Breakdown ===== */
+.ip-breakdown {
+  margin: 1.5rem 0;
+  padding: 2rem;
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.ip-octets {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.ip-octet {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+}
+
+.ip-octet.network { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.ip-octet.host { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
+.ip-dot { font-size: 2rem; font-weight: 700; color: var(--text-muted); padding: 0 0.25rem; }
+.ip-cidr { font-family: var(--font-mono); font-size: 1.25rem; color: var(--text-muted); margin-left: 0.5rem; align-self: flex-start; }
+
+.ip-labels { display: flex; justify-content: center; gap: 2rem; }
+
+.ip-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.ip-net-label { color: #10b981; }
+.ip-host-label { color: #22d3ee; }
+.ip-label-line { width: 40px; height: 2px; border-radius: 1px; }
+.ip-net-label .ip-label-line { background: #10b981; }
+.ip-host-label .ip-label-line { background: #22d3ee; }
+
+/* ===== Subnet Table ===== */
+.subnet-table {
+  margin: 1rem 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.subnet-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.subnet-row:last-child { border-bottom: none; }
+
+.subnet-hdr {
+  background: rgba(255, 255, 255, 0.03);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.mono { font-family: var(--font-mono); }
+
+/* ===== Router Visual ===== */
+
+/* ===== Ports Grid ===== */
+.ports-grid {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+.port-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.port-num { font-family: var(--font-mono); font-weight: 600; color: var(--accent-secondary); }
+.port-svc { font-size: 0.8125rem; color: var(--text-muted); }
+
+/* ===== Addressing Stack ===== */
+.addr-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1.5rem 0;
+}
+
+.addr-level {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: var(--bg-card);
+  border: 2px solid var(--ac);
+  border-radius: 10px;
+  width: 100%;
+}
+
+.addr-tag {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ac);
+  background: color-mix(in srgb, var(--ac) 10%, transparent);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.addr-type { font-weight: 600; font-size: 0.9375rem; }
+.addr-info code { font-size: 0.8125rem; }
+.addr-target { font-size: 0.8125rem; color: var(--text-muted); text-align: right; }
+.addr-arrow-down { width: 2px; height: 20px; background: var(--border-color); }
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .benefits-grid,
+  .reasons-grid,
+  .proxy-compare { grid-template-columns: 1fr; }
+  .problems-grid { grid-template-columns: 1fr; }
+
+
+  .model-compare { flex-direction: column; align-items: center; }
+  .model-arrow { flex-direction: row; padding-top: 0; }
+  .ip-octet { font-size: 1.5rem; padding: 0.375rem 0.625rem; }
+}

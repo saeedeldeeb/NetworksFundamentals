@@ -1,0 +1,52 @@
+<div class="home">
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">Interactive Course</div>
+      <h1>Fundamentals of<br><span class="gradient-text">Network Engineering</span></h1>
+      <p class="hero-description">
+        Bridge the gap between software engineering and network engineering.
+        Learn first-principle building blocks of networking — from IP packets to TCP handshakes.
+      </p>
+      <div class="hero-meta">
+        <div class="meta-item">
+          <span class="meta-value">11</span>
+          <span class="meta-label">Sections</span>
+        </div>
+        <div class="meta-divider"></div>
+        <div class="meta-item">
+          <span class="meta-value">40+</span>
+          <span class="meta-label">Lessons</span>
+        </div>
+        <div class="meta-divider"></div>
+        <div class="meta-item">
+          <span class="meta-value">Hands-on</span>
+          <span class="meta-label">Approach</span>
+        </div>
+      </div>
+      <div class="credit">
+        A course by
+        <a href="https://www.husseinnasser.com" target="_blank" rel="noopener" class="author-link">
+          Hussein Nasser
+        </a>
+      </div>
+      <a routerLink="/section/1" class="cta-button">Start Learning</a>
+    </div>
+    <div class="hero-visual">
+      <app-hero-network />
+    </div>
+  </section>
+
+  <section class="sections-overview">
+    <h2>Course Sections</h2>
+    <div class="grid">
+      @for (section of sections; track section.id) {
+        <a [routerLink]="'/section/' + section.id" class="section-card" [style.--card-accent]="section.color">
+          <span class="card-number">{{ section.num }}</span>
+          <h3>{{ section.title }}</h3>
+          <p>{{ section.description }}</p>
+          <span class="card-arrow">&rarr;</span>
+        </a>
+      }
+    </div>
+  </section>
+</div>

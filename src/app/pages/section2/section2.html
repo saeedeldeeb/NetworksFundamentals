@@ -237,30 +237,36 @@
       </div>
 
       <h3>OSI vs TCP/IP Model</h3>
-      <div class="model-compare">
-        <div class="model-col">
-          <div class="model-title">OSI Model</div>
-          <div class="model-layer" style="--mc: #6366f1">7. Application</div>
-          <div class="model-layer" style="--mc: #8b5cf6">6. Presentation</div>
-          <div class="model-layer" style="--mc: #a855f7">5. Session</div>
-          <div class="model-layer" style="--mc: #22d3ee">4. Transport</div>
-          <div class="model-layer" style="--mc: #10b981">3. Network</div>
-          <div class="model-layer" style="--mc: #f59e0b">2. Data Link</div>
-          <div class="model-layer" style="--mc: #ef4444">1. Physical</div>
-        </div>
-        <div class="model-arrow">
-          <div class="model-map map-app">&rarr;</div>
-          <div class="model-map map-transport">&rarr;</div>
-          <div class="model-map map-internet">&rarr;</div>
-          <div class="model-map map-access">&rarr;</div>
-        </div>
-        <div class="model-col">
-          <div class="model-title">TCP/IP Model</div>
-          <div class="model-layer model-tall-3" style="--mc: #8b5cf6">Application</div>
-          <div class="model-layer" style="--mc: #22d3ee">Transport</div>
-          <div class="model-layer" style="--mc: #10b981">Internet</div>
-          <div class="model-layer model-tall-2" style="--mc: #f59e0b">Network Access</div>
-        </div>
+      <div class="model-grid">
+        <!-- Header row -->
+        <div class="mg-header">OSI Model</div>
+        <div class="mg-header-mid"></div>
+        <div class="mg-header">TCP/IP Model</div>
+        <!-- Row 1: L7 → Application -->
+        <div class="mg-osi" style="--mc: #8b5cf6">7. Application</div>
+        <div class="mg-link" style="--lc: #8b5cf6"><span class="mg-dash"></span></div>
+        <div class="mg-tcp mg-tcp-app" style="--mc: #8b5cf6">Application</div>
+        <!-- Row 2: L6 -->
+        <div class="mg-osi" style="--mc: #8b5cf6">6. Presentation</div>
+        <div class="mg-link" style="--lc: #8b5cf6"><span class="mg-dash"></span></div>
+        <!-- Row 3: L5 -->
+        <div class="mg-osi" style="--mc: #8b5cf6">5. Session</div>
+        <div class="mg-link" style="--lc: #8b5cf6"><span class="mg-dash"></span></div>
+        <!-- Row 4: L4 → Transport -->
+        <div class="mg-osi" style="--mc: #22d3ee">4. Transport</div>
+        <div class="mg-link" style="--lc: #22d3ee"><span class="mg-dash"></span></div>
+        <div class="mg-tcp mg-tcp-transport" style="--mc: #22d3ee">Transport</div>
+        <!-- Row 5: L3 → Internet -->
+        <div class="mg-osi" style="--mc: #10b981">3. Network</div>
+        <div class="mg-link" style="--lc: #10b981"><span class="mg-dash"></span></div>
+        <div class="mg-tcp mg-tcp-internet" style="--mc: #10b981">Internet</div>
+        <!-- Row 6: L2 → Network Access -->
+        <div class="mg-osi" style="--mc: #f59e0b">2. Data Link</div>
+        <div class="mg-link" style="--lc: #f59e0b"><span class="mg-dash"></span></div>
+        <div class="mg-tcp mg-tcp-access" style="--mc: #f59e0b">Network Access</div>
+        <!-- Row 7: L1 -->
+        <div class="mg-osi" style="--mc: #f59e0b">1. Physical</div>
+        <div class="mg-link" style="--lc: #f59e0b"><span class="mg-dash"></span></div>
       </div>
 
       <div class="highlight-box">

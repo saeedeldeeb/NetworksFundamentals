@@ -10,6 +10,7 @@ import { PingTracerouteComponent } from './animations/ping-traceroute.component'
 import { ArpFlowComponent } from './animations/arp-flow.component';
 import { RoutingExampleComponent } from './animations/routing-example.component';
 import { BlackholeAnimationComponent } from './animations/blackhole-animation.component';
+import { VrrpAnimationComponent } from './animations/vrrp-animation.component';
 
 @Component({
   selector: 'app-section3',
@@ -25,6 +26,7 @@ import { BlackholeAnimationComponent } from './animations/blackhole-animation.co
     ArpFlowComponent,
     RoutingExampleComponent,
     BlackholeAnimationComponent,
+    VrrpAnimationComponent,
   ],
   templateUrl: './section3.html',
   styleUrl: './section3.css',

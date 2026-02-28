@@ -628,6 +628,15 @@
       <h3>VRRP (Virtual Router Redundancy)</h3>
       <p>ARP enables high availability: multiple routers share one virtual IP. If the primary fails, the backup starts answering ARP requests — hosts don't notice.</p>
 
+      <app-vrrp-animation />
+
+      <ul>
+        <li><strong>Virtual IP:</strong> Both routers share a single IP (and virtual MAC). Hosts only know this address as their gateway.</li>
+        <li><strong>MASTER / STANDBY:</strong> The highest-priority router becomes MASTER and handles all traffic. The STANDBY monitors heartbeats.</li>
+        <li><strong>Transparent failover:</strong> When the MASTER fails, the STANDBY takes over the virtual IP within seconds — no configuration change needed on hosts.</li>
+        <li><strong>Real-world use:</strong> Tools like <code>keepalived</code> implement VRRP for load balancers, database proxies, and API gateways.</li>
+      </ul>
+
       <div class="key-insight">
         <strong>For backend engineers:</strong> Understanding ARP explains why the first packet to a new host is slower (ARP lookup), how MITM attacks work on local networks, and how high-availability setups like keepalived work.
       </div>

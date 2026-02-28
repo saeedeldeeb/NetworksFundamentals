@@ -35,6 +35,68 @@
         </div>
       </div>
 
+      <h3>DHCP — How Devices Get an IP Automatically</h3>
+      <p>When you connect to a network, your device doesn't magically know its IP address. <strong>DHCP (Dynamic Host Configuration Protocol)</strong> handles this through a 4-step handshake known as <strong>DORA</strong>:</p>
+
+      <div class="dhcp-steps-text">
+        <div class="dhcp-step-card">
+          <span class="dhcp-step-num" style="background: #f59e0b;">D</span>
+          <div>
+            <strong>Discover</strong>
+            <span>Your device broadcasts: "I'm new here, I need an IP address!" Since it has no IP yet, it sends to the broadcast address <code>255.255.255.255</code>.</span>
+          </div>
+        </div>
+        <div class="dhcp-step-card">
+          <span class="dhcp-step-num" style="background: #6366f1;">O</span>
+          <div>
+            <strong>Offer</strong>
+            <span>The DHCP server responds: "How about 192.168.1.50? It's available." The server picks an IP from its pool and reserves it temporarily.</span>
+          </div>
+        </div>
+        <div class="dhcp-step-card">
+          <span class="dhcp-step-num" style="background: #22d3ee;">R</span>
+          <div>
+            <strong>Request</strong>
+            <span>Your device confirms: "Yes, I'll take 192.168.1.50!" This is broadcast so other DHCP servers (if any) know the offer was accepted.</span>
+          </div>
+        </div>
+        <div class="dhcp-step-card">
+          <span class="dhcp-step-num" style="background: #10b981;">A</span>
+          <div>
+            <strong>Acknowledge</strong>
+            <span>Server finalizes: "Confirmed! Here's your IP, subnet mask, default gateway, DNS server, and lease time." Your device is now fully configured.</span>
+          </div>
+        </div>
+      </div>
+
+      <app-dhcp-flow />
+
+      <div class="dhcp-extra">
+        <div class="dhcp-detail-card">
+          <div class="dhcp-detail-title">What DHCP Gives You</div>
+          <div class="dhcp-detail-list">
+            <span><code>IP Address</code> — Your identity on the network</span>
+            <span><code>Subnet Mask</code> — Defines your local network boundary</span>
+            <span><code>Default Gateway</code> — The router to reach other networks</span>
+            <span><code>DNS Server</code> — Translates domain names to IPs</span>
+            <span><code>Lease Time</code> — How long you keep this IP (must renew)</span>
+          </div>
+        </div>
+        <div class="dhcp-detail-card">
+          <div class="dhcp-detail-title">DHCP vs Static</div>
+          <div class="dhcp-vs">
+            <div class="dhcp-vs-row">
+              <span class="dhcp-vs-label">DHCP</span>
+              <span>Automatic, convenient, IPs can change. Used by phones, laptops, IoT devices.</span>
+            </div>
+            <div class="dhcp-vs-row">
+              <span class="dhcp-vs-label static">Static</span>
+              <span>Manual, fixed IP. Used for servers, printers, routers — things that need a stable address.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <h3>IP Address Structure</h3>
       <p>Every IP has two parts: a <strong>network portion</strong> and a <strong>host portion</strong>, divided by the CIDR notation.</p>
 
@@ -96,61 +158,9 @@
       </div>
 
       <h3>How Subnet Mask Works</h3>
-      <p>Apply a bitwise AND between the IP and subnet mask to determine which network a host belongs to.</p>
+      <p>Apply a bitwise AND between the IP and subnet mask to determine which network a host belongs to. Watch it alternate between same-subnet and different-subnet examples:</p>
 
-      <div class="and-demo">
-        <div class="and-example and-same">
-          <div class="and-title">Same Subnet</div>
-          <div class="and-row">
-            <span class="and-label">Source IP</span>
-            <span class="mono">192.168.1.3</span>
-          </div>
-          <div class="and-row">
-            <span class="and-label">Dest IP</span>
-            <span class="mono">192.168.1.2</span>
-          </div>
-          <div class="and-row">
-            <span class="and-label">Mask</span>
-            <span class="mono">255.255.255.0</span>
-          </div>
-          <div class="and-divider"></div>
-          <div class="and-row">
-            <span class="and-label">Source AND</span>
-            <span class="mono and-result">192.168.1.0</span>
-          </div>
-          <div class="and-row">
-            <span class="and-label">Dest AND</span>
-            <span class="mono and-result">192.168.1.0</span>
-          </div>
-          <div class="and-verdict same">MATCH &rarr; Send directly via MAC</div>
-        </div>
-
-        <div class="and-example and-diff">
-          <div class="and-title">Different Subnet</div>
-          <div class="and-row">
-            <span class="and-label">Source IP</span>
-            <span class="mono">192.168.1.3</span>
-          </div>
-          <div class="and-row">
-            <span class="and-label">Dest IP</span>
-            <span class="mono">192.168.2.2</span>
-          </div>
-          <div class="and-row">
-            <span class="and-label">Mask</span>
-            <span class="mono">255.255.255.0</span>
-          </div>
-          <div class="and-divider"></div>
-          <div class="and-row">
-            <span class="and-label">Source AND</span>
-            <span class="mono and-result">192.168.1.0</span>
-          </div>
-          <div class="and-row">
-            <span class="and-label">Dest AND</span>
-            <span class="mono and-result diff">192.168.2.0</span>
-          </div>
-          <div class="and-verdict diff">MISMATCH &rarr; Send to gateway</div>
-        </div>
-      </div>
+      <app-subnet-check />
 
       <h3>The Decision Tree</h3>
       <div class="decision-tree">
@@ -176,34 +186,7 @@
       <h3>Default Gateway</h3>
       <p>Every network needs a default gateway — a router with <strong>multiple network interfaces</strong>, living in multiple networks at once.</p>
 
-      <div class="gateway-visual">
-        <div class="gw-network gw-net1">
-          <div class="gw-net-label">Network 1</div>
-          <div class="gw-net-cidr">192.168.1.x/24</div>
-          <div class="gw-hosts">
-            <span class="gw-host">Host<br><small>192.168.1.3</small></span>
-          </div>
-        </div>
-        <div class="gw-router">
-          <div class="gw-iface gw-iface-left">
-            <small>.1.1</small>
-          </div>
-          <div class="gw-router-box">
-            <div class="gw-router-label">Router / Gateway</div>
-            <div class="gw-router-sub">"Lives two lives"</div>
-          </div>
-          <div class="gw-iface gw-iface-right">
-            <small>.2.1</small>
-          </div>
-        </div>
-        <div class="gw-network gw-net2">
-          <div class="gw-net-label">Network 2</div>
-          <div class="gw-net-cidr">192.168.2.x/24</div>
-          <div class="gw-hosts">
-            <span class="gw-host">Host<br><small>192.168.2.2</small></span>
-          </div>
-        </div>
-      </div>
+      <app-gateway-routing />
 
       <div class="highlight-box">
         <h3>Three Things Every Host Needs</h3>
@@ -373,77 +356,11 @@
       <h3>Time to Live (TTL)</h3>
       <p><strong>Problem:</strong> IP is stateless — routers don't remember packets. Without TTL, a packet could loop forever between misconfigured routers.</p>
 
-      <div class="ttl-visual">
-        <div class="ttl-sender">
-          <div class="ttl-device-label">Sender</div>
-          <div class="ttl-value">TTL=64</div>
-        </div>
-        <div class="ttl-hop">
-          <div class="ttl-arrow">&rarr;</div>
-          <div class="ttl-router">Router 1</div>
-          <div class="ttl-value">TTL=63</div>
-        </div>
-        <div class="ttl-hop">
-          <div class="ttl-arrow">&rarr;</div>
-          <div class="ttl-router">Router 2</div>
-          <div class="ttl-value">TTL=62</div>
-        </div>
-        <div class="ttl-hop">
-          <div class="ttl-arrow">&rarr;</div>
-          <div class="ttl-router">Router 3</div>
-          <div class="ttl-value">TTL=61</div>
-        </div>
-        <div class="ttl-hop">
-          <div class="ttl-arrow">&rarr;</div>
-          <div class="ttl-device-label">Destination</div>
-        </div>
-      </div>
+      <app-ttl-animation />
 
       <p>If TTL reaches <strong>0</strong>, the packet is dropped and the router sends an <strong>ICMP "Time Exceeded"</strong> message back to the source. This is how <code>traceroute</code> works — by sending packets with incrementally increasing TTLs.</p>
 
-      <div class="traceroute-demo">
-        <div class="tr-title">How Traceroute Uses TTL</div>
-        <div class="tr-step">
-          <span class="tr-ttl">TTL=1</span>
-          <span class="tr-path">
-            <span class="tr-node active">R1</span>
-            <span class="tr-node dim">R2</span>
-            <span class="tr-node dim">R3</span>
-            <span class="tr-node dim">Dest</span>
-          </span>
-          <span class="tr-result">R1 replies with ICMP Time Exceeded</span>
-        </div>
-        <div class="tr-step">
-          <span class="tr-ttl">TTL=2</span>
-          <span class="tr-path">
-            <span class="tr-node pass">R1</span>
-            <span class="tr-node active">R2</span>
-            <span class="tr-node dim">R3</span>
-            <span class="tr-node dim">Dest</span>
-          </span>
-          <span class="tr-result">R2 replies with ICMP Time Exceeded</span>
-        </div>
-        <div class="tr-step">
-          <span class="tr-ttl">TTL=3</span>
-          <span class="tr-path">
-            <span class="tr-node pass">R1</span>
-            <span class="tr-node pass">R2</span>
-            <span class="tr-node active">R3</span>
-            <span class="tr-node dim">Dest</span>
-          </span>
-          <span class="tr-result">R3 replies with ICMP Time Exceeded</span>
-        </div>
-        <div class="tr-step">
-          <span class="tr-ttl">TTL=4</span>
-          <span class="tr-path">
-            <span class="tr-node pass">R1</span>
-            <span class="tr-node pass">R2</span>
-            <span class="tr-node pass">R3</span>
-            <span class="tr-node reached">Dest</span>
-          </span>
-          <span class="tr-result success">Destination reached!</span>
-        </div>
-      </div>
+      <app-traceroute-animation />
 
       <h3>Fragmentation</h3>
       <p>When a packet is larger than the MTU (Maximum Transmission Unit, typically <strong>1,500 bytes</strong>), it must be fragmented or dropped.</p>
@@ -533,52 +450,7 @@
       <h3>Explicit Congestion Notification (ECN)</h3>
       <p>A smarter way to handle network congestion — without dropping packets.</p>
 
-      <div class="ecn-compare">
-        <div class="ecn-approach ecn-old">
-          <div class="ecn-title">Traditional (Without ECN)</div>
-          <div class="ecn-steps">
-            <div class="ecn-step">
-              <span class="ecn-num">1</span>
-              <span>Router buffer fills up</span>
-            </div>
-            <div class="ecn-step">
-              <span class="ecn-num">2</span>
-              <span>Router <strong>drops</strong> packets</span>
-            </div>
-            <div class="ecn-step">
-              <span class="ecn-num">3</span>
-              <span>Sender waits for ACK timeout</span>
-            </div>
-            <div class="ecn-step">
-              <span class="ecn-num">4</span>
-              <span>Sender assumes congestion, slows down</span>
-            </div>
-          </div>
-          <div class="ecn-verdict bad">Wasted packets + timeout delay</div>
-        </div>
-        <div class="ecn-approach ecn-new">
-          <div class="ecn-title">With ECN</div>
-          <div class="ecn-steps">
-            <div class="ecn-step">
-              <span class="ecn-num">1</span>
-              <span>Router buffer getting full</span>
-            </div>
-            <div class="ecn-step">
-              <span class="ecn-num">2</span>
-              <span>Router <strong>marks</strong> ECN bit (no drop)</span>
-            </div>
-            <div class="ecn-step">
-              <span class="ecn-num">3</span>
-              <span>Receiver sees ECN flag, tells sender</span>
-            </div>
-            <div class="ecn-step">
-              <span class="ecn-num">4</span>
-              <span>Sender slows down immediately</span>
-            </div>
-          </div>
-          <div class="ecn-verdict good">No packet loss, faster response</div>
-        </div>
-      </div>
+      <app-ecn-animation />
 
       <h3>IP Spoofing</h3>
       <p>Can you fake the source IP? Technically <strong>yes</strong> — but practically it rarely works.</p>
@@ -607,38 +479,421 @@
         </div>
       </div>
 
-      <h3>TCP Black Hole Connections</h3>
-      <p>When "Don't Fragment" is set and ICMP is blocked — packets vanish silently.</p>
+      <div class="key-insight">
+        <strong>For backend engineers:</strong> The IP packet is usually just "data with source and destination IP." But understanding headers helps debug network issues — TTL for traceroute, fragmentation for performance, ECN for congestion.
+      </div>
+    </div>
+  </article>
 
-      <div class="blackhole-visual">
-        <div class="bh-step">
-          <div class="bh-icon ok">1</div>
-          <span>TCP handshake succeeds (small packets)</span>
+  <!-- ==================== LESSON 3 ==================== -->
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 3</span>
+      <h2>ICMP, Ping, and Traceroute</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">ICMP (Internet Control Message Protocol) is a critical Layer 3 protocol used for network diagnostics and error reporting.</p>
+
+      <h3>What is ICMP?</h3>
+      <div class="ip-facts">
+        <div class="ip-fact">
+          <span class="fact-label">Layer</span>
+          <span class="fact-value">3 (Network)</span>
         </div>
-        <div class="bh-step">
-          <div class="bh-icon ok">2</div>
-          <span>Start sending real data (larger packets)</span>
+        <div class="ip-fact">
+          <span class="fact-label">Uses</span>
+          <span class="fact-value">IP directly, no ports</span>
         </div>
-        <div class="bh-step">
-          <div class="bh-icon warn">3</div>
-          <span>Packet hits router with smaller MTU</span>
+        <div class="ip-fact">
+          <span class="fact-label">Protocol #</span>
+          <span class="fact-value">1</span>
         </div>
-        <div class="bh-step">
-          <div class="bh-icon danger">4</div>
-          <span>DF=1, can't fragment &rarr; packet dropped</span>
+        <div class="ip-fact">
+          <span class="fact-label">Listener</span>
+          <span class="fact-value">None needed</span>
         </div>
-        <div class="bh-step">
-          <div class="bh-icon danger">5</div>
-          <span>ICMP "Frag Needed" blocked by firewall</span>
+      </div>
+
+      <h3>Common ICMP Messages</h3>
+      <div class="subnet-visual">
+        <div class="subnet-row subnet-hdr">
+          <span>Type</span><span>Message</span><span>When Sent</span>
         </div>
-        <div class="bh-step">
-          <div class="bh-icon black">6</div>
-          <span>Sender never knows &rarr; connection hangs forever</span>
+        <div class="subnet-row">
+          <span class="mono">0</span><span>Echo Reply</span><span class="accent">Response to ping</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">3</span><span>Destination Unreachable</span><span class="accent">Host/port unreachable</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">5</span><span>Redirect</span><span class="accent">Better route available</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">8</span><span>Echo Request</span><span class="accent">Ping request</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">11</span><span>Time Exceeded</span><span class="accent">TTL reached 0</span>
+        </div>
+      </div>
+
+      <h3>Ping</h3>
+      <p>Sends an <strong>ICMP Echo Request</strong> and waits for an <strong>Echo Reply</strong>. Tests if a host is reachable and measures round-trip time.</p>
+
+      <app-ping-traceroute />
+
+      <h3>Why ICMP Gets Blocked</h3>
+      <p>Some firewalls block ICMP because of flooding attacks, network probing by attackers, and backchannel attacks using ICMP for covert communication.</p>
+
+      <h3>TCP Black Hole (ICMP Blocking Problem)</h3>
+
+      <app-blackhole-animation />
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> ICMP is essential infrastructure. Blocking it can cause hard-to-debug network issues like TCP black holes. When ping doesn't work, don't assume the host is down — ICMP might be blocked.
+      </div>
+    </div>
+  </article>
+
+  <!-- ==================== LESSON 4 ==================== -->
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 4</span>
+      <h2>ARP (Address Resolution Protocol)</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">ARP maps IP addresses to MAC addresses — essential for sending frames on a local network.</p>
+
+      <h3>The Problem ARP Solves</h3>
+      <div class="and-demo">
+        <div class="and-example and-same">
+          <div class="and-title">What We Know</div>
+          <div class="and-row">
+            <span class="and-label">Hostname</span>
+            <span>Use DNS &rarr; get IP address</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">IP Address</span>
+            <span>Use ARP &rarr; get MAC address</span>
+          </div>
+          <div class="and-verdict same">ARP bridges Layer 3 (IP) and Layer 2 (MAC)</div>
+        </div>
+        <div class="and-example and-diff">
+          <div class="and-title">Why We Need MAC</div>
+          <div class="and-row">
+            <span class="and-label">Frames</span>
+            <span>Require MAC for delivery</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Switches</span>
+            <span>Use MAC to forward frames</span>
+          </div>
+          <div class="and-verdict diff">IP alone isn't enough for local delivery</div>
+        </div>
+      </div>
+
+      <h3>How ARP Works</h3>
+      <p>Host A wants to send to Host B. It broadcasts <strong>"Who has this IP?"</strong> to all devices. Only Host B replies with its MAC address. A caches the result in its ARP table.</p>
+
+      <app-arp-flow />
+
+      <h3>ARP Poisoning Attack</h3>
+      <p>ARP has <strong>no authentication</strong>. Anyone can answer ARP requests.</p>
+
+      <div class="spoof-flow">
+        <div class="spoof-step">
+          <div class="spoof-icon">1</div>
+          <div class="spoof-text">
+            <strong>Host A broadcasts: "Who has 10.0.0.1 (gateway)?"</strong>
+            <span>Normal ARP request to find the router</span>
+          </div>
+        </div>
+        <div class="spoof-step">
+          <div class="spoof-icon block">2</div>
+          <div class="spoof-text">
+            <strong>Attacker responds: "That's me!"</strong>
+            <span>Sends fake ARP reply with attacker's MAC address</span>
+          </div>
+        </div>
+        <div class="spoof-step dim">
+          <div class="spoof-icon block">3</div>
+          <div class="spoof-text">
+            <strong>All traffic goes through attacker</strong>
+            <span>Man-in-the-Middle: Host A &rarr; Attacker &rarr; Gateway &rarr; Internet</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>VRRP (Virtual Router Redundancy)</h3>
+      <p>ARP enables high availability: multiple routers share one virtual IP. If the primary fails, the backup starts answering ARP requests — hosts don't notice.</p>
+
+      <div class="key-insight">
+        <strong>For backend engineers:</strong> Understanding ARP explains why the first packet to a new host is slower (ARP lookup), how MITM attacks work on local networks, and how high-availability setups like keepalived work.
+      </div>
+    </div>
+  </article>
+
+  <!-- ==================== LESSON 5 ==================== -->
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 5</span>
+      <h2>Capturing Packets with tcpdump</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">Practical packet analysis using tcpdump — a command-line packet analyzer available on macOS and Linux.</p>
+
+      <h3>Common Options</h3>
+      <div class="subnet-visual">
+        <div class="subnet-row subnet-hdr">
+          <span>Option</span><span>Description</span><span>Example</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">-i &lt;iface&gt;</span><span>Capture on specific interface</span><span class="accent">-i en0</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">-n</span><span>Don't resolve hostnames</span><span class="accent">Show raw IPs</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">-v / -vv</span><span>Verbose output</span><span class="accent">Show TTL, flags, etc.</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">-w file</span><span>Write to pcap file</span><span class="accent">-w capture.pcap</span>
+        </div>
+      </div>
+
+      <h3>Quick Reference</h3>
+      <div class="tcpdump-grid">
+        <div class="tcpdump-card">
+          <div class="tcpdump-cmd">tcpdump -i en0 -n arp</div>
+          <span>Capture all ARP packets</span>
+        </div>
+        <div class="tcpdump-card">
+          <div class="tcpdump-cmd">tcpdump -i en0 -n icmp</div>
+          <span>Capture all ICMP (ping)</span>
+        </div>
+        <div class="tcpdump-card">
+          <div class="tcpdump-cmd">tcpdump -i en0 -n host 1.2.3.4</div>
+          <span>Filter by specific host</span>
+        </div>
+        <div class="tcpdump-card">
+          <div class="tcpdump-cmd">tcpdump -i en0 -n -v icmp</div>
+          <span>Verbose ICMP details</span>
+        </div>
+        <div class="tcpdump-card">
+          <div class="tcpdump-cmd">tcpdump -i en0 -w file.pcap</div>
+          <span>Save for Wireshark</span>
+        </div>
+        <div class="tcpdump-card">
+          <div class="tcpdump-cmd">tcpdump -n icmp and host 8.8.8.8</div>
+          <span>Combine filters</span>
+        </div>
+      </div>
+
+      <h3>Key Observations</h3>
+      <div class="three-things">
+        <div class="thing">
+          <span class="thing-num">1</span>
+          <span class="thing-text">ARP is Layer 2 — just MAC addresses</span>
+        </div>
+        <div class="thing">
+          <span class="thing-num">2</span>
+          <span class="thing-text">ICMP is Layer 3 — source/dest IP, no ports</span>
+        </div>
+        <div class="thing">
+          <span class="thing-num">3</span>
+          <span class="thing-text">Ports appear at Layer 4 (TCP/UDP)</span>
         </div>
       </div>
 
       <div class="key-insight">
-        <strong>For backend engineers:</strong> The IP packet is usually just "data with source and destination IP." But understanding headers helps debug network issues — TTL for traceroute, fragmentation for performance, ECN for congestion.
+        <strong>Key insight:</strong> At the IP layer, there are no ports — only source and destination IP addresses. Ports come with TCP/UDP in the transport layer.
+      </div>
+    </div>
+  </article>
+
+  <!-- ==================== LESSON 6 ==================== -->
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 6</span>
+      <h2>Routing Example</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">How IP packets flow through switches and routers — a practical walkthrough of same-network, cross-network, and internet routing.</p>
+
+      <app-routing-example />
+
+      <h3>Layer 2 vs Layer 3 Destinations</h3>
+      <div class="and-demo">
+        <div class="and-example and-same">
+          <div class="and-title">MAC Address (Layer 2)</div>
+          <div class="and-row">
+            <span class="and-label">Scope</span>
+            <span>Local delivery only</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Changes?</span>
+            <span>Yes — at every hop</span>
+          </div>
+          <div class="and-verdict same">Switch uses MAC to forward frames</div>
+        </div>
+        <div class="and-example and-diff">
+          <div class="and-title">IP Address (Layer 3)</div>
+          <div class="and-row">
+            <span class="and-label">Scope</span>
+            <span>End-to-end routing</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Changes?</span>
+            <span>No — stays constant</span>
+          </div>
+          <div class="and-verdict diff">Router uses IP to decide next hop</div>
+        </div>
+      </div>
+
+      <h3>Device Comparison</h3>
+      <div class="subnet-visual">
+        <div class="subnet-row subnet-hdr">
+          <span>Device</span><span>Layer</span><span>Sees</span><span>Action</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">Hub</span><span>1</span><span>Signals</span><span class="accent">Broadcasts to all</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">Switch</span><span>2</span><span>MAC</span><span class="accent">Forwards to specific port</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">Router</span><span>3</span><span>IP</span><span class="accent">Routes between networks</span>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key takeaway:</strong> Same network = switch + MAC. Different network = router. Internet = router + NAT. IP destination stays constant; MAC destination changes per hop.
+      </div>
+    </div>
+  </article>
+
+  <!-- ==================== LESSON 7 ==================== -->
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 7</span>
+      <h2>Private IP Addresses</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">Private IP ranges, subnet planning, and a real-world example from airplane WiFi.</p>
+
+      <h3>Private IP Address Ranges</h3>
+      <p>These IPs are reserved for local networks. They are <strong>not routable on the public internet</strong> — packets with these addresses will be dropped.</p>
+
+      <div class="subnet-visual">
+        <div class="subnet-row subnet-hdr">
+          <span>Range</span><span>CIDR</span><span>Host Bits</span><span>Total</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">10.0.0.0 – 10.255.255.255</span>
+          <span class="mono">/8</span>
+          <span>24</span>
+          <span class="accent">~16.7 million</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">172.16.0.0 – 172.31.255.255</span>
+          <span class="mono">/12</span>
+          <span>20</span>
+          <span class="accent">~1 million</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">192.168.0.0 – 192.168.255.255</span>
+          <span class="mono">/16</span>
+          <span>16</span>
+          <span class="accent">~65,000</span>
+        </div>
+      </div>
+
+      <h3>Real Example: Airplane WiFi</h3>
+      <div class="highlight-box">
+        <h3>Alaska Airlines WiFi Configuration</h3>
+        <div class="three-things">
+          <div class="thing">
+            <span class="thing-num">IP</span>
+            <span class="thing-text">172.19.31.48</span>
+          </div>
+          <div class="thing">
+            <span class="thing-num">Mask</span>
+            <span class="thing-text">255.255.254.0 (/23)</span>
+          </div>
+          <div class="thing">
+            <span class="thing-num">GW</span>
+            <span class="thing-text">172.19.30.1</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="and-demo">
+        <div class="and-example and-same">
+          <div class="and-title">Why /23 instead of /24?</div>
+          <div class="and-row">
+            <span class="and-label">/24</span>
+            <span>256 addresses (254 usable)</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">/23</span>
+            <span>512 addresses (510 usable)</span>
+          </div>
+          <div class="and-verdict same">~200 passengers &times; 2-3 devices = need 512+</div>
+        </div>
+        <div class="and-example and-diff">
+          <div class="and-title">Port-Based Service Filtering</div>
+          <div class="and-row">
+            <span class="and-label">Allowed</span>
+            <span>HTTP (80), DNS (53), text messages</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Blocked</span>
+            <span>HTTPS (443), images, voice calls</span>
+          </div>
+          <div class="and-verdict diff">Router blocks ports for bandwidth control</div>
+        </div>
+      </div>
+
+      <h3>Private vs Public IP</h3>
+      <div class="and-demo">
+        <div class="and-example and-same">
+          <div class="and-title">Private IP</div>
+          <div class="and-row">
+            <span class="and-label">Internet</span>
+            <span>Not routable</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">NAT</span>
+            <span>Required to access internet</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Reusable?</span>
+            <span>Yes, in different networks</span>
+          </div>
+        </div>
+        <div class="and-example and-diff">
+          <div class="and-title">Public IP</div>
+          <div class="and-row">
+            <span class="and-label">Internet</span>
+            <span>Globally routable</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">NAT</span>
+            <span>Not needed</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Reusable?</span>
+            <span>No, globally unique</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key takeaway:</strong> Private IPs require NAT. Subnet mask determines capacity — one extra bit doubles hosts. Real networks are designed based on device count, and port filtering enables granular access control.
       </div>
     </div>
   </article>

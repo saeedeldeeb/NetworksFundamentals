@@ -21,6 +21,122 @@
 .fact-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
 .fact-value { font-weight: 600; font-size: 0.9375rem; }
 
+/* ===== DHCP Steps ===== */
+.dhcp-steps-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+}
+
+.dhcp-step-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  padding: 1rem 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+}
+
+.dhcp-step-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.9375rem;
+  color: white;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.dhcp-step-card div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dhcp-step-card strong { font-size: 0.9375rem; }
+.dhcp-step-card span { font-size: 0.8125rem; color: var(--text-secondary); line-height: 1.5; }
+.dhcp-step-card code { font-size: 0.75rem; }
+
+/* ===== DHCP Extra Details ===== */
+.dhcp-extra {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.dhcp-detail-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.dhcp-detail-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0.875rem;
+  color: var(--text-primary);
+}
+
+.dhcp-detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dhcp-detail-list span {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.dhcp-detail-list code {
+  color: var(--accent-secondary);
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.dhcp-vs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dhcp-vs-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.dhcp-vs-label {
+  padding: 0.25rem 0.625rem;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  background: rgba(34, 211, 238, 0.1);
+  color: #22d3ee;
+  border: 1px solid rgba(34, 211, 238, 0.3);
+}
+
+.dhcp-vs-label.static {
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+  border-color: rgba(168, 85, 247, 0.3);
+}
+
 /* ===== IP Structure Bar ===== */
 .ip-structure {
   margin: 1.5rem 0;
@@ -863,9 +979,41 @@
 .bh-icon.danger { background: #ef4444; }
 .bh-icon.black { background: #1f2937; border: 2px solid #374151; }
 
+/* ===== tcpdump Grid ===== */
+.tcpdump-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.tcpdump-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+}
+
+.tcpdump-cmd {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-secondary);
+  word-break: break-all;
+}
+
+.tcpdump-card span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
   .ip-facts { grid-template-columns: repeat(2, 1fr); }
+  .dhcp-extra { grid-template-columns: 1fr; }
   .and-demo { grid-template-columns: 1fr; }
   .dt-branches { flex-direction: column; align-items: center; }
   .gateway-visual { flex-direction: column; gap: 1rem; }
@@ -886,4 +1034,5 @@
   .tr-step { flex-wrap: wrap; }
   .tr-result { min-width: auto; }
   .frag-pieces { flex-direction: column; }
+  .tcpdump-grid { grid-template-columns: 1fr; }
 }

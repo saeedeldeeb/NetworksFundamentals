@@ -1,0 +1,374 @@
+/* ===== Fact Cards ===== */
+.ip-facts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.ip-fact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.fact-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.fact-value { font-weight: 600; font-size: 0.9375rem; }
+
+/* ===== Comparison Boxes (and-demo) ===== */
+.and-demo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.and-example {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border-top: 3px solid;
+  display: flex;
+  flex-direction: column;
+}
+
+.and-example .and-verdict {
+  margin-top: auto;
+}
+
+.and-same { border-top-color: #10b981; }
+.and-diff { border-top-color: #ef4444; }
+
+.and-title { font-weight: 600; margin-bottom: 1rem; font-size: 1rem; }
+
+.and-row {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.375rem 0;
+  font-size: 0.875rem;
+}
+
+.and-row span:last-child {
+  flex: 1;
+}
+
+.and-label {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  flex-shrink: 0;
+  min-width: 70px;
+}
+
+.and-verdict {
+  margin-top: 0.75rem;
+  padding: 0.625rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.and-verdict.same { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.and-verdict.diff { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+/* ===== UDP vs TCP Comparison Table ===== */
+.udp-compare {
+  margin: 1rem 0 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.udp-compare-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 0;
+  padding: 0.625rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  align-items: center;
+}
+
+.udp-compare-row:last-child {
+  border-bottom: none;
+}
+
+.udp-compare-hdr {
+  background: var(--bg-card);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.udp-val-good {
+  color: #10b981;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+
+.udp-val-warn {
+  color: #f59e0b;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+
+.udp-val-neutral {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+
+/* ===== Port Demo ===== */
+.port-demo {
+  margin: 1.25rem 0;
+}
+
+.port-host {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  max-width: 360px;
+}
+
+.port-host-header {
+  padding: 0.75rem 1.25rem;
+  background: rgba(99, 102, 241, 0.1);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.port-host-ip {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--accent-secondary);
+}
+
+.port-apps {
+  padding: 0.5rem 0;
+}
+
+.port-app {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1.25rem;
+}
+
+.port-app-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.75rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.port-app-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.port-app-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.port-app-info code {
+  font-size: 0.75rem;
+}
+
+/* ===== Use Case Grid ===== */
+.use-case-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+}
+
+.use-case-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.use-case-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.use-case-title {
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.use-case-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ===== VPN Packet Visual ===== */
+.vpn-packet-visual {
+  margin: 1.25rem 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.vpn-packet-label {
+  font-weight: 700;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary);
+}
+
+.vpn-layer {
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.vpn-outer {
+  background: rgba(99, 102, 241, 0.08);
+  border: 1.5px solid rgba(99, 102, 241, 0.3);
+}
+
+.vpn-udp {
+  background: rgba(34, 211, 238, 0.06);
+  border: 1.5px solid rgba(34, 211, 238, 0.25);
+  margin-top: 0.375rem;
+}
+
+.vpn-encrypted {
+  background: rgba(245, 158, 11, 0.06);
+  border: 1.5px dashed rgba(245, 158, 11, 0.3);
+  margin-top: 0.375rem;
+}
+
+.vpn-inner {
+  background: rgba(16, 185, 129, 0.06);
+  border: 1.5px solid rgba(16, 185, 129, 0.25);
+  margin-top: 0.375rem;
+}
+
+.vpn-layer-name {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.vpn-packet-note {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ===== Four Tuple ===== */
+.four-tuple {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1.25rem 0;
+  flex-wrap: wrap;
+}
+
+.tuple-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  min-width: 110px;
+}
+
+.tuple-label {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--accent-secondary);
+}
+
+.tuple-desc {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.tuple-sep {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .ip-facts {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .and-demo {
+    grid-template-columns: 1fr;
+  }
+
+  .udp-compare-row {
+    grid-template-columns: 1.2fr 1fr 1fr;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .use-case-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .four-tuple {
+    gap: 0.375rem;
+  }
+
+  .tuple-item {
+    min-width: 90px;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .tuple-sep {
+    font-size: 1rem;
+  }
+
+  .port-host {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .use-case-grid {
+    grid-template-columns: 1fr;
+  }
+}

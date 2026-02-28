@@ -14,7 +14,7 @@ export class App {
     { id: 1, title: 'Introduction', path: '/section/1', available: true },
     { id: 2, title: 'Fundamentals', path: '/section/2', available: true },
     { id: 3, title: 'Internet Protocol', path: '/section/3', available: true },
-    { id: 4, title: 'UDP', path: '/section/4', available: false },
+    { id: 4, title: 'UDP', path: '/section/4', available: true },
     { id: 5, title: 'TCP', path: '/section/5', available: false },
     { id: 6, title: 'Protocols Overview', path: '/section/6', available: false },
     { id: 7, title: 'Network Performance', path: '/section/7', available: false },

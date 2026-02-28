@@ -17,5 +17,9 @@ export const routes: Routes = [
     path: 'section/3',
     loadComponent: () => import('./pages/section3/section3').then((m) => m.Section3),
   },
+  {
+    path: 'section/4',
+    loadComponent: () => import('./pages/section4/section4').then((m) => m.Section4),
+  },
   { path: '**', redirectTo: '' },
 ];

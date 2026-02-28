@@ -1,59 +1,48 @@
-# NetworksFundamentals
+# Networks Fundamentals
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.3.
+Interactive Angular educational platform teaching network engineering fundamentals. Built as a visual companion to Hussein Nasser's Udemy course.
 
-## Development server
+## Course Reference
 
-To start a local development server, run:
+This project is based on **[Fundamentals of Network Engineering](https://www.udemy.com/course/fundamentals-of-networking-for-effective-backend-design/?couponCode=NET-FEB2026-L)** by [Hussein Nasser](https://www.husseinnasser.com/).
 
-```bash
-ng serve
-```
+## Sections
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+| # | Topic | Status |
+|---|-------|--------|
+| 1 | Introduction | Done |
+| 2 | Fundamentals | Done |
+| 3 | Internet Protocol (IP) | Done |
+| 4 | UDP | In Progress |
+| 5 | TCP | Planned |
+| 6 | Protocols Overview | Planned |
+| 7 | Network Performance | Planned |
+| 8 | Routing | Planned |
+| 9 | Wireshark Analysis | Planned |
+| 10 | Q&A | Planned |
+| 12 | Extras | Planned |
 
-## Code scaffolding
+## Tech Stack
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- Angular 21 (standalone components, signals, lazy routing)
+- GSAP 3.14 with ScrollTrigger and MotionPathPlugin
+- Vitest
+- Prettier
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Getting Started
 
 ```bash
-ng test
+npm install
+npm start
 ```
 
-## Running end-to-end tests
+Open [http://localhost:4200](http://localhost:4200).
 
-For end-to-end (e2e) testing, run:
+## Scripts
 
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+| Command | Description |
+|---------|-------------|
+| `npm start` | Dev server at localhost:4200 |
+| `npm run build` | Production build |
+| `npm test` | Run unit tests (Vitest) |
+| `npm run watch` | Dev build with file watching |

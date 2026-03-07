@@ -329,6 +329,421 @@
   color: var(--text-muted);
 }
 
+/* ===== Port Table (Lesson 2) ===== */
+.port-table {
+  margin: 1rem 0 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.port-table-header,
+.port-table-row {
+  display: grid;
+  grid-template-columns: 80px 80px 1fr;
+  gap: 0;
+  padding: 0.625rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  align-items: center;
+}
+
+.port-table-row:last-child {
+  border-bottom: none;
+}
+
+.port-table-header {
+  background: var(--bg-card);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.port-table-desc {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+/* ===== Port Exhaustion Demo ===== */
+.exhaustion-demo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+
+.exhaustion-fixed,
+.exhaustion-variable {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.25rem;
+  border-top: 3px solid;
+}
+
+.exhaustion-fixed {
+  border-top-color: var(--text-muted);
+}
+
+.exhaustion-variable {
+  border-top-color: #f59e0b;
+}
+
+.exhaustion-label {
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.exhaustion-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.exhaustion-limit {
+  margin-top: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+/* ===== Checksum Flow ===== */
+.checksum-flow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1.25rem 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.checksum-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 0.875rem 1rem;
+  flex: 1;
+  min-width: 150px;
+}
+
+.checksum-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.checksum-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.checksum-info strong {
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+}
+
+.checksum-info span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.checksum-arrow {
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+/* ===== Pros Cards (Lesson 3) ===== */
+.pros-cons-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+}
+
+.pro-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1rem;
+  border-left: 3px solid #10b981;
+}
+
+.pro-card-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  margin-bottom: 0.375rem;
+}
+
+.pro-card-title {
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.pro-card-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ===== Cons List (Lesson 3) ===== */
+.cons-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin: 1.25rem 0;
+}
+
+.con-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 0.875rem 1rem;
+  border-left: 3px solid #ef4444;
+}
+
+.con-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.con-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.con-info strong {
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+}
+
+.con-info span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ===== Protocol Choice (Lesson 3) ===== */
+.protocol-choice {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+}
+
+.protocol-choice-col {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.protocol-choice-header {
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.protocol-choice-header.protocol-udp {
+  background: rgba(34, 211, 238, 0.1);
+  color: #22d3ee;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.protocol-choice-header.protocol-tcp {
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.protocol-choice-item {
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.protocol-choice-item:last-child {
+  border-bottom: none;
+}
+
+/* ===== Step Cards (Lesson 4-5) ===== */
+.step-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin: 1.25rem 0;
+}
+
+.step-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 0.875rem 1rem;
+}
+
+.step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.step-body strong {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+  margin-bottom: 0.125rem;
+}
+
+.step-body p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ===== Flag Grid (Lesson 6) ===== */
+.flag-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.flag-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.flag-item code {
+  flex-shrink: 0;
+}
+
+/* ===== Capture Breakdown (Lesson 6) ===== */
+.capture-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1.25rem 0;
+}
+
+.capture-layer {
+  display: flex;
+  gap: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  align-items: flex-start;
+}
+
+.capture-layer-tag {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+  min-width: 36px;
+  text-align: center;
+}
+
+.layer-ip {
+  background: rgba(99, 102, 241, 0.15);
+  color: #6366f1;
+}
+
+.layer-udp {
+  background: rgba(34, 211, 238, 0.15);
+  color: #22d3ee;
+}
+
+.layer-dns {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.capture-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+
+.capture-field {
+  display: flex;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+}
+
+.capture-field-name {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.capture-field-name::after {
+  content: ':';
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
   .ip-facts {
@@ -364,6 +779,37 @@
 
   .port-host {
     max-width: 100%;
+  }
+
+  .pros-cons-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .protocol-choice {
+    grid-template-columns: 1fr;
+  }
+
+  .exhaustion-demo {
+    grid-template-columns: 1fr;
+  }
+
+  .checksum-flow {
+    flex-direction: column;
+  }
+
+  .checksum-arrow {
+    transform: rotate(90deg);
+  }
+
+  .port-table-header,
+  .port-table-row {
+    grid-template-columns: 70px 70px 1fr;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .flag-grid {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -116,9 +116,9 @@ import { GsapAnimationBase } from './gsap-animation.base';
         </g>
 
         <!-- Packet dots -->
-        <circle class="mux-pkt mux-pkt1" r="6" fill="#f59e0b" opacity="0" />
-        <circle class="mux-pkt mux-pkt2" r="6" fill="#6366f1" opacity="0" />
-        <circle class="mux-pkt mux-pkt3" r="6" fill="#22d3ee" opacity="0" />
+        <circle class="mux-pkt mux-pkt1" cx="130" cy="106" r="6" fill="#f59e0b" opacity="0" />
+        <circle class="mux-pkt mux-pkt2" cx="130" cy="174" r="6" fill="#6366f1" opacity="0" />
+        <circle class="mux-pkt mux-pkt3" cx="130" cy="242" r="6" fill="#22d3ee" opacity="0" />
 
         <!-- Port labels that appear on packets as they travel -->
         <g class="mux-port-tag mux-tag1" opacity="0">

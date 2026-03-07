@@ -103,8 +103,8 @@ import { GsapAnimationBase } from './gsap-animation.base';
         </g>
 
         <!-- Packet dots -->
-        <circle class="udp-pkt-req" r="8" fill="#22d3ee" opacity="0" filter="url(#udp-glow)" />
-        <circle class="udp-pkt-res" r="8" fill="#6366f1" opacity="0" filter="url(#udp-glow)" />
+        <circle class="udp-pkt-req" cx="170" cy="150" r="8" fill="#22d3ee" opacity="0" filter="url(#udp-glow)" />
+        <circle class="udp-pkt-res" cx="530" cy="150" r="8" fill="#6366f1" opacity="0" filter="url(#udp-glow)" />
 
         <!-- "Send & Forget" label -->
         <g class="udp-forget-label" opacity="0">

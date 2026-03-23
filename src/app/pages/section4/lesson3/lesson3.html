@@ -1,0 +1,297 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 04</span>
+    <h1>UDP (User Datagram Protocol)</h1>
+    <p class="section-description">
+      Understanding the simplest Layer 4 protocol — stateless, connectionless, and fast
+    </p>
+  </div>
+
+  <!-- ==================== LESSON 3 ==================== -->
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 3</span>
+      <h2>UDP Pros &amp; Cons</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        Everything has tradeoffs. Understanding UDP's strengths and weaknesses helps you choose
+        the right protocol for the job.
+      </p>
+
+      <h3>Pros of UDP</h3>
+
+      <div class="pros-cons-grid">
+        <div class="pro-card">
+          <div class="pro-card-icon">&#9889;</div>
+          <div class="pro-card-title">Simple Protocol</div>
+          <div class="pro-card-desc">
+            Does exactly what developers need — nothing more. No unnecessary overhead.
+            Perfect when you want control over the communication logic.
+          </div>
+        </div>
+        <div class="pro-card">
+          <div class="pro-card-icon">&#128230;</div>
+          <div class="pro-card-title">Small Header (8 bytes)</div>
+          <div class="pro-card-desc">
+            More bandwidth available for actual data. Less processing at each network hop.
+            Faster packet handling.
+          </div>
+        </div>
+        <div class="pro-card">
+          <div class="pro-card-icon">&#128200;</div>
+          <div class="pro-card-title">Stateless &amp; Scalable</div>
+          <div class="pro-card-desc">
+            No memory consumed for connection tracking. Server can handle many more
+            concurrent clients. Process and forget.
+          </div>
+        </div>
+        <div class="pro-card">
+          <div class="pro-card-icon">&#128640;</div>
+          <div class="pro-card-title">Low Latency</div>
+          <div class="pro-card-desc">
+            No handshake, no acknowledgments, no retransmission delays.
+            First packet = your actual data.
+          </div>
+        </div>
+      </div>
+
+      <h3>Latency Comparison</h3>
+      <div class="and-demo">
+        <div class="and-example and-diff">
+          <div class="and-title">TCP (4 packets before data)</div>
+          <div class="and-row">
+            <span class="and-label">Pkt 1</span>
+            <span>SYN</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Pkt 2</span>
+            <span>SYN-ACK</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Pkt 3</span>
+            <span>ACK</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Pkt 4</span>
+            <span>DATA (finally!)</span>
+          </div>
+          <div class="and-verdict diff">1.5 round trips before data</div>
+        </div>
+        <div class="and-example and-same">
+          <div class="and-title">UDP (1 packet)</div>
+          <div class="and-row">
+            <span class="and-label">Pkt 1</span>
+            <span>DATA (immediately!)</span>
+          </div>
+          <div class="and-verdict same">Zero round trips — instant</div>
+        </div>
+      </div>
+
+      <h3>Stateful vs Stateless</h3>
+      <div class="and-demo">
+        <div class="and-example and-diff">
+          <div class="and-title">TCP: Each Connection Stores</div>
+          <div class="and-row">
+            <span class="and-label">Memory</span>
+            <span>Window sizes, sequences, buffers, timers</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Scale</span>
+            <span>Memory grows with each connection</span>
+          </div>
+          <div class="and-verdict diff">1000s of connections = significant RAM</div>
+        </div>
+        <div class="and-example and-same">
+          <div class="and-title">UDP: Nothing Stored</div>
+          <div class="and-row">
+            <span class="and-label">Memory</span>
+            <span>Process and forget — zero state</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Scale</span>
+            <span>Theoretically infinite clients</span>
+          </div>
+          <div class="and-verdict same">Scales with almost no overhead</div>
+        </div>
+      </div>
+
+      <h3>Cons of UDP</h3>
+
+      <div class="cons-grid">
+        <div class="con-item">
+          <span class="con-num">1</span>
+          <div class="con-info">
+            <strong>No Acknowledgment</strong>
+            <span>
+              Sender doesn't know if data arrived. Can't verify the server received or processed
+              anything. Bad for databases, financial transactions, or any critical data.
+            </span>
+          </div>
+        </div>
+        <div class="con-item">
+          <span class="con-num">2</span>
+          <div class="con-info">
+            <strong>No Guaranteed Delivery</strong>
+            <span>
+              Packets may be lost or arrive out of order. No automatic retransmission.
+              The application must handle losses itself.
+            </span>
+          </div>
+        </div>
+        <div class="con-item">
+          <span class="con-num">3</span>
+          <div class="con-info">
+            <strong>Connectionless (Security Risk)</strong>
+            <span>
+              No authentication between parties. Anyone can send to anyone.
+              Source addresses are easily spoofed — enabling reflection attacks.
+            </span>
+          </div>
+        </div>
+        <div class="con-item">
+          <span class="con-num">4</span>
+          <div class="con-info">
+            <strong>No Flow Control</strong>
+            <span>
+              Sender has no idea how much the receiver can handle. Can overwhelm the
+              receiver's buffer. Packets dropped silently with no feedback.
+            </span>
+          </div>
+        </div>
+        <div class="con-item">
+          <span class="con-num">5</span>
+          <div class="con-info">
+            <strong>No Congestion Control</strong>
+            <span>
+              No awareness of network conditions. Can contribute to congestion.
+              Routers may drop packets silently with no backoff mechanism.
+            </span>
+          </div>
+        </div>
+        <div class="con-item">
+          <span class="con-num">6</span>
+          <div class="con-info">
+            <strong>No Packet Ordering</strong>
+            <span>
+              Packets may arrive out of sequence. The application must reorder them
+              if order matters — or accept out-of-order data.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <h3>UDP-Based Attacks</h3>
+      <p>
+        UDP's connectionless, stateless nature makes it vulnerable to abuse.
+        Two common attacks exploit these weaknesses:
+      </p>
+
+      <h4>DNS Amplification Attack</h4>
+      <p>
+        The attacker sends small DNS queries to many DNS servers but <strong>forges the source IP</strong>
+        to be the victim's address. DNS servers send their large responses to the victim,
+        flooding it with unsolicited traffic. A 40-byte query can produce a 3,000-byte response —
+        a <strong>75x amplification</strong>.
+      </p>
+
+      <app-dns-amplification />
+
+      <h4>UDP Flood Attack</h4>
+      <p>
+        The attacker sends massive amounts of UDP datagrams to a server. Since UDP is stateless,
+        the server <strong>must process every single packet</strong> — it can't filter by connection
+        state like TCP can. This consumes CPU and memory until the server is overwhelmed.
+      </p>
+
+      <app-udp-flood />
+
+      <h3>When to Use UDP vs TCP</h3>
+      <div class="protocol-choice">
+        <div class="protocol-choice-col">
+          <div class="protocol-choice-header protocol-udp">Use UDP</div>
+          <div class="protocol-choice-item">Video streaming</div>
+          <div class="protocol-choice-item">Gaming (real-time)</div>
+          <div class="protocol-choice-item">VoIP / Video calls</div>
+          <div class="protocol-choice-item">DNS queries</div>
+          <div class="protocol-choice-item">VPN tunneling</div>
+        </div>
+        <div class="protocol-choice-col">
+          <div class="protocol-choice-header protocol-tcp">Use TCP</div>
+          <div class="protocol-choice-item">Database operations</div>
+          <div class="protocol-choice-item">File transfers</div>
+          <div class="protocol-choice-item">Web browsing</div>
+          <div class="protocol-choice-item">Email</div>
+          <div class="protocol-choice-item">Financial transactions</div>
+        </div>
+      </div>
+
+      <h3>Building Custom Reliability on UDP</h3>
+      <p>
+        Some developers choose UDP and build <strong>only the features they need</strong>.
+        This gives maximum control — pick TCP-like features without the full cost.
+      </p>
+
+      <div class="and-demo">
+        <div class="and-example and-diff">
+          <div class="and-title">Full TCP Features</div>
+          <div class="and-row">
+            <span class="and-label">Order</span>
+            <span>Full sequence tracking</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Reliability</span>
+            <span>Every packet acknowledged</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Flow</span>
+            <span>Window-based flow control</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Congestion</span>
+            <span>Slow start, avoidance algorithms</span>
+          </div>
+          <div class="and-verdict diff">All features, all overhead</div>
+        </div>
+        <div class="and-example and-same">
+          <div class="and-title">Custom on UDP (e.g. Game)</div>
+          <div class="and-row">
+            <span class="and-label">Order</span>
+            <span>Simple sequence numbers</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Reliability</span>
+            <span>Selective — only critical events</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Flow</span>
+            <span>Simple rate limiting</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Congestion</span>
+            <span>Not needed</span>
+          </div>
+          <div class="and-verdict same">Only what you need, minimal overhead</div>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> UDP gives you a blank canvas. TCP gives you a complete
+        painting. Choose based on whether you need the full picture or want to paint your own.
+      </div>
+    </div>
+  </article>
+
+  <!-- Navigation -->
+  <div class="section-nav">
+    <a routerLink="/section/4/2" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; UDP Datagram Structure</span>
+    </a>
+    <a routerLink="/section/4/4" class="nav-btn next">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">UDP Server with Node.js &rarr;</span>
+    </a>
+  </div>
+</div>

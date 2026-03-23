@@ -1,0 +1,340 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 04</span>
+    <h1>UDP (User Datagram Protocol)</h1>
+    <p class="section-description">
+      Understanding the simplest Layer 4 protocol — stateless, connectionless, and fast
+    </p>
+  </div>
+
+  <!-- ==================== LESSON 1 ==================== -->
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 1</span>
+      <h2>What Is UDP?</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        The User Datagram Protocol — a simple, stateless Layer 4 protocol that sits on top of IP
+        and introduces the concept of <strong>ports</strong>.
+      </p>
+
+      <h3>UDP at a Glance</h3>
+      <div class="ip-facts">
+        <div class="ip-fact">
+          <span class="fact-label">Layer</span>
+          <span class="fact-value">4 (Transport)</span>
+        </div>
+        <div class="ip-fact">
+          <span class="fact-label">Header</span>
+          <span class="fact-value">8 bytes</span>
+        </div>
+        <div class="ip-fact">
+          <span class="fact-label">State</span>
+          <span class="fact-value">Stateless</span>
+        </div>
+        <div class="ip-fact">
+          <span class="fact-label">Connection</span>
+          <span class="fact-value">None required</span>
+        </div>
+      </div>
+
+      <p>
+        UDP sends <strong>datagrams</strong> — self-contained packets of data that don't require a
+        connection or acknowledgment. It's the "send and forget" protocol.
+      </p>
+
+      <h3>UDP vs TCP</h3>
+      <div class="udp-compare">
+        <div class="udp-compare-row udp-compare-hdr">
+          <span>Feature</span>
+          <span>UDP</span>
+          <span>TCP</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Connection required</span>
+          <span class="udp-val-good">No</span>
+          <span class="udp-val-neutral">Yes</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>State stored</span>
+          <span class="udp-val-good">No (stateless)</span>
+          <span class="udp-val-neutral">Yes (stateful)</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Delivery guaranteed</span>
+          <span class="udp-val-warn">No</span>
+          <span class="udp-val-neutral">Yes</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Order guaranteed</span>
+          <span class="udp-val-warn">No</span>
+          <span class="udp-val-neutral">Yes</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Header size</span>
+          <span class="udp-val-good">8 bytes</span>
+          <span class="udp-val-neutral">20+ bytes</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Speed</span>
+          <span class="udp-val-good">Faster</span>
+          <span class="udp-val-neutral">Slower</span>
+        </div>
+      </div>
+
+      <h3>What Stateless Really Means</h3>
+      <div class="and-demo">
+        <div class="and-example and-diff">
+          <div class="and-title">TCP (Stateful)</div>
+          <div class="and-row">
+            <span class="and-label">Setup</span>
+            <span>3-way handshake before data</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Memory</span>
+            <span>Stores window sizes, sequences, buffers, timers</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Tracking</span>
+            <span>Maintains connection state throughout</span>
+          </div>
+          <div class="and-verdict diff">More overhead, more guarantees</div>
+        </div>
+        <div class="and-example and-same">
+          <div class="and-title">UDP (Stateless)</div>
+          <div class="and-row">
+            <span class="and-label">Setup</span>
+            <span>None — send immediately</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Memory</span>
+            <span>Nothing stored on either side</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Tracking</span>
+            <span>Each datagram is independent</span>
+          </div>
+          <div class="and-verdict same">Minimal overhead, maximum speed</div>
+        </div>
+      </div>
+
+      <h3>The Power of Ports</h3>
+      <p>
+        Before UDP (at the IP layer), you could only address a <strong>host</strong> — an entire
+        machine. UDP introduces <strong>ports</strong>, letting you address specific
+        <strong>processes</strong> within a host.
+      </p>
+
+      <div class="port-demo">
+        <div class="port-host">
+          <div class="port-host-header">
+            <span class="port-host-ip">Host 192.168.1.5</span>
+          </div>
+          <div class="port-apps">
+            <div class="port-app">
+              <span class="port-app-icon" style="background: #f59e0b;">D</span>
+              <div class="port-app-info">
+                <span class="port-app-name">DNS Server</span>
+                <code>Port 53</code>
+              </div>
+            </div>
+            <div class="port-app">
+              <span class="port-app-icon" style="background: #6366f1;">H</span>
+              <div class="port-app-info">
+                <span class="port-app-name">DHCP Client</span>
+                <code>Port 68</code>
+              </div>
+            </div>
+            <div class="port-app">
+              <span class="port-app-icon" style="background: #22d3ee;">C</span>
+              <div class="port-app-info">
+                <span class="port-app-name">Custom App</span>
+                <code>Port 6097</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>UDP Use Cases</h3>
+      <div class="use-case-grid">
+        <div class="use-case-card">
+          <div class="use-case-icon">&#9654;</div>
+          <div class="use-case-title">Video Streaming</div>
+          <div class="use-case-desc">
+            Dropped frames are acceptable. Retransmitting old frames would cause buffering — better
+            to skip a frame than delay the stream.
+          </div>
+        </div>
+        <div class="use-case-card">
+          <div class="use-case-icon">&#128274;</div>
+          <div class="use-case-title">VPN</div>
+          <div class="use-case-desc">
+            Avoids TCP meltdown — if VPN uses TCP and your app uses TCP, packet loss causes double
+            retransmission.
+          </div>
+        </div>
+        <div class="use-case-card">
+          <div class="use-case-icon">&#128270;</div>
+          <div class="use-case-title">DNS</div>
+          <div class="use-case-desc">
+            Simple query/response. Small packets, low overhead. Millions of lookups per second
+            globally.
+          </div>
+        </div>
+        <div class="use-case-card">
+          <div class="use-case-icon">&#127918;</div>
+          <div class="use-case-title">Gaming</div>
+          <div class="use-case-desc">
+            Speed over reliability. Player positions update constantly — missing one update is fine,
+            the next one corrects it.
+          </div>
+        </div>
+        <div class="use-case-card">
+          <div class="use-case-icon">&#128247;</div>
+          <div class="use-case-title">WebRTC</div>
+          <div class="use-case-desc">
+            Real-time peer-to-peer video calls. UDP not directly exposed in browsers — WebRTC
+            provides controlled access.
+          </div>
+        </div>
+        <div class="use-case-card">
+          <div class="use-case-icon">&#128222;</div>
+          <div class="use-case-title">VoIP</div>
+          <div class="use-case-desc">
+            Real-time audio. A tiny gap in sound is acceptable — waiting for retransmission is not.
+          </div>
+        </div>
+      </div>
+
+      <h3>VPN: Why Not TCP?</h3>
+      <p>
+        If a VPN uses TCP and your application also uses TCP, you get a dangerous problem called
+        <strong>TCP Meltdown</strong>:
+      </p>
+
+      <div class="and-demo">
+        <div class="and-example and-diff">
+          <div class="and-title">VPN over TCP (Bad)</div>
+          <div class="and-row">
+            <span class="and-label">Layer 1</span>
+            <span>Your app's TCP packet</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Layer 2</span>
+            <span>Wrapped in VPN's TCP</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Loss</span>
+            <span>Both inner and outer TCP retransmit</span>
+          </div>
+          <div class="and-verdict diff">Double retransmission = TCP Meltdown</div>
+        </div>
+        <div class="and-example and-same">
+          <div class="and-title">VPN over UDP (Good)</div>
+          <div class="and-row">
+            <span class="and-label">Layer 1</span>
+            <span>Your app's TCP packet</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Layer 2</span>
+            <span>Wrapped in VPN's UDP</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Loss</span>
+            <span>Only your app's TCP handles retransmission</span>
+          </div>
+          <div class="and-verdict same">Single retransmission, no meltdown</div>
+        </div>
+      </div>
+
+      <div class="vpn-packet-visual">
+        <div class="vpn-packet-label">VPN Encapsulation</div>
+        <div class="vpn-packet-layers">
+          <div class="vpn-layer vpn-outer">
+            <span class="vpn-layer-name">IP: dest=vpn-server</span>
+            <div class="vpn-layer vpn-udp">
+              <span class="vpn-layer-name">UDP</span>
+              <div class="vpn-layer vpn-encrypted">
+                <span class="vpn-layer-name">Encrypted</span>
+                <div class="vpn-layer vpn-inner">
+                  <span class="vpn-layer-name">IP: dest=google.com | TCP | Data</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="vpn-packet-note">ISP only sees traffic to the VPN server</p>
+      </div>
+
+      <h3>Multiplexing &amp; Demultiplexing</h3>
+      <p>
+        <strong>Multiplexing</strong> combines multiple app streams into one network connection.
+        <strong>Demultiplexing</strong> sorts incoming packets to the correct application by port.
+      </p>
+
+      <app-mux-demux />
+
+      <h3>The Four-Tuple</h3>
+      <p>
+        Every UDP datagram is uniquely identified by four values. Together, they tell the network
+        exactly who is talking to whom:
+      </p>
+
+      <div class="four-tuple">
+        <div class="tuple-item">
+          <span class="tuple-label">Source IP</span>
+          <span class="tuple-desc">Sender's address</span>
+        </div>
+        <div class="tuple-sep">+</div>
+        <div class="tuple-item">
+          <span class="tuple-label">Source Port</span>
+          <span class="tuple-desc">Sender's app</span>
+        </div>
+        <div class="tuple-sep">+</div>
+        <div class="tuple-item">
+          <span class="tuple-label">Dest IP</span>
+          <span class="tuple-desc">Receiver's address</span>
+        </div>
+        <div class="tuple-sep">+</div>
+        <div class="tuple-item">
+          <span class="tuple-label">Dest Port</span>
+          <span class="tuple-desc">Receiver's app</span>
+        </div>
+      </div>
+
+      <p>
+        The <strong>source port</strong> is critical — without it, the server wouldn't know which
+        application on the client to send the response back to.
+      </p>
+
+      <h3>UDP Communication in Action</h3>
+      <p>
+        Watch a DNS query and response. Notice how source and destination are
+        <strong>flipped</strong> in the response — this is how the server knows where to reply:
+      </p>
+
+      <app-udp-comm />
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> UDP is simple by design. When you need speed over reliability,
+        or when your application can handle its own error correction, UDP is the right choice. TCP
+        does more but costs more in overhead and latency.
+      </div>
+    </div>
+  </article>
+
+  <!-- Navigation -->
+  <div class="section-nav">
+    <a routerLink="/section/3" class="nav-btn prev">
+      <span class="nav-btn-label">Previous</span>
+      <span class="nav-btn-title">&larr; Internet Protocol</span>
+    </a>
+    <a routerLink="/section/4/2" class="nav-btn next">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">UDP Datagram Structure &rarr;</span>
+    </a>
+  </div>
+</div>

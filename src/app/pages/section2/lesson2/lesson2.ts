@@ -1,27 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { HeroClientServerComponent } from './animations/hero-client-server.component';
-import { MultiClientScalingComponent } from './animations/multi-client-scaling.component';
-import { ThreeTierFlowComponent } from './animations/three-tier-flow.component';
-import { RpcTimelineComponent } from './animations/rpc-timeline.component';
-import { BroadcastProblemComponent } from './animations/broadcast-problem.component';
-import { RouterVisualComponent } from './animations/router-visual.component';
 
 @Component({
-  selector: 'app-section2',
-  imports: [
-    RouterLink,
-    HeroClientServerComponent,
-    MultiClientScalingComponent,
-    ThreeTierFlowComponent,
-    RpcTimelineComponent,
-    BroadcastProblemComponent,
-    RouterVisualComponent,
-  ],
-  templateUrl: './section2.html',
-  styleUrl: './section2.css',
+  selector: 'app-section2-lesson2',
+  imports: [RouterLink],
+  templateUrl: './lesson2.html',
+  styleUrl: '../section2.css',
 })
-export class Section2 {
+export class Section2Lesson2 {
   activeOsiLayer = signal<number | null>(null);
 
   osiLayers = [

@@ -1,0 +1,75 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 02</span>
+    <h1>Fundamentals of Networking</h1>
+    <p class="section-description">Client-server architecture, the OSI model, and host-to-host communication</p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 1</span>
+      <h2>Client-Server Architecture</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">The revolution that started it all — separating server and client into different locations where different pieces of code can live and execute remotely.</p>
+
+      <app-hero-client-server />
+
+      <div class="highlight-box">
+        <h3>The Problem It Solves</h3>
+        <ul>
+          <li>Machines are expensive</li>
+          <li>Applications are complex</li>
+          <li>Running everything on a single mainframe is inefficient</li>
+        </ul>
+        <p><strong>Solution:</strong> Break the application into multiple components that can call each other.</p>
+      </div>
+
+      <h3>Benefits</h3>
+      <div class="benefits-grid">
+        <div class="benefit-card">
+          <h4>Centralized Servers</h4>
+          <p>Servers have dedicated resources; clients use commodity hardware</p>
+        </div>
+        <div class="benefit-card">
+          <h4>Better Scaling</h4>
+          <p>Many lightweight clients can call a single powerful server</p>
+        </div>
+        <div class="benefit-card">
+          <h4>Faster Startup</h4>
+          <p>Clients don't carry heavy application logic; binaries are smaller</p>
+        </div>
+        <div class="benefit-card">
+          <h4>Fewer Dependencies</h4>
+          <p>Server handles dependencies (DB drivers, libs); client just makes calls</p>
+        </div>
+      </div>
+
+      <app-multi-client-scaling />
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> Microservices inherited this same model — breaking a monolith into smaller services that call each other.
+      </div>
+
+      <h3>Remote Procedure Call (RPC)</h3>
+      <p>Born from client-server architecture in the 1960s-70s. The idea of making a call to a remote machine. Initially no standards — just send data across the wire. Standards evolved over time, leading to <strong>gRPC</strong> (Google Remote Procedure Call) as a modern universal standard.</p>
+
+      <app-rpc-timeline />
+
+      <h3>Three-Tier Architecture</h3>
+      <app-three-tier-flow />
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/1" class="nav-btn prev">
+      <span class="nav-btn-label">Previous</span>
+      <span class="nav-btn-title">&larr; Introduction</span>
+    </a>
+    <a routerLink="/section/2/2" class="nav-btn next">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">OSI Model &rarr;</span>
+    </a>
+  </div>
+</div>

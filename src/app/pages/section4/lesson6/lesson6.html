@@ -1,0 +1,234 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 04</span>
+    <h1>UDP (User Datagram Protocol)</h1>
+    <p class="section-description">
+      Understanding the simplest Layer 4 protocol — stateless, connectionless, and fast
+    </p>
+  </div>
+
+  <!-- ==================== LESSON 6 ==================== -->
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 6</span>
+      <h2>Capturing UDP Traffic with tcpdump</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        Seeing UDP in action by capturing real DNS traffic. Despite its name,
+        <code>tcpdump</code> captures all protocols — including UDP, ICMP, and ARP.
+      </p>
+
+      <h3>The Capture Command</h3>
+
+      <app-code-block
+        lang="Bash"
+        filename="Capture DNS traffic"
+        [code]="tcpdumpCmd"
+      />
+
+      <div class="flag-grid">
+        <div class="flag-item">
+          <code>-n</code>
+          <span>Show numbers only (no DNS resolution)</span>
+        </div>
+        <div class="flag-item">
+          <code>-vv</code>
+          <span>Very verbose output</span>
+        </div>
+        <div class="flag-item">
+          <code>-i en0</code>
+          <span>Capture on interface <code>en0</code></span>
+        </div>
+        <div class="flag-item">
+          <code>host 8.8.8.8</code>
+          <span>Filter: packets to/from Google DNS</span>
+        </div>
+      </div>
+
+      <h3>Generate DNS Traffic</h3>
+
+      <app-code-block
+        lang="Bash"
+        filename="In another window"
+        [code]="nslookupCmd"
+        [small]="true"
+      />
+
+      <h3>The Request Packet</h3>
+
+      <app-code-block
+        lang="tcpdump"
+        filename="Request"
+        [code]="tcpdumpRequest"
+      />
+
+      <div class="capture-breakdown">
+        <div class="capture-layer">
+          <span class="capture-layer-tag layer-ip">IP</span>
+          <div class="capture-fields">
+            <div class="capture-field">
+              <span class="capture-field-name">TTL</span>
+              <span>64 (max hops)</span>
+            </div>
+            <div class="capture-field">
+              <span class="capture-field-name">Protocol</span>
+              <span>17 = UDP</span>
+            </div>
+            <div class="capture-field">
+              <span class="capture-field-name">Total length</span>
+              <span>63 bytes</span>
+            </div>
+            <div class="capture-field">
+              <span class="capture-field-name">Source IP</span>
+              <span>192.168.1.144</span>
+            </div>
+            <div class="capture-field">
+              <span class="capture-field-name">Dest IP</span>
+              <span>8.8.8.8</span>
+            </div>
+          </div>
+        </div>
+        <div class="capture-layer">
+          <span class="capture-layer-tag layer-udp">UDP</span>
+          <div class="capture-fields">
+            <div class="capture-field">
+              <span class="capture-field-name">Source port</span>
+              <span>58635 (ephemeral)</span>
+            </div>
+            <div class="capture-field">
+              <span class="capture-field-name">Dest port</span>
+              <span>53 (DNS)</span>
+            </div>
+            <div class="capture-field">
+              <span class="capture-field-name">Length</span>
+              <span>35 bytes</span>
+            </div>
+          </div>
+        </div>
+        <div class="capture-layer">
+          <span class="capture-layer-tag layer-dns">DNS</span>
+          <div class="capture-fields">
+            <div class="capture-field">
+              <span class="capture-field-name">Query ID</span>
+              <span>12345</span>
+            </div>
+            <div class="capture-field">
+              <span class="capture-field-name">Type</span>
+              <span>A (IP address lookup)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>The Response Packet</h3>
+
+      <app-code-block
+        lang="tcpdump"
+        filename="Response"
+        [code]="tcpdumpResponse"
+      />
+
+      <h3>Request vs Response</h3>
+      <div class="udp-compare">
+        <div class="udp-compare-row udp-compare-hdr">
+          <span>Field</span>
+          <span>Request</span>
+          <span>Response</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Source IP</span>
+          <span class="udp-val-good">192.168.1.144</span>
+          <span class="udp-val-neutral">8.8.8.8</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Source Port</span>
+          <span class="udp-val-good">58635</span>
+          <span class="udp-val-neutral">53</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Dest IP</span>
+          <span class="udp-val-good">8.8.8.8</span>
+          <span class="udp-val-neutral">192.168.1.144</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Dest Port</span>
+          <span class="udp-val-good">53</span>
+          <span class="udp-val-neutral">58635</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>TTL</span>
+          <span class="udp-val-good">64</span>
+          <span class="udp-val-neutral">120</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Total Size</span>
+          <span class="udp-val-good">63 bytes</span>
+          <span class="udp-val-neutral">127 bytes</span>
+        </div>
+      </div>
+
+      <p>
+        Notice how source and destination are <strong>flipped</strong> in the response — that's how
+        the server knows where to reply. The <strong>same query ID</strong> (12345) links request
+        to response.
+      </p>
+
+      <h3>Packet Size Breakdown</h3>
+      <div class="and-demo">
+        <div class="and-example and-same">
+          <div class="and-title">Request (63 bytes)</div>
+          <div class="and-row">
+            <span class="and-label">IP header</span>
+            <span>20 bytes</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">UDP header</span>
+            <span>8 bytes</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">DNS data</span>
+            <span>35 bytes</span>
+          </div>
+          <div class="and-verdict same">Small query</div>
+        </div>
+        <div class="and-example and-diff">
+          <div class="and-title">Response (127 bytes)</div>
+          <div class="and-row">
+            <span class="and-label">IP header</span>
+            <span>20 bytes</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">UDP header</span>
+            <span>8 bytes</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">DNS data</span>
+            <span>99 bytes (4 IP addresses)</span>
+          </div>
+          <div class="and-verdict diff">Larger response — amplification potential</div>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> UDP is just a thin wrapper that adds ports to IP. The real
+        work happens in the application protocol (DNS in this case). Looking at a capture,
+        UDP adds very little — source port, destination port, length, and checksum. This
+        simplicity is what makes UDP fast and lightweight.
+      </div>
+    </div>
+  </article>
+
+  <!-- Navigation -->
+  <div class="section-nav">
+    <a routerLink="/section/4/5" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; UDP Server with C</span>
+    </a>
+    <a routerLink="/section/5" class="nav-btn next">
+      <span class="nav-btn-label">Next Section</span>
+      <span class="nav-btn-title">TCP &rarr;</span>
+    </a>
+  </div>
+</div>

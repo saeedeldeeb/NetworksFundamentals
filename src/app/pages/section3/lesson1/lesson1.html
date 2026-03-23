@@ -1,0 +1,242 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 03</span>
+    <h1>Internet Protocol (IP)</h1>
+    <p class="section-description">Deep dive into IP addressing, packets, ICMP, ARP, and routing</p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 1</span>
+      <h2>The IP Building Blocks</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">Fundamental concepts needed to understand the IP protocol — addressing, subnets, and gateways.</p>
+
+      <h3>IP Address Basics</h3>
+      <div class="ip-facts">
+        <div class="ip-fact">
+          <span class="fact-label">Layer</span>
+          <span class="fact-value">3 (Network)</span>
+        </div>
+        <div class="ip-fact">
+          <span class="fact-label">Size</span>
+          <span class="fact-value">4 bytes (32 bits)</span>
+        </div>
+        <div class="ip-fact">
+          <span class="fact-label">Assignment</span>
+          <span class="fact-value">DHCP or Static</span>
+        </div>
+        <div class="ip-fact">
+          <span class="fact-label">Format</span>
+          <span class="fact-value">A.B.C.D/X</span>
+        </div>
+      </div>
+
+      <h3>DHCP — How Devices Get an IP Automatically</h3>
+      <p>When you connect to a network, your device doesn't magically know its IP address. <strong>DHCP (Dynamic Host Configuration Protocol)</strong> handles this through a 4-step handshake known as <strong>DORA</strong>:</p>
+
+      <div class="dhcp-steps-text">
+        <div class="dhcp-step-card">
+          <span class="dhcp-step-num" style="background: #f59e0b;">D</span>
+          <div>
+            <strong>Discover</strong>
+            <span>Your device broadcasts: "I'm new here, I need an IP address!" Since it has no IP yet, it sends to the broadcast address <code>255.255.255.255</code>.</span>
+          </div>
+        </div>
+        <div class="dhcp-step-card">
+          <span class="dhcp-step-num" style="background: #6366f1;">O</span>
+          <div>
+            <strong>Offer</strong>
+            <span>The DHCP server responds: "How about 192.168.1.50? It's available." The server picks an IP from its pool and reserves it temporarily.</span>
+          </div>
+        </div>
+        <div class="dhcp-step-card">
+          <span class="dhcp-step-num" style="background: #22d3ee;">R</span>
+          <div>
+            <strong>Request</strong>
+            <span>Your device confirms: "Yes, I'll take 192.168.1.50!" This is broadcast so other DHCP servers (if any) know the offer was accepted.</span>
+          </div>
+        </div>
+        <div class="dhcp-step-card">
+          <span class="dhcp-step-num" style="background: #10b981;">A</span>
+          <div>
+            <strong>Acknowledge</strong>
+            <span>Server finalizes: "Confirmed! Here's your IP, subnet mask, default gateway, DNS server, and lease time." Your device is now fully configured.</span>
+          </div>
+        </div>
+      </div>
+
+      <app-dhcp-flow />
+
+      <div class="dhcp-extra">
+        <div class="dhcp-detail-card">
+          <div class="dhcp-detail-title">What DHCP Gives You</div>
+          <div class="dhcp-detail-list">
+            <span><code>IP Address</code> — Your identity on the network</span>
+            <span><code>Subnet Mask</code> — Defines your local network boundary</span>
+            <span><code>Default Gateway</code> — The router to reach other networks</span>
+            <span><code>DNS Server</code> — Translates domain names to IPs</span>
+            <span><code>Lease Time</code> — How long you keep this IP (must renew)</span>
+          </div>
+        </div>
+        <div class="dhcp-detail-card">
+          <div class="dhcp-detail-title">DHCP vs Static</div>
+          <div class="dhcp-vs">
+            <div class="dhcp-vs-row">
+              <span class="dhcp-vs-label">DHCP</span>
+              <span>Automatic, convenient, IPs can change. Used by phones, laptops, IoT devices.</span>
+            </div>
+            <div class="dhcp-vs-row">
+              <span class="dhcp-vs-label static">Static</span>
+              <span>Manual, fixed IP. Used for servers, printers, routers — things that need a stable address.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>IP Address Structure</h3>
+      <p>Every IP has two parts: a <strong>network portion</strong> and a <strong>host portion</strong>, divided by the CIDR notation.</p>
+
+      <div class="ip-structure">
+        <div class="ip-example-label">Example: <code>192.168.254.0/24</code></div>
+        <div class="ip-bar">
+          <div class="ip-bar-network">
+            <span class="ip-bar-bytes">192 . 168 . 254</span>
+            <span class="ip-bar-label">Network (24 bits)</span>
+          </div>
+          <div class="ip-bar-host">
+            <span class="ip-bar-bytes">.0 – .255</span>
+            <span class="ip-bar-label">Host (8 bits)</span>
+          </div>
+        </div>
+        <div class="ip-stats">
+          <div class="ip-stat">
+            <span class="stat-num">2<sup>24</sup></span>
+            <span class="stat-desc">~16M possible networks</span>
+          </div>
+          <div class="ip-stat">
+            <span class="stat-num">254</span>
+            <span class="stat-desc">usable hosts per network</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>Subnet and Subnet Mask</h3>
+      <p>A <strong>subnet</strong> is a logical subdivision of an IP network. The <strong>subnet mask</strong> determines which part is network vs host.</p>
+
+      <div class="subnet-visual">
+        <div class="subnet-row subnet-hdr">
+          <span>CIDR</span><span>Subnet Mask</span><span>Host Bits</span><span>Max Hosts</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">/8</span>
+          <span class="mono">255.0.0.0</span>
+          <span>24</span>
+          <span class="accent">~16 million</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">/16</span>
+          <span class="mono">255.255.0.0</span>
+          <span>16</span>
+          <span class="accent">65,534</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">/24</span>
+          <span class="mono">255.255.255.0</span>
+          <span>8</span>
+          <span class="accent">254</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">/32</span>
+          <span class="mono">255.255.255.255</span>
+          <span>0</span>
+          <span class="accent">1 (single host)</span>
+        </div>
+      </div>
+
+      <h3>How Subnet Mask Works</h3>
+      <p>Apply a bitwise AND between the IP and subnet mask to determine which network a host belongs to. Watch it alternate between same-subnet and different-subnet examples:</p>
+
+      <app-subnet-check />
+
+      <h3>The Decision Tree</h3>
+      <div class="decision-tree">
+        <div class="dt-question">Is destination in my subnet?</div>
+        <div class="dt-branches">
+          <div class="dt-branch dt-yes">
+            <div class="dt-connector yes"></div>
+            <div class="dt-answer yes">
+              <span class="dt-label">YES</span>
+              <p>Send directly using MAC address (Layer 2)</p>
+            </div>
+          </div>
+          <div class="dt-branch dt-no">
+            <div class="dt-connector no"></div>
+            <div class="dt-answer no">
+              <span class="dt-label">NO</span>
+              <p>Send to default gateway (router)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Default Gateway</h3>
+      <p>Every network needs a default gateway — a router with <strong>multiple network interfaces</strong>, living in multiple networks at once.</p>
+
+      <app-gateway-routing />
+
+      <div class="highlight-box">
+        <h3>Three Things Every Host Needs</h3>
+        <div class="three-things">
+          <div class="thing">
+            <span class="thing-num">1</span>
+            <span class="thing-text">IP Address</span>
+          </div>
+          <div class="thing">
+            <span class="thing-num">2</span>
+            <span class="thing-text">Subnet Mask</span>
+          </div>
+          <div class="thing">
+            <span class="thing-num">3</span>
+            <span class="thing-text">Default Gateway</span>
+          </div>
+        </div>
+        <p class="note">Without these three, you're "dead in the water."</p>
+      </div>
+
+      <h3>Security Note: ARP Poisoning</h3>
+      <p>When sending to the gateway, you use ARP to find its MAC address. An attacker can <strong>pretend to be the router</strong> — all your packets then flow through the attacker instead (Man-in-the-Middle).</p>
+
+      <h3>Backend Performance Insight</h3>
+      <div class="perf-insight">
+        <div class="perf-bad">
+          <div class="perf-title">Database in different subnet</div>
+          <p>Every query goes through the router. If the router is congested, your SQL statements wait in its buffer. Result: unexplained latency.</p>
+        </div>
+        <div class="perf-arrow">&rarr;</div>
+        <div class="perf-good">
+          <div class="perf-title">Database in same subnet</div>
+          <p>Use a dedicated switch (Layer 2). Switches are designed for high-throughput local traffic — no routing overhead.</p>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> Understanding networking helps you ask the right questions to network engineers. They know everything about configuration — but they need you to tell them what you need.
+      </div>
+    </div>
+  </article>
+
+  <!-- Navigation -->
+  <div class="section-nav">
+    <a routerLink="/section/2" class="nav-btn prev">
+      <span class="nav-btn-label">Previous</span>
+      <span class="nav-btn-title">&larr; Fundamentals</span>
+    </a>
+    <a routerLink="/section/3/2" class="nav-btn next">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">The IP Packet &rarr;</span>
+    </a>
+  </div>
+</div>

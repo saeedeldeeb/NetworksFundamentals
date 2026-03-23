@@ -1,0 +1,141 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 03</span>
+    <h1>Internet Protocol (IP)</h1>
+    <p class="section-description">Deep dive into IP addressing, packets, ICMP, ARP, and routing</p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 7</span>
+      <h2>Private IP Addresses</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">Private IP ranges, subnet planning, and a real-world example from airplane WiFi.</p>
+
+      <h3>Private IP Address Ranges</h3>
+      <p>These IPs are reserved for local networks. They are <strong>not routable on the public internet</strong> — packets with these addresses will be dropped.</p>
+
+      <div class="subnet-visual">
+        <div class="subnet-row subnet-hdr">
+          <span>Range</span><span>CIDR</span><span>Host Bits</span><span>Total</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">10.0.0.0 – 10.255.255.255</span>
+          <span class="mono">/8</span>
+          <span>24</span>
+          <span class="accent">~16.7 million</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">172.16.0.0 – 172.31.255.255</span>
+          <span class="mono">/12</span>
+          <span>20</span>
+          <span class="accent">~1 million</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">192.168.0.0 – 192.168.255.255</span>
+          <span class="mono">/16</span>
+          <span>16</span>
+          <span class="accent">~65,000</span>
+        </div>
+      </div>
+
+      <h3>Real Example: Airplane WiFi</h3>
+      <div class="highlight-box">
+        <h3>Alaska Airlines WiFi Configuration</h3>
+        <div class="three-things">
+          <div class="thing">
+            <span class="thing-num">IP</span>
+            <span class="thing-text">172.19.31.48</span>
+          </div>
+          <div class="thing">
+            <span class="thing-num">Mask</span>
+            <span class="thing-text">255.255.254.0 (/23)</span>
+          </div>
+          <div class="thing">
+            <span class="thing-num">GW</span>
+            <span class="thing-text">172.19.30.1</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="and-demo">
+        <div class="and-example and-same">
+          <div class="and-title">Why /23 instead of /24?</div>
+          <div class="and-row">
+            <span class="and-label">/24</span>
+            <span>256 addresses (254 usable)</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">/23</span>
+            <span>512 addresses (510 usable)</span>
+          </div>
+          <div class="and-verdict same">~200 passengers &times; 2-3 devices = need 512+</div>
+        </div>
+        <div class="and-example and-diff">
+          <div class="and-title">Port-Based Service Filtering</div>
+          <div class="and-row">
+            <span class="and-label">Allowed</span>
+            <span>HTTP (80), DNS (53), text messages</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Blocked</span>
+            <span>HTTPS (443), images, voice calls</span>
+          </div>
+          <div class="and-verdict diff">Router blocks ports for bandwidth control</div>
+        </div>
+      </div>
+
+      <h3>Private vs Public IP</h3>
+      <div class="and-demo">
+        <div class="and-example and-same">
+          <div class="and-title">Private IP</div>
+          <div class="and-row">
+            <span class="and-label">Internet</span>
+            <span>Not routable</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">NAT</span>
+            <span>Required to access internet</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Reusable?</span>
+            <span>Yes, in different networks</span>
+          </div>
+        </div>
+        <div class="and-example and-diff">
+          <div class="and-title">Public IP</div>
+          <div class="and-row">
+            <span class="and-label">Internet</span>
+            <span>Globally routable</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">NAT</span>
+            <span>Not needed</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Reusable?</span>
+            <span>No, globally unique</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key takeaway:</strong> Private IPs require NAT. Subnet mask determines capacity — one extra bit doubles hosts. Real networks are designed based on device count, and port filtering enables granular access control.
+      </div>
+    </div>
+  </article>
+
+  <!-- Navigation -->
+  <div class="section-nav">
+    <a routerLink="/section/3/6" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; Routing Example</span>
+    </a>
+    <a routerLink="/section/4" class="nav-btn next">
+      <span class="nav-btn-label">Next Section</span>
+      <span class="nav-btn-title">UDP &rarr;</span>
+    </a>
+  </div>
+</div>

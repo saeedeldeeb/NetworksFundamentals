@@ -1,0 +1,164 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 04</span>
+    <h1>UDP (User Datagram Protocol)</h1>
+    <p class="section-description">
+      Understanding the simplest Layer 4 protocol — stateless, connectionless, and fast
+    </p>
+  </div>
+
+  <!-- ==================== LESSON 5 ==================== -->
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 5</span>
+      <h2>UDP Server with C</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        Going to the lowest level — building a UDP server in C to understand what high-level
+        abstractions hide: buffers, file descriptors, byte order, and memory.
+      </p>
+
+      <h3>The Complete UDP Server</h3>
+
+      <app-code-block
+        lang="C"
+        filename="udp_server.c"
+        [code]="cServerCode"
+      />
+
+      <h3>Key Components</h3>
+
+      <div class="step-cards">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Socket file descriptor</strong>
+            <p>
+              <code>socket(AF_INET, SOCK_DGRAM, 0)</code> returns an integer — a file descriptor.
+              The OS uses it to identify your socket. Default limit: ~10,000 per process.
+            </p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Address structures</strong>
+            <p>
+              In Node.js, addresses are simple strings like <code>"127.0.0.1"</code>.
+              In C, you fill a <code>sockaddr_in</code> struct with family, port, and address fields.
+            </p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Buffer allocation</strong>
+            <p>
+              <code>char buffer[1024]</code> — you manually allocate the receive buffer.
+              This is the max data you can receive at once (not including the 8-byte UDP header).
+            </p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>Byte order conversion</strong>
+            <p>
+              <code>htons(port)</code> converts from host byte order to network byte order.
+              <code>inet_pton()</code> converts a string IP to binary. Node.js does this
+              automatically.
+            </p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <strong>Bind + Receive</strong>
+            <p>
+              <code>bind()</code> associates the socket with an IP:Port. <code>recvfrom()</code>
+              blocks until a datagram arrives and fills <code>remoteaddr</code> with the sender's info.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <h3>Why does the program exit?</h3>
+      <p>
+        No loop! The program receives <strong>one</strong> datagram, prints it, and exits.
+        C does exactly what you tell it — if you don't write a loop, it won't loop.
+      </p>
+
+      <app-code-block
+        lang="C"
+        filename="Fix: add a loop"
+        [code]="cLoopCode"
+        [small]="true"
+      />
+
+      <h3>Node.js vs C Comparison</h3>
+      <div class="udp-compare">
+        <div class="udp-compare-row udp-compare-hdr">
+          <span>Task</span>
+          <span>Node.js</span>
+          <span>C</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Buffer allocation</span>
+          <span class="udp-val-good">Automatic</span>
+          <span class="udp-val-neutral">Manual (arrays)</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>File descriptors</span>
+          <span class="udp-val-good">Hidden</span>
+          <span class="udp-val-neutral">Explicit integers</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Event loop</span>
+          <span class="udp-val-good">Built-in</span>
+          <span class="udp-val-neutral">Write it yourself</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Memory</span>
+          <span class="udp-val-good">Garbage collected</span>
+          <span class="udp-val-neutral">Manual management</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Byte order</span>
+          <span class="udp-val-good">Automatic</span>
+          <span class="udp-val-neutral">htons / inet_pton</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Address handling</span>
+          <span class="udp-val-good">Simple strings</span>
+          <span class="udp-val-neutral">Structs &amp; conversions</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Control</span>
+          <span class="udp-val-neutral">Limited</span>
+          <span class="udp-val-good">Complete</span>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> High-level languages do all this for you in one or two lines.
+        Understanding the C implementation helps you debug issues and understand what's happening
+        when things go wrong — because under the hood, it's always sockets, buffers, and file
+        descriptors.
+      </div>
+    </div>
+  </article>
+
+  <!-- Navigation -->
+  <div class="section-nav">
+    <a routerLink="/section/4/4" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; UDP Server with Node.js</span>
+    </a>
+    <a routerLink="/section/4/6" class="nav-btn next">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">Capturing UDP Traffic &rarr;</span>
+    </a>
+  </div>
+</div>

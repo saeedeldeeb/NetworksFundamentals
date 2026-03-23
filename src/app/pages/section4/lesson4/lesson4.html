@@ -1,0 +1,176 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 04</span>
+    <h1>UDP (User Datagram Protocol)</h1>
+    <p class="section-description">
+      Understanding the simplest Layer 4 protocol — stateless, connectionless, and fast
+    </p>
+  </div>
+
+  <!-- ==================== LESSON 4 ==================== -->
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 4</span>
+      <h2>UDP Server with Node.js</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        Building a UDP server using Node.js — a high-level approach that abstracts away buffers,
+        file descriptors, and memory management.
+      </p>
+
+      <h3>The Complete UDP Server</h3>
+      <p>
+        Node.js provides the <code>dgram</code> module for UDP socket operations.
+        The entire server fits in about 10 lines:
+      </p>
+
+      <app-code-block
+        lang="JavaScript"
+        filename="index.mjs"
+        [code]="jsServerCode"
+      />
+
+      <h3>Step by Step</h3>
+
+      <div class="step-cards">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Import the dgram module</strong>
+            <p>
+              Node.js provides <code>dgram</code> for UDP socket operations. It handles
+              all the low-level system calls behind the scenes.
+            </p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Create a socket</strong>
+            <p>
+              <code>createSocket('udp4')</code> creates an IPv4 UDP socket.
+              Use <code>'udp6'</code> for IPv6. At this point the socket exists but has
+              no binding — it doesn't know where to listen yet.
+            </p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Bind to address and port</strong>
+            <p>
+              <code>socket.bind(5500, '127.0.0.1')</code> tells the socket to listen on
+              port 5500 at localhost only.
+            </p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>Handle incoming messages</strong>
+            <p>
+              The <code>'message'</code> event fires for each datagram received.
+              The callback provides the data and sender info (IP, port, family, size).
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <h3>Security: Binding to 127.0.0.1</h3>
+      <div class="and-demo">
+        <div class="and-example and-diff">
+          <div class="and-title">Omitting the address (dangerous)</div>
+          <div class="and-row">
+            <span class="and-label">Listens on</span>
+            <span>ALL interfaces</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Accessible</span>
+            <span>Loopback, Wi-Fi, Ethernet, public IP</span>
+          </div>
+          <div class="and-verdict diff">Exposed to the internet!</div>
+        </div>
+        <div class="and-example and-same">
+          <div class="and-title">Binding to 127.0.0.1 (safe)</div>
+          <div class="and-row">
+            <span class="and-label">Listens on</span>
+            <span>Loopback only</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Accessible</span>
+            <span>Only from this machine</span>
+          </div>
+          <div class="and-verdict same">Local-only, no external access</div>
+        </div>
+      </div>
+
+      <h3>The <code>info</code> Object</h3>
+      <div class="udp-compare">
+        <div class="udp-compare-row udp-compare-hdr">
+          <span>Property</span>
+          <span>Example</span>
+          <span>Description</span>
+        </div>
+        <div class="udp-compare-row">
+          <span><code>info.address</code></span>
+          <span class="udp-val-good">127.0.0.1</span>
+          <span class="udp-val-neutral">Sender's IP</span>
+        </div>
+        <div class="udp-compare-row">
+          <span><code>info.port</code></span>
+          <span class="udp-val-good">53618</span>
+          <span class="udp-val-neutral">Sender's ephemeral port</span>
+        </div>
+        <div class="udp-compare-row">
+          <span><code>info.family</code></span>
+          <span class="udp-val-good">IPv4</span>
+          <span class="udp-val-neutral">Address family</span>
+        </div>
+        <div class="udp-compare-row">
+          <span><code>info.size</code></span>
+          <span class="udp-val-good">3</span>
+          <span class="udp-val-neutral">Datagram size in bytes</span>
+        </div>
+      </div>
+
+      <h3>Testing with Netcat</h3>
+      <app-code-block
+        lang="Bash"
+        filename="Client"
+        [code]="netcatCode"
+      />
+
+      <app-code-block
+        lang="Output"
+        filename="Server"
+        [code]="netcatOutput"
+      />
+
+      <p>
+        <strong>Why 3 bytes?</strong> The characters <code>h</code>, <code>i</code>, and the
+        newline <code>\n</code> — each is 1 byte.
+      </p>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> Node.js abstracts away buffers, file descriptors, loops,
+        and memory management. The same functionality that takes ~30 lines in C takes ~10 in
+        Node.js. But understanding the low-level implementation helps you know what's happening
+        under the hood.
+      </div>
+    </div>
+  </article>
+
+  <!-- Navigation -->
+  <div class="section-nav">
+    <a routerLink="/section/4/3" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; UDP Pros &amp; Cons</span>
+    </a>
+    <a routerLink="/section/4/5" class="nav-btn next">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">UDP Server with C &rarr;</span>
+    </a>
+  </div>
+</div>

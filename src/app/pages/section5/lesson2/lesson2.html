@@ -1,0 +1,196 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 05</span>
+    <h1>TCP (Transmission Control Protocol)</h1>
+    <p class="section-description">
+      The backbone of reliable internet communication — stateful, connection-oriented, and controlled
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 2</span>
+      <h2>TCP Segment</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        The anatomy of a TCP segment — understanding the <strong>20-byte header</strong> and the
+        fields that make reliability possible.
+      </p>
+
+      <h3>How TCP Fits Inside IP</h3>
+      <p>
+        A TCP segment slides into an IP packet as its data portion. The IP header's
+        <strong>protocol field</strong> is set to <code>6</code> (vs UDP's <code>17</code>),
+        telling the receiver "this data is TCP."
+      </p>
+
+      <app-tcp-encap />
+
+      <h3>The TCP Header</h3>
+      <p>
+        The header has a <strong>minimum of 20 bytes</strong> (5 rows of 32 bits) and can grow
+        up to <strong>60 bytes</strong> with options. Compare to UDP's 8 bytes — TCP's complexity
+        comes at a cost.
+      </p>
+
+      <app-tcp-header />
+
+      <h3>Header Fields Explained</h3>
+
+      <h4>Source &amp; Destination Ports</h4>
+      <p>
+        <strong>16 bits each</strong> (same as UDP), range 0–65,535. Identifies which application
+        sends and receives — exactly like UDP.
+      </p>
+
+      <h4>Sequence Number</h4>
+      <div class="field-detail">
+        <div class="field-detail-header">
+          <span class="field-tag" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">32 bits</span>
+          <span class="field-name">Sequence Number</span>
+        </div>
+        <div class="field-detail-body">
+          <div class="field-point">Tracks the order of data sent — increments with each byte</div>
+          <div class="field-point">Range: 0 to ~4 billion, then wraps back to zero</div>
+          <div class="field-point">Same wraparound problem exists in PostgreSQL transaction IDs</div>
+        </div>
+      </div>
+
+      <h4>Acknowledgment Number</h4>
+      <div class="field-detail">
+        <div class="field-detail-header">
+          <span class="field-tag" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">32 bits</span>
+          <span class="field-name">Acknowledgment Number</span>
+        </div>
+        <div class="field-detail-body">
+          <div class="field-point">Only valid when the ACK flag is set</div>
+          <div class="field-point">Tells sender: "I've received everything up to this number"</div>
+          <div class="field-point">Separate from sequence — you can send data AND acknowledge simultaneously</div>
+        </div>
+      </div>
+
+      <h4>Window Size (Flow Control)</h4>
+      <div class="field-detail">
+        <div class="field-detail-header">
+          <span class="field-tag" style="background: rgba(236, 72, 153, 0.15); color: #ec4899;">16 bits</span>
+          <span class="field-name">Window Size</span>
+        </div>
+        <div class="field-detail-body">
+          <div class="field-point">Default max: 65,535 bytes (seems small for modern networks)</div>
+          <div class="field-point">Tells sender: "This is how much data I can receive right now"</div>
+          <div class="field-point">Window Scale option (negotiated during handshake) can increase this to ~1 GB</div>
+        </div>
+      </div>
+
+      <h3>The 9 Flags</h3>
+      <p>
+        Each flag is a single bit that controls different aspects of the connection. They're
+        grouped into three categories:
+      </p>
+
+      <div class="flag-categories">
+        <div class="flag-cat">
+          <div class="flag-cat-header" style="border-color: #22d3ee;">Connection</div>
+          <div class="flag-cat-items">
+            <div class="flag-entry"><code>SYN</code><span>Initiate connection (handshake)</span></div>
+            <div class="flag-entry"><code>FIN</code><span>Close connection gracefully</span></div>
+            <div class="flag-entry"><code>RST</code><span>Abort connection immediately</span></div>
+          </div>
+        </div>
+        <div class="flag-cat">
+          <div class="flag-cat-header" style="border-color: #10b981;">Data</div>
+          <div class="flag-cat-items">
+            <div class="flag-entry"><code>ACK</code><span>Acknowledge received data</span></div>
+            <div class="flag-entry"><code>PSH</code><span>Deliver to app immediately</span></div>
+            <div class="flag-entry"><code>URG</code><span>Data is urgent (rarely used)</span></div>
+          </div>
+        </div>
+        <div class="flag-cat">
+          <div class="flag-cat-header" style="border-color: #f59e0b;">Congestion</div>
+          <div class="flag-cat-items">
+            <div class="flag-entry"><code>ECE</code><span>Router signaled congestion</span></div>
+            <div class="flag-entry"><code>CWR</code><span>Sender reduced sending rate</span></div>
+            <div class="flag-entry"><code>NS</code><span>ECN nonce protection</span></div>
+          </div>
+        </div>
+      </div>
+
+      <h3>How Congestion Flags Work</h3>
+      <p>
+        Instead of waiting for packet loss to detect congestion, <strong>ECN</strong> lets
+        routers warn senders early — no data is lost, and the sender slows down proactively.
+      </p>
+
+      <app-ecn-flow />
+
+      <h3>Maximum Segment Size (MSS)</h3>
+      <p>
+        How much data can fit in one TCP segment? It depends on the
+        <strong>MTU</strong> (Maximum Transmission Unit) — the Layer 2 limit.
+      </p>
+
+      <div class="mss-calc">
+        <div class="mss-row">
+          <span class="mss-label">MTU (Ethernet)</span>
+          <span class="mss-value">1500 bytes</span>
+        </div>
+        <div class="mss-row mss-minus">
+          <span class="mss-label">IP Header</span>
+          <span class="mss-value">&minus; 20 bytes</span>
+        </div>
+        <div class="mss-row mss-minus">
+          <span class="mss-label">TCP Header</span>
+          <span class="mss-value">&minus; 20 bytes</span>
+        </div>
+        <div class="mss-row mss-result">
+          <span class="mss-label">MSS</span>
+          <span class="mss-value">= 1460 bytes</span>
+        </div>
+      </div>
+
+      <p>
+        If your data exceeds the MSS, TCP splits it into multiple segments automatically.
+        Some networks support <strong>jumbo frames</strong> (MTU ~9000 bytes, MSS ~8960 bytes) —
+        common inside cloud provider networks for better performance.
+      </p>
+
+      <h3>TCP Header vs UDP Header</h3>
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr">
+          <span>Field</span>
+          <span>TCP</span>
+          <span>UDP</span>
+        </div>
+        <div class="tcp-compare-row"><span>Source Port</span><span class="tcp-val-neutral">16 bits</span><span class="tcp-val-neutral">16 bits</span></div>
+        <div class="tcp-compare-row"><span>Dest Port</span><span class="tcp-val-neutral">16 bits</span><span class="tcp-val-neutral">16 bits</span></div>
+        <div class="tcp-compare-row"><span>Sequence Number</span><span class="tcp-val-good">32 bits</span><span class="tcp-val-warn">&mdash;</span></div>
+        <div class="tcp-compare-row"><span>Acknowledgment</span><span class="tcp-val-good">32 bits</span><span class="tcp-val-warn">&mdash;</span></div>
+        <div class="tcp-compare-row"><span>Flags</span><span class="tcp-val-good">9 bits</span><span class="tcp-val-warn">&mdash;</span></div>
+        <div class="tcp-compare-row"><span>Window Size</span><span class="tcp-val-good">16 bits</span><span class="tcp-val-warn">&mdash;</span></div>
+        <div class="tcp-compare-row"><span>Checksum</span><span class="tcp-val-neutral">16 bits</span><span class="tcp-val-neutral">16 bits</span></div>
+        <div class="tcp-compare-row"><span>Urgent Pointer</span><span class="tcp-val-good">16 bits</span><span class="tcp-val-warn">&mdash;</span></div>
+        <div class="tcp-compare-row"><span><strong>Minimum Size</strong></span><span class="tcp-val-neutral"><strong>20 bytes</strong></span><span class="tcp-val-good"><strong>8 bytes</strong></span></div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> TCP's 20-byte header (vs UDP's 8 bytes) carries all the
+        machinery for reliability: sequence numbers for ordering, acknowledgments for confirmation,
+        window size for flow control, and flags for connection management. This overhead is the
+        price of reliability.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/5/1" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; What Is TCP?</span>
+    </a>
+    <a routerLink="/section/5/3" class="nav-btn next">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">Flow Control &rarr;</span>
+    </a>
+  </div>
+</div>

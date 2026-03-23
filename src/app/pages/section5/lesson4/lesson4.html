@@ -1,0 +1,164 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 05</span>
+    <h1>TCP (Transmission Control Protocol)</h1>
+    <p class="section-description">
+      The backbone of reliable internet communication — stateful, connection-oriented, and controlled
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 4</span>
+      <h2>Congestion Control</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        How much can the <strong>network</strong> handle? Congestion control protects the routers
+        and middle boxes from being overwhelmed — think of it as "flow control for routers."
+      </p>
+
+      <h3>The Problem</h3>
+      <p>
+        The receiver might handle your data, but the <strong>routers in between</strong> might not.
+        Routers have buffers too — if you send too fast, their buffers fill up, packets get dropped,
+        and retransmissions make things worse.
+      </p>
+
+      <div class="router-chain">
+        <span class="rc-node rc-sender">Sender</span>
+        <span class="rc-arrow">&rarr;</span>
+        <span class="rc-node rc-router">Router 1<br><small>Buffer limit!</small></span>
+        <span class="rc-arrow">&rarr;</span>
+        <span class="rc-node rc-router">Router 2<br><small>Buffer limit!</small></span>
+        <span class="rc-arrow">&rarr;</span>
+        <span class="rc-node rc-router">Router 3<br><small>Buffer limit!</small></span>
+        <span class="rc-arrow">&rarr;</span>
+        <span class="rc-node rc-receiver">Receiver</span>
+      </div>
+
+      <h3>The Congestion Window (cwnd)</h3>
+      <p>
+        A <strong>sender-side</strong> property that limits how much unacknowledged data can be
+        in flight. The effective sending limit is always the smaller of the two windows:
+      </p>
+
+      <div class="eff-window">
+        <div class="eff-formula">
+          Effective Window = min(<span class="eff-cwnd">cwnd</span>, <span class="eff-rwnd">rwnd</span>)
+        </div>
+        <div class="eff-desc">
+          <div class="eff-item">
+            <span class="eff-tag" style="background: rgba(34, 211, 238, 0.15); color: #22d3ee;">cwnd</span>
+            <span>What the <strong>network</strong> can handle</span>
+          </div>
+          <div class="eff-item">
+            <span class="eff-tag" style="background: rgba(236, 72, 153, 0.15); color: #ec4899;">rwnd</span>
+            <span>What the <strong>receiver</strong> can handle</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>Two Algorithms</h3>
+      <div class="algo-compare">
+        <div class="algo-card">
+          <div class="algo-header" style="border-color: #22d3ee;">Slow Start</div>
+          <div class="algo-body">
+            <div class="algo-row"><span class="algo-label">When</span><span>Beginning of connection</span></div>
+            <div class="algo-row"><span class="algo-label">Growth</span><span><strong>Exponential</strong> — doubles each RTT</span></div>
+            <div class="algo-row"><span class="algo-label">Rule</span><span>+1 MSS per ACK received</span></div>
+            <div class="algo-row"><span class="algo-label">Pattern</span><span class="algo-pattern">1 &rarr; 2 &rarr; 4 &rarr; 8 &rarr; 16</span></div>
+          </div>
+        </div>
+        <div class="algo-card">
+          <div class="algo-header" style="border-color: #10b981;">Congestion Avoidance</div>
+          <div class="algo-body">
+            <div class="algo-row"><span class="algo-label">When</span><span>After ssthresh reached</span></div>
+            <div class="algo-row"><span class="algo-label">Growth</span><span><strong>Linear</strong> — +1 MSS per RTT</span></div>
+            <div class="algo-row"><span class="algo-label">Rule</span><span>+1 MSS per complete round trip</span></div>
+            <div class="algo-row"><span class="algo-label">Pattern</span><span class="algo-pattern">8 &rarr; 9 &rarr; 10 &rarr; 11 &rarr; 12</span></div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Slow Start: Exponential Growth</h3>
+      <p>
+        Despite the name, slow start is actually <strong>fast</strong>. It starts at 1 MSS
+        (that's the "slow" part) but grows exponentially because every single ACK adds 1 MSS:
+      </p>
+
+      <div class="ss-rounds">
+        <div class="ss-round"><span class="ss-round-num">1</span><div class="ss-round-body"><span>Send <strong>1</strong> segment &rarr; get 1 ACK &rarr; cwnd = <strong>2</strong></span></div></div>
+        <div class="ss-round"><span class="ss-round-num">2</span><div class="ss-round-body"><span>Send <strong>2</strong> segments &rarr; get 2 ACKs &rarr; cwnd = <strong>4</strong></span></div></div>
+        <div class="ss-round"><span class="ss-round-num">3</span><div class="ss-round-body"><span>Send <strong>4</strong> segments &rarr; get 4 ACKs &rarr; cwnd = <strong>8</strong></span></div></div>
+        <div class="ss-round"><span class="ss-round-num">4</span><div class="ss-round-body"><span>Send <strong>8</strong> segments &rarr; get 8 ACKs &rarr; cwnd = <strong>16</strong></span></div></div>
+      </div>
+
+      <app-slow-start />
+
+      <p>
+        Slow start continues until cwnd reaches the <strong>slow start threshold (ssthresh)</strong>,
+        then switches to congestion avoidance.
+      </p>
+
+      <h3>Congestion Avoidance: Linear Growth</h3>
+      <p>
+        After ssthresh, growth slows dramatically. Instead of +1 MSS per ACK, you only get
+        +1 MSS per <strong>complete round trip</strong>. Send 10 segments, get all 10 ACKs,
+        cwnd grows by just 1.
+      </p>
+
+      <app-congestion-avoidance />
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr"><span>Phase</span><span>Per ACK</span><span>Per Round Trip</span></div>
+        <div class="tcp-compare-row"><span>Slow Start</span><span class="tcp-val-good">+1 MSS</span><span class="tcp-val-good">+cwnd (doubles)</span></div>
+        <div class="tcp-compare-row"><span>Congestion Avoidance</span><span class="tcp-val-neutral">+fraction</span><span class="tcp-val-neutral">+1 MSS</span></div>
+      </div>
+
+      <h3>The Congestion Control Cycle</h3>
+      <p>
+        Watch the full cycle: slow start grows exponentially until ssthresh, then congestion
+        avoidance grows linearly. When packet loss is detected, cwnd resets to 1 and the
+        cycle starts over with a <strong>halved threshold</strong>.
+      </p>
+
+      <app-cwnd-chart />
+
+      <h3>What Happens on Congestion?</h3>
+      <p>When packet loss is detected (timeout or duplicate ACKs):</p>
+
+      <div class="loss-steps">
+        <div class="loss-step"><span class="loss-step-num">1</span><span>ssthresh = cwnd / 2 <em>(halve the threshold)</em></span></div>
+        <div class="loss-step"><span class="loss-step-num">2</span><span>cwnd = 1 MSS <em>(reset to slow start)</em></span></div>
+        <div class="loss-step"><span class="loss-step-num">3</span><span>Start slow start again <em>(ramp back up)</em></span></div>
+      </div>
+
+      <h3>Congestion in LAN vs WAN</h3>
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr"><span>Network</span><span>Risk</span><span>Why</span></div>
+        <div class="tcp-compare-row"><span>LAN</span><span class="tcp-val-good">Low</span><span class="tcp-val-neutral">Short distance, high bandwidth</span></div>
+        <div class="tcp-compare-row"><span>WAN / Internet</span><span class="tcp-val-warn">High</span><span class="tcp-val-neutral">Many routers, varying capacity</span></div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> Congestion control lets you "fill the pipe" between sender
+        and receiver with as much data as the network can handle. The algorithms probe the
+        network's capacity, backing off when congestion is detected, and ramping up when the
+        path is clear. This maximizes throughput while being a good network citizen.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/5/3" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; Flow Control</span>
+    </a>
+    <a routerLink="/section/5/4" class="nav-btn next disabled-nav">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">Slow Start Deep Dive &rarr;</span>
+    </a>
+  </div>
+</div>

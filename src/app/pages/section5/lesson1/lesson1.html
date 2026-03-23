@@ -1,0 +1,401 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 05</span>
+    <h1>TCP (Transmission Control Protocol)</h1>
+    <p class="section-description">
+      The backbone of reliable internet communication — stateful, connection-oriented, and controlled
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 1</span>
+      <h2>What Is TCP?</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        The Transmission Control Protocol — one of the most popular protocols on the internet.
+        Unlike UDP's "fire and forget" approach, TCP <strong>controls the transmission</strong>.
+      </p>
+
+      <h3>TCP at a Glance</h3>
+      <div class="tcp-facts">
+        <div class="tcp-fact">
+          <span class="fact-label">Layer</span>
+          <span class="fact-value">4 (Transport)</span>
+        </div>
+        <div class="tcp-fact">
+          <span class="fact-label">Header</span>
+          <span class="fact-value">20–60 bytes</span>
+        </div>
+        <div class="tcp-fact">
+          <span class="fact-label">State</span>
+          <span class="fact-value">Stateful</span>
+        </div>
+        <div class="tcp-fact">
+          <span class="fact-label">Connection</span>
+          <span class="fact-value">Required</span>
+        </div>
+        <div class="tcp-fact">
+          <span class="fact-label">Delivery</span>
+          <span class="fact-value">Guaranteed</span>
+        </div>
+        <div class="tcp-fact">
+          <span class="fact-label">Order</span>
+          <span class="fact-value">Guaranteed</span>
+        </div>
+      </div>
+
+      <h3>TCP vs UDP: The Core Difference</h3>
+      <p>
+        <strong>UDP is a firehose</strong> — it just sends data without control, which can overwhelm
+        receivers and networks. <strong>TCP controls</strong> the flow: flow control, congestion
+        control, ordering, and retransmission.
+      </p>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr">
+          <span>Aspect</span>
+          <span>TCP</span>
+          <span>UDP</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Transmission</span>
+          <span class="tcp-val-good">Controlled</span>
+          <span class="tcp-val-warn">Firehose</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>State</span>
+          <span class="tcp-val-good">Stateful</span>
+          <span class="tcp-val-neutral">Stateless</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Connection</span>
+          <span class="tcp-val-good">Required</span>
+          <span class="tcp-val-neutral">Not required</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Header size</span>
+          <span class="tcp-val-neutral">20–60 bytes</span>
+          <span class="tcp-val-good">8 bytes</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Delivery</span>
+          <span class="tcp-val-good">Guaranteed</span>
+          <span class="tcp-val-warn">Not guaranteed</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Order</span>
+          <span class="tcp-val-good">Guaranteed</span>
+          <span class="tcp-val-warn">Not guaranteed</span>
+        </div>
+      </div>
+
+      <h3>The Concept of a Connection</h3>
+      <p>
+        A TCP <strong>connection</strong> is an agreement between client and server, established
+        through a handshake. It creates <strong>state</strong> (a session) on both sides, stored
+        in memory as a file descriptor.
+      </p>
+
+      <div class="conn-props">
+        <div class="conn-prop">
+          <div class="conn-prop-icon" style="background: rgba(34, 211, 238, 0.15); color: #22d3ee;">&#128274;</div>
+          <div class="conn-prop-info">
+            <strong>Security</strong>
+            <span>Can't just send data without establishing identity — no spoofing</span>
+          </div>
+        </div>
+        <div class="conn-prop">
+          <div class="conn-prop-icon" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">&#128200;</div>
+          <div class="conn-prop-info">
+            <strong>Reliability</strong>
+            <span>Know who you're talking to — both sides agree on sequence numbers</span>
+          </div>
+        </div>
+        <div class="conn-prop">
+          <div class="conn-prop-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">&#9881;</div>
+          <div class="conn-prop-info">
+            <strong>Control</strong>
+            <span>Can block or reject unwanted connections before any data flows</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>Connection Identification: The Four-Tuple</h3>
+      <p>
+        Every TCP connection is uniquely identified by four values. The OS <strong>hashes</strong>
+        these to look up the connection's file descriptor (socket).
+      </p>
+
+      <div class="four-tuple">
+        <div class="tuple-item">
+          <span class="tuple-label">Source IP</span>
+          <span class="tuple-desc">Layer 3</span>
+        </div>
+        <div class="tuple-sep">+</div>
+        <div class="tuple-item">
+          <span class="tuple-label">Source Port</span>
+          <span class="tuple-desc">Layer 4</span>
+        </div>
+        <div class="tuple-sep">+</div>
+        <div class="tuple-item">
+          <span class="tuple-label">Dest IP</span>
+          <span class="tuple-desc">Layer 3</span>
+        </div>
+        <div class="tuple-sep">+</div>
+        <div class="tuple-item">
+          <span class="tuple-label">Dest Port</span>
+          <span class="tuple-desc">Layer 4</span>
+        </div>
+      </div>
+
+      <div class="fd-box">
+        <div class="fd-box-header">File Descriptor (Socket)</div>
+        <div class="fd-box-body">
+          <div class="fd-row">
+            <span class="fd-label">What it is</span>
+            <span>A number that represents the connection in memory</span>
+          </div>
+          <div class="fd-row">
+            <span class="fd-label">Contains</span>
+            <span>Sequence numbers, window sizes, buffers, timers</span>
+          </div>
+          <div class="fd-row">
+            <span class="fd-label">Layer</span>
+            <span>Layer 5 (Session)</span>
+          </div>
+          <div class="fd-row">
+            <span class="fd-label">Cost</span>
+            <span>Each connection consumes memory — more connections = more RAM</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>The Three-Way Handshake</h3>
+      <p>
+        Before any data can flow, TCP establishes a connection using three messages.
+        <strong>SYN</strong> = Synchronize — both sides exchange sequence numbers so they can
+        track data order.
+      </p>
+
+      <app-tcp-handshake />
+
+      <div class="hs-steps">
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: #22d3ee; color: #0f172a;">1</div>
+          <div class="hs-step-body">
+            <strong>SYN</strong>
+            <p>Client says: "I want to connect. My sequence starts at 1000"</p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: #6366f1;">2</div>
+          <div class="hs-step-body">
+            <strong>SYN-ACK</strong>
+            <p>Server says: "OK. My sequence starts at 5000. I acknowledge your 1000"</p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: #10b981; color: #0f172a;">3</div>
+          <div class="hs-step-body">
+            <strong>ACK</strong>
+            <p>Client says: "I acknowledge your 5000. Let's go!"</p>
+          </div>
+        </div>
+      </div>
+
+      <p>
+        After the handshake, both sides have a <strong>file descriptor</strong> (socket) with
+        each other's sequence numbers and connection metadata.
+      </p>
+
+      <h3>Sending Data &amp; Acknowledgments</h3>
+      <p>
+        Once connected, the client sends <strong>segments</strong> with sequence numbers.
+        The server <strong>acknowledges</strong> receipt — ACKing sequence N means
+        "I received everything up to N."
+      </p>
+
+      <p>
+        You don't have to wait for each ACK before sending the next segment — you can send
+        multiple at once. But there's a limit: <strong>flow control</strong> (how much the
+        receiver can handle) and <strong>congestion control</strong> (how much the network
+        can handle).
+      </p>
+
+      <h3>What If Segments Arrive Out of Order?</h3>
+      <p>
+        TCP segments travel inside IP packets, and IP has no guaranteed path — different routers
+        may choose different routes. The receiver uses <strong>sequence numbers</strong> to
+        reconstruct the original order before delivering to the application.
+      </p>
+
+      <div class="reorder-demo">
+        <div class="reorder-col">
+          <div class="reorder-label">Sent</div>
+          <div class="reorder-items">
+            <span class="reorder-item">1</span>
+            <span class="reorder-item">2</span>
+            <span class="reorder-item">3</span>
+          </div>
+        </div>
+        <div class="reorder-arrow">&rarr;</div>
+        <div class="reorder-col">
+          <div class="reorder-label">Arrived</div>
+          <div class="reorder-items scrambled">
+            <span class="reorder-item">2</span>
+            <span class="reorder-item">3</span>
+            <span class="reorder-item">1</span>
+          </div>
+        </div>
+        <div class="reorder-arrow">&rarr;</div>
+        <div class="reorder-col">
+          <div class="reorder-label">Delivered</div>
+          <div class="reorder-items fixed">
+            <span class="reorder-item">1</span>
+            <span class="reorder-item">2</span>
+            <span class="reorder-item">3</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>Retransmission: TCP's Reliability</h3>
+      <p>
+        When segments are lost (router congestion, network failure, timeouts), TCP
+        <strong>automatically retransmits</strong> them. The sender notices missing ACKs
+        and resends the data.
+      </p>
+
+      <app-tcp-data-flow />
+
+      <h3>Closing a Connection: Four-Way Handshake</h3>
+      <p>
+        Each side must independently announce they're done (<strong>FIN</strong>) and acknowledge
+        the other's FIN (<strong>ACK</strong>). The side that initiates the close enters
+        <strong>TIME_WAIT</strong> — waiting ~4 minutes for any delayed segments.
+      </p>
+
+      <app-tcp-close />
+
+      <div class="highlight-box">
+        <strong>Why TIME_WAIT?</strong> To catch any old, delayed segments that might arrive late
+        and prevent confusion if a new connection reuses the same four-tuple. It's not a bug — it's
+        a safety mechanism.
+      </div>
+
+      <h3>Bidirectional Communication</h3>
+      <p>
+        TCP itself is <strong>bidirectional</strong> — either side can send data at any time,
+        like WebSockets. HTTP adds a request-response pattern on top, but TCP doesn't require it.
+      </p>
+
+      <div class="bidir-demo">
+        <div class="bidir-row">
+          <span class="bidir-label">TCP</span>
+          <span class="bidir-arrows">A &harr; B</span>
+          <span class="bidir-desc">Either side can send anytime</span>
+        </div>
+        <div class="bidir-row">
+          <span class="bidir-label">HTTP</span>
+          <span class="bidir-arrows">A &rarr; B &rarr; A</span>
+          <span class="bidir-desc">Request-response pattern on top</span>
+        </div>
+      </div>
+
+      <h3>TCP Use Cases</h3>
+      <div class="use-case-grid">
+        <div class="use-case-card">
+          <div class="use-case-icon">&#128172;</div>
+          <div class="use-case-title">Chat / Messaging</div>
+          <div class="use-case-desc">Messages can't be scrambled or lost — order and delivery matter.</div>
+        </div>
+        <div class="use-case-card">
+          <div class="use-case-icon">&#128421;</div>
+          <div class="use-case-title">Remote Shell (SSH)</div>
+          <div class="use-case-desc">Commands must execute exactly as sent. A reordered command could be catastrophic.</div>
+        </div>
+        <div class="use-case-card">
+          <div class="use-case-icon">&#128451;</div>
+          <div class="use-case-title">Databases</div>
+          <div class="use-case-desc">Can't have SELECT become TRUNCATE. Query integrity is critical.</div>
+        </div>
+        <div class="use-case-card">
+          <div class="use-case-icon">&#127760;</div>
+          <div class="use-case-title">Web (HTTP/1.1, HTTP/2)</div>
+          <div class="use-case-desc">Reliable page loading. Every resource must arrive complete and in order.</div>
+        </div>
+        <div class="use-case-card">
+          <div class="use-case-icon">&#128231;</div>
+          <div class="use-case-title">Email</div>
+          <div class="use-case-desc">Messages must arrive complete. Partial emails are useless.</div>
+        </div>
+        <div class="use-case-card">
+          <div class="use-case-icon">&#128193;</div>
+          <div class="use-case-title">File Transfer</div>
+          <div class="use-case-desc">Files can't have missing pieces. Every byte must arrive correctly.</div>
+        </div>
+      </div>
+
+      <h3>Connection Limits</h3>
+      <p>
+        Each connection stores state in memory: sequence numbers, window sizes, buffers, timers.
+        <strong>More connections = more memory</strong>. WhatsApp servers handle up to
+        <strong>3 million TCP connections per server</strong>.
+      </p>
+
+      <div class="highlight-box">
+        <strong>"But ports only go to 65,535?"</strong> That limit applies to connections TO a
+        single destination. Connections FROM different source IPs are unlimited.
+        Theoretical max: 4 billion IPs &times; 65,535 ports. Practical limits: RAM, CPU, and
+        OS file descriptor limits.
+      </div>
+
+      <h3>Connection Lookup Cost</h3>
+      <p>Every incoming segment requires the OS to:</p>
+
+      <div class="lookup-steps">
+        <div class="lookup-step">
+          <span class="lookup-num">1</span>
+          <span>Hash the four-tuple</span>
+        </div>
+        <div class="lookup-step">
+          <span class="lookup-num">2</span>
+          <span>Look up connection table</span>
+        </div>
+        <div class="lookup-step">
+          <span class="lookup-num">3</span>
+          <span>If found &rarr; process</span>
+        </div>
+        <div class="lookup-step">
+          <span class="lookup-num">4</span>
+          <span>If not found &rarr; drop/reject</span>
+        </div>
+      </div>
+
+      <p>
+        At millions of connections, this consumes significant CPU. Unlike UDP, where any packet
+        is processed, TCP rejects packets that don't belong to a valid connection.
+      </p>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> TCP's reliability comes at a cost — header overhead, memory
+        for state, latency for handshakes, CPU for connection management. It controls the
+        transmission, unlike UDP's firehose approach. Choose TCP when reliability matters more
+        than raw speed.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/4" class="nav-btn prev">
+      <span class="nav-btn-label">Previous</span>
+      <span class="nav-btn-title">&larr; UDP</span>
+    </a>
+    <a routerLink="/section/5/2" class="nav-btn next">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">TCP Segment &rarr;</span>
+    </a>
+  </div>
+</div>

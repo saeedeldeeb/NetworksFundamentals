@@ -1,0 +1,255 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 04</span>
+    <h1>UDP (User Datagram Protocol)</h1>
+    <p class="section-description">
+      Understanding the simplest Layer 4 protocol — stateless, connectionless, and fast
+    </p>
+  </div>
+
+  <!-- ==================== LESSON 2 ==================== -->
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 2</span>
+      <h2>UDP Datagram Structure</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        The anatomy of the UDP datagram — understanding the
+        <strong>8-byte header</strong> that makes UDP the simplest transport protocol.
+      </p>
+
+      <h3>How UDP Fits Inside IP</h3>
+      <p>
+        A UDP datagram slides into an IP packet as its data portion. The IP header's
+        <strong>protocol field</strong> is set to <code>17</code>, telling the receiver
+        "this data is UDP." The IP packet doesn't care what's inside — it just sees bytes.
+      </p>
+
+      <app-udp-encap />
+
+      <h3>The UDP Header</h3>
+      <p>
+        Only <strong>4 fields</strong>, each 16 bits (2 bytes). Two rows of 32 bits each
+        give us the 8-byte header. Compare that to TCP's 20–60 bytes — UDP keeps it minimal.
+      </p>
+
+      <app-udp-header />
+
+      <h3>Source &amp; Destination Ports</h3>
+      <p>
+        Both are <strong>16 bits</strong>, giving a range of 0–65,535. Ports identify which
+        application on a host should receive the datagram.
+      </p>
+
+      <div class="port-table">
+        <div class="port-table-header">
+          <span>Port</span>
+          <span>Service</span>
+          <span>Purpose</span>
+        </div>
+        <div class="port-table-row">
+          <code>53</code>
+          <span>DNS</span>
+          <span class="port-table-desc">Domain name resolution</span>
+        </div>
+        <div class="port-table-row">
+          <code>67/68</code>
+          <span>DHCP</span>
+          <span class="port-table-desc">Automatic IP assignment</span>
+        </div>
+        <div class="port-table-row">
+          <code>69</code>
+          <span>TFTP</span>
+          <span class="port-table-desc">Simple file transfer</span>
+        </div>
+        <div class="port-table-row">
+          <code>123</code>
+          <span>NTP</span>
+          <span class="port-table-desc">Time synchronization</span>
+        </div>
+        <div class="port-table-row">
+          <code>161</code>
+          <span>SNMP</span>
+          <span class="port-table-desc">Network monitoring</span>
+        </div>
+        <div class="port-table-row">
+          <code>500</code>
+          <span>IKE</span>
+          <span class="port-table-desc">VPN key exchange</span>
+        </div>
+      </div>
+
+      <h3>Port Exhaustion</h3>
+      <p>
+        If you fix the destination IP, destination port, and source IP, then only the
+        <strong>source port</strong> varies — limiting you to <strong>65,535</strong> concurrent
+        connections to the same server.
+      </p>
+
+      <div class="exhaustion-demo">
+        <div class="exhaustion-fixed">
+          <div class="exhaustion-label">Fixed</div>
+          <div class="exhaustion-items">
+            <span>Dst IP: <code>8.8.8.8</code></span>
+            <span>Dst Port: <code>53</code></span>
+            <span>Src IP: <code>10.0.0.1</code></span>
+          </div>
+        </div>
+        <div class="exhaustion-variable">
+          <div class="exhaustion-label">Variable</div>
+          <div class="exhaustion-items">
+            <span>Src Port: <code>1024</code> ... <code>65535</code></span>
+          </div>
+          <div class="exhaustion-limit">Max ~65,535 connections</div>
+        </div>
+      </div>
+
+      <h3>Length Field</h3>
+      <p>
+        Specifies the <strong>total size</strong> of the UDP datagram (header + data). At 16 bits,
+        the maximum value is 65,535 bytes. Since the header is always 8 bytes, the minimum
+        value is <code>8</code> (header only, no data).
+      </p>
+
+      <div class="and-demo">
+        <div class="and-example and-same">
+          <div class="and-title">Minimum</div>
+          <div class="and-row">
+            <span class="and-label">Header</span>
+            <span>8 bytes</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Data</span>
+            <span>0 bytes</span>
+          </div>
+          <div class="and-verdict same">Length = 8</div>
+        </div>
+        <div class="and-example and-diff">
+          <div class="and-title">Maximum</div>
+          <div class="and-row">
+            <span class="and-label">Header</span>
+            <span>8 bytes</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Data</span>
+            <span>65,527 bytes</span>
+          </div>
+          <div class="and-verdict diff">Length = 65,535</div>
+        </div>
+      </div>
+
+      <h3>Checksum Field</h3>
+      <p>
+        The checksum detects <strong>data corruption</strong> during transmission. Electrical
+        interference, voltage attenuation, or even cosmic rays can flip bits in transit.
+      </p>
+
+      <div class="checksum-flow">
+        <div class="checksum-step">
+          <span class="checksum-num">1</span>
+          <div class="checksum-info">
+            <strong>Sender calculates</strong>
+            <span>Checksum from header + data</span>
+          </div>
+        </div>
+        <div class="checksum-arrow">&rarr;</div>
+        <div class="checksum-step">
+          <span class="checksum-num">2</span>
+          <div class="checksum-info">
+            <strong>Receiver recalculates</strong>
+            <span>Same algorithm on received data</span>
+          </div>
+        </div>
+        <div class="checksum-arrow">&rarr;</div>
+        <div class="checksum-step">
+          <span class="checksum-num">3</span>
+          <div class="checksum-info">
+            <strong>Compare</strong>
+            <span>Match = OK, Mismatch = discard</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <strong>IPv4 vs IPv6:</strong> In IPv4, the UDP checksum is <em>optional</em>.
+        In IPv6, it's <em>mandatory</em> — because IPv6 removed the IP-level checksum,
+        so the transport layer must ensure integrity.
+      </div>
+
+      <h3>UDP vs TCP Header</h3>
+      <div class="udp-compare">
+        <div class="udp-compare-row udp-compare-hdr">
+          <span>Field</span>
+          <span>UDP</span>
+          <span>TCP</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Source Port</span>
+          <span class="udp-val-good">16 bits</span>
+          <span class="udp-val-neutral">16 bits</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Destination Port</span>
+          <span class="udp-val-good">16 bits</span>
+          <span class="udp-val-neutral">16 bits</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Sequence Number</span>
+          <span class="udp-val-good">&mdash;</span>
+          <span class="udp-val-neutral">32 bits</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Acknowledgment</span>
+          <span class="udp-val-good">&mdash;</span>
+          <span class="udp-val-neutral">32 bits</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Flags</span>
+          <span class="udp-val-good">&mdash;</span>
+          <span class="udp-val-neutral">9 bits</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Window Size</span>
+          <span class="udp-val-good">&mdash;</span>
+          <span class="udp-val-neutral">16 bits</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Checksum</span>
+          <span class="udp-val-good">16 bits</span>
+          <span class="udp-val-neutral">16 bits</span>
+        </div>
+        <div class="udp-compare-row">
+          <span>Length / Urgent Ptr</span>
+          <span class="udp-val-good">16 bits</span>
+          <span class="udp-val-neutral">16 bits</span>
+        </div>
+        <div class="udp-compare-row udp-compare-hdr">
+          <span>Total Minimum</span>
+          <span class="udp-val-good">8 bytes</span>
+          <span class="udp-val-neutral">20 bytes</span>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> UDP's 8-byte header carries only what's essential — ports
+        for addressing, length for sizing, and a checksum for integrity. No sequence numbers,
+        no acknowledgments, no flow control. This simplicity means more bandwidth for your
+        actual data and less processing at each hop.
+      </div>
+    </div>
+  </article>
+
+  <!-- Navigation -->
+  <div class="section-nav">
+    <a routerLink="/section/4/1" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; What Is UDP?</span>
+    </a>
+    <a routerLink="/section/4/3" class="nav-btn next">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">UDP Pros &amp; Cons &rarr;</span>
+    </a>
+  </div>
+</div>

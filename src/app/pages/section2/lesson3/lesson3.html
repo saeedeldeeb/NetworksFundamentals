@@ -1,0 +1,150 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 02</span>
+    <h1>Fundamentals of Networking</h1>
+    <p class="section-description">Client-server architecture, the OSI model, and host-to-host communication</p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 3</span>
+      <h2>Host-to-Host Communication</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">How messages are sent between hosts at the lowest level — Layer 2 and Layer 3.</p>
+
+      <h3>MAC Address (Media Access Control)</h3>
+      <p>Every network card has a unique MAC address: <code>00:1A:2B:3C:4D:5E</code> (6 bytes, 48 bits). This is the lowest level of addressing.</p>
+
+      <h3>The Broadcast Problem</h3>
+      <p>On a shared network, when Host A sends to Host B:</p>
+
+      <app-broadcast-problem />
+
+      <p class="note">Everyone receives the frame. Only the intended recipient processes it — others drop it. This is how public Wi-Fi sniffing worked.</p>
+
+      <div class="highlight-box">
+        <h3>Why MAC Addresses Aren't Enough</h3>
+        <div class="problems-grid">
+          <div class="problem-item">
+            <h4>No Routability</h4>
+            <p>MAC addresses are random — no location info</p>
+          </div>
+          <div class="problem-item">
+            <h4>No Segmentation</h4>
+            <p>Cannot divide into smaller networks</p>
+          </div>
+          <div class="problem-item">
+            <h4>Global Scanning</h4>
+            <p>Finding a MAC globally means scanning everything</p>
+          </div>
+        </div>
+        <div class="key-insight">
+          <strong>Key insight:</strong> MAC addresses are globally unique but provide no location information — like having a unique name but no address.
+        </div>
+      </div>
+
+      <h3>Enter: IP Addresses</h3>
+      <p>IP addresses solve the routability problem by having two parts:</p>
+
+      <div class="ip-breakdown">
+        <div class="ip-octets">
+          <div class="ip-octet network">192</div>
+          <span class="ip-dot">.</span>
+          <div class="ip-octet network">168</div>
+          <span class="ip-dot">.</span>
+          <div class="ip-octet network">1</div>
+          <span class="ip-dot">.</span>
+          <div class="ip-octet host">5</div>
+          <span class="ip-cidr">/24</span>
+        </div>
+        <div class="ip-labels">
+          <div class="ip-label ip-net-label">
+            <span class="ip-label-line"></span>
+            Network Portion (24 bits)
+          </div>
+          <div class="ip-label ip-host-label">
+            <span class="ip-label-line"></span>
+            Host (8 bits)
+          </div>
+        </div>
+      </div>
+
+      <h3>Subnet Mask</h3>
+      <p>Determines which part is network vs host:</p>
+      <div class="subnet-table">
+        <div class="subnet-row subnet-hdr">
+          <span>CIDR</span><span>Subnet Mask</span><span>Network Bits</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">/24</span><span class="mono">255.255.255.0</span><span>First 3 bytes</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">/16</span><span class="mono">255.255.0.0</span><span>First 2 bytes</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">/8</span><span class="mono">255.0.0.0</span><span>First 1 byte</span>
+        </div>
+      </div>
+
+      <h3>Routers: Connecting Networks</h3>
+      <app-router-visual />
+
+      <h3>Ports: Addressing Applications</h3>
+      <p>IP identifies the machine, but which app should receive the data? <strong>Ports</strong> (Layer 4) solve this.</p>
+      <div class="ports-grid">
+        <div class="port-item"><span class="port-num">80</span><span class="port-svc">HTTP</span></div>
+        <div class="port-item"><span class="port-num">443</span><span class="port-svc">HTTPS</span></div>
+        <div class="port-item"><span class="port-num">22</span><span class="port-svc">SSH</span></div>
+        <div class="port-item"><span class="port-num">53</span><span class="port-svc">DNS</span></div>
+        <div class="port-item"><span class="port-num">5432</span><span class="port-svc">PostgreSQL</span></div>
+      </div>
+
+      <h3>The Complete Addressing Stack</h3>
+      <div class="addr-stack">
+        <div class="addr-level" style="--ac: #f59e0b">
+          <div class="addr-tag">Layer 2</div>
+          <div class="addr-info">
+            <div class="addr-type">MAC Address</div>
+            <code>00:1A:2B:3C:4D:5E</code>
+          </div>
+          <div class="addr-target">Physical NIC</div>
+        </div>
+        <div class="addr-arrow-down"></div>
+        <div class="addr-level" style="--ac: #10b981">
+          <div class="addr-tag">Layer 3</div>
+          <div class="addr-info">
+            <div class="addr-type">IP Address</div>
+            <code>192.168.1.5</code>
+          </div>
+          <div class="addr-target">Host on Network</div>
+        </div>
+        <div class="addr-arrow-down"></div>
+        <div class="addr-level" style="--ac: #22d3ee">
+          <div class="addr-tag">Layer 4</div>
+          <div class="addr-info">
+            <div class="addr-type">Port Number</div>
+            <code>:443</code>
+          </div>
+          <div class="addr-target">Application</div>
+        </div>
+      </div>
+
+      <div class="key-insight" style="margin-top: 1.5rem">
+        <strong>Full path:</strong> Frame (MAC) &rarr; Packet (IP) &rarr; Segment (Port) &rarr; Application
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/2/2" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; OSI Model</span>
+    </a>
+    <a routerLink="/section/3" class="nav-btn next">
+      <span class="nav-btn-label">Next Section</span>
+      <span class="nav-btn-title">Internet Protocol &rarr;</span>
+    </a>
+  </div>
+</div>

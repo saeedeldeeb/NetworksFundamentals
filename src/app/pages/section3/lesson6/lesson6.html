@@ -1,0 +1,80 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 03</span>
+    <h1>Internet Protocol (IP)</h1>
+    <p class="section-description">Deep dive into IP addressing, packets, ICMP, ARP, and routing</p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 6</span>
+      <h2>Routing Example</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">How IP packets flow through switches and routers — a practical walkthrough of same-network, cross-network, and internet routing.</p>
+
+      <app-routing-example />
+
+      <h3>Layer 2 vs Layer 3 Destinations</h3>
+      <div class="and-demo">
+        <div class="and-example and-same">
+          <div class="and-title">MAC Address (Layer 2)</div>
+          <div class="and-row">
+            <span class="and-label">Scope</span>
+            <span>Local delivery only</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Changes?</span>
+            <span>Yes — at every hop</span>
+          </div>
+          <div class="and-verdict same">Switch uses MAC to forward frames</div>
+        </div>
+        <div class="and-example and-diff">
+          <div class="and-title">IP Address (Layer 3)</div>
+          <div class="and-row">
+            <span class="and-label">Scope</span>
+            <span>End-to-end routing</span>
+          </div>
+          <div class="and-row">
+            <span class="and-label">Changes?</span>
+            <span>No — stays constant</span>
+          </div>
+          <div class="and-verdict diff">Router uses IP to decide next hop</div>
+        </div>
+      </div>
+
+      <h3>Device Comparison</h3>
+      <div class="subnet-visual">
+        <div class="subnet-row subnet-hdr">
+          <span>Device</span><span>Layer</span><span>Sees</span><span>Action</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">Hub</span><span>1</span><span>Signals</span><span class="accent">Broadcasts to all</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">Switch</span><span>2</span><span>MAC</span><span class="accent">Forwards to specific port</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">Router</span><span>3</span><span>IP</span><span class="accent">Routes between networks</span>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key takeaway:</strong> Same network = switch + MAC. Different network = router. Internet = router + NAT. IP destination stays constant; MAC destination changes per hop.
+      </div>
+    </div>
+  </article>
+
+  <!-- Navigation -->
+  <div class="section-nav">
+    <a routerLink="/section/3/5" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; Capturing Packets</span>
+    </a>
+    <a routerLink="/section/3/7" class="nav-btn next">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">Private IP Addresses &rarr;</span>
+    </a>
+  </div>
+</div>

@@ -1,0 +1,97 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 03</span>
+    <h1>Internet Protocol (IP)</h1>
+    <p class="section-description">Deep dive into IP addressing, packets, ICMP, ARP, and routing</p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 5</span>
+      <h2>Capturing Packets with tcpdump</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">Practical packet analysis using tcpdump — a command-line packet analyzer available on macOS and Linux.</p>
+
+      <h3>Common Options</h3>
+      <div class="subnet-visual">
+        <div class="subnet-row subnet-hdr">
+          <span>Option</span><span>Description</span><span>Example</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">-i &lt;iface&gt;</span><span>Capture on specific interface</span><span class="accent">-i en0</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">-n</span><span>Don't resolve hostnames</span><span class="accent">Show raw IPs</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">-v / -vv</span><span>Verbose output</span><span class="accent">Show TTL, flags, etc.</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">-w file</span><span>Write to pcap file</span><span class="accent">-w capture.pcap</span>
+        </div>
+      </div>
+
+      <h3>Quick Reference</h3>
+      <div class="tcpdump-grid">
+        <div class="tcpdump-card">
+          <div class="tcpdump-cmd">tcpdump -i en0 -n arp</div>
+          <span>Capture all ARP packets</span>
+        </div>
+        <div class="tcpdump-card">
+          <div class="tcpdump-cmd">tcpdump -i en0 -n icmp</div>
+          <span>Capture all ICMP (ping)</span>
+        </div>
+        <div class="tcpdump-card">
+          <div class="tcpdump-cmd">tcpdump -i en0 -n host 1.2.3.4</div>
+          <span>Filter by specific host</span>
+        </div>
+        <div class="tcpdump-card">
+          <div class="tcpdump-cmd">tcpdump -i en0 -n -v icmp</div>
+          <span>Verbose ICMP details</span>
+        </div>
+        <div class="tcpdump-card">
+          <div class="tcpdump-cmd">tcpdump -i en0 -w file.pcap</div>
+          <span>Save for Wireshark</span>
+        </div>
+        <div class="tcpdump-card">
+          <div class="tcpdump-cmd">tcpdump -n icmp and host 8.8.8.8</div>
+          <span>Combine filters</span>
+        </div>
+      </div>
+
+      <h3>Key Observations</h3>
+      <div class="three-things">
+        <div class="thing">
+          <span class="thing-num">1</span>
+          <span class="thing-text">ARP is Layer 2 — just MAC addresses</span>
+        </div>
+        <div class="thing">
+          <span class="thing-num">2</span>
+          <span class="thing-text">ICMP is Layer 3 — source/dest IP, no ports</span>
+        </div>
+        <div class="thing">
+          <span class="thing-num">3</span>
+          <span class="thing-text">Ports appear at Layer 4 (TCP/UDP)</span>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> At the IP layer, there are no ports — only source and destination IP addresses. Ports come with TCP/UDP in the transport layer.
+      </div>
+    </div>
+  </article>
+
+  <!-- Navigation -->
+  <div class="section-nav">
+    <a routerLink="/section/3/4" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; ARP</span>
+    </a>
+    <a routerLink="/section/3/6" class="nav-btn next">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">Routing Example &rarr;</span>
+    </a>
+  </div>
+</div>

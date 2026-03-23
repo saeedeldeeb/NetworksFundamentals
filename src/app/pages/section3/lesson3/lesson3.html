@@ -1,0 +1,88 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 03</span>
+    <h1>Internet Protocol (IP)</h1>
+    <p class="section-description">Deep dive into IP addressing, packets, ICMP, ARP, and routing</p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 3</span>
+      <h2>ICMP, Ping, and Traceroute</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">ICMP (Internet Control Message Protocol) is a critical Layer 3 protocol used for network diagnostics and error reporting.</p>
+
+      <h3>What is ICMP?</h3>
+      <div class="ip-facts">
+        <div class="ip-fact">
+          <span class="fact-label">Layer</span>
+          <span class="fact-value">3 (Network)</span>
+        </div>
+        <div class="ip-fact">
+          <span class="fact-label">Uses</span>
+          <span class="fact-value">IP directly, no ports</span>
+        </div>
+        <div class="ip-fact">
+          <span class="fact-label">Protocol #</span>
+          <span class="fact-value">1</span>
+        </div>
+        <div class="ip-fact">
+          <span class="fact-label">Listener</span>
+          <span class="fact-value">None needed</span>
+        </div>
+      </div>
+
+      <h3>Common ICMP Messages</h3>
+      <div class="subnet-visual">
+        <div class="subnet-row subnet-hdr">
+          <span>Type</span><span>Message</span><span>When Sent</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">0</span><span>Echo Reply</span><span class="accent">Response to ping</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">3</span><span>Destination Unreachable</span><span class="accent">Host/port unreachable</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">5</span><span>Redirect</span><span class="accent">Better route available</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">8</span><span>Echo Request</span><span class="accent">Ping request</span>
+        </div>
+        <div class="subnet-row">
+          <span class="mono">11</span><span>Time Exceeded</span><span class="accent">TTL reached 0</span>
+        </div>
+      </div>
+
+      <h3>Ping</h3>
+      <p>Sends an <strong>ICMP Echo Request</strong> and waits for an <strong>Echo Reply</strong>. Tests if a host is reachable and measures round-trip time.</p>
+
+      <app-ping-traceroute />
+
+      <h3>Why ICMP Gets Blocked</h3>
+      <p>Some firewalls block ICMP because of flooding attacks, network probing by attackers, and backchannel attacks using ICMP for covert communication.</p>
+
+      <h3>TCP Black Hole (ICMP Blocking Problem)</h3>
+
+      <app-blackhole-animation />
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> ICMP is essential infrastructure. Blocking it can cause hard-to-debug network issues like TCP black holes. When ping doesn't work, don't assume the host is down — ICMP might be blocked.
+      </div>
+    </div>
+  </article>
+
+  <!-- Navigation -->
+  <div class="section-nav">
+    <a routerLink="/section/3/2" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; The IP Packet</span>
+    </a>
+    <a routerLink="/section/3/4" class="nav-btn next">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">ARP &rarr;</span>
+    </a>
+  </div>
+</div>

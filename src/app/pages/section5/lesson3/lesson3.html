@@ -1,0 +1,206 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 05</span>
+    <h1>TCP (Transmission Control Protocol)</h1>
+    <p class="section-description">
+      The backbone of reliable internet communication — stateful, connection-oriented, and controlled
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 3</span>
+      <h2>Flow Control</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        How much data can the <strong>receiver</strong> handle? Flow control prevents the sender
+        from overwhelming the receiver's buffer.
+      </p>
+
+      <h3>Flow Control vs Congestion Control</h3>
+      <p>
+        These are often confused but solve different problems:
+      </p>
+
+      <div class="fc-vs">
+        <div class="fc-vs-card">
+          <div class="fc-vs-header" style="border-color: #22d3ee;">Flow Control</div>
+          <div class="fc-vs-body">
+            <div class="fc-vs-q">How much can the <strong>receiver</strong> handle?</div>
+            <div class="fc-vs-a">Protects the receiver</div>
+          </div>
+        </div>
+        <div class="fc-vs-card">
+          <div class="fc-vs-header" style="border-color: #f59e0b;">Congestion Control</div>
+          <div class="fc-vs-body">
+            <div class="fc-vs-q">How much can the <strong>network</strong> handle?</div>
+            <div class="fc-vs-a">Protects the routers</div>
+          </div>
+        </div>
+      </div>
+
+      <h3>The Problem: Naive Approach</h3>
+      <p>
+        Send one segment, wait for ACK, send next, wait for ACK... You pay the
+        <strong>round-trip time (RTT)</strong> for every single segment. Extremely slow.
+      </p>
+      <p>
+        The better approach: send multiple segments at once, get one ACK for all of them.
+        But <strong>how many can you send?</strong> That depends on the receiver's buffer.
+      </p>
+
+      <h3>The Receiver Buffer</h3>
+      <p>
+        When segments arrive, they go into a <strong>receiver buffer</strong> in memory.
+        The application reads from this buffer at its own pace. If you send too much data:
+      </p>
+
+      <div class="buffer-consequences">
+        <div class="buf-con">
+          <span class="buf-con-num">1</span>
+          <span>Buffer fills up</span>
+        </div>
+        <div class="buf-con">
+          <span class="buf-con-num">2</span>
+          <span>New segments are <strong>dropped</strong></span>
+        </div>
+        <div class="buf-con">
+          <span class="buf-con-num">3</span>
+          <span>Wasted bandwidth, need retransmission</span>
+        </div>
+      </div>
+
+      <h3>The Solution: Receiver Window (rwnd)</h3>
+      <p>
+        The receiver tells the sender: <strong>"This is how much data I can receive right now."</strong>
+        This value is carried in the <strong>Window Size</strong> field of every TCP ACK.
+      </p>
+
+      <div class="rwnd-names">
+        <span class="rwnd-tag">Receiver Window (rwnd)</span>
+        <span class="rwnd-tag">Flow Control Window</span>
+        <span class="rwnd-tag">Window Size (TCP header)</span>
+      </div>
+
+      <h3>Flow Control in Action</h3>
+      <p>
+        Watch how the receiver dynamically adjusts the window size based on buffer capacity.
+        When the buffer is full, the sender must <strong>stop</strong> until the receiver catches up.
+      </p>
+
+      <app-flow-control />
+
+      <h3>Dynamic Window Sizes</h3>
+      <p>
+        The receiver window changes with <strong>every ACK</strong> — it's not static:
+      </p>
+
+      <div class="win-timeline">
+        <div class="win-tl-row">
+          <span class="win-tl-ack">ACK 1</span>
+          <div class="win-tl-bar" style="width: 100%;"><div class="win-tl-fill" style="width: 83%; background: #10b981;"></div></div>
+          <span class="win-tl-val" style="color: #10b981;">5000 B</span>
+          <span class="win-tl-note">"Lots of room"</span>
+        </div>
+        <div class="win-tl-row">
+          <span class="win-tl-ack">ACK 2</span>
+          <div class="win-tl-bar" style="width: 100%;"><div class="win-tl-fill" style="width: 50%; background: #f59e0b;"></div></div>
+          <span class="win-tl-val" style="color: #f59e0b;">3000 B</span>
+          <span class="win-tl-note">"Filling up"</span>
+        </div>
+        <div class="win-tl-row">
+          <span class="win-tl-ack">ACK 3</span>
+          <div class="win-tl-bar" style="width: 100%;"><div class="win-tl-fill" style="width: 17%; background: #ef4444;"></div></div>
+          <span class="win-tl-val" style="color: #ef4444;">1000 B</span>
+          <span class="win-tl-note">"Almost full!"</span>
+        </div>
+        <div class="win-tl-row">
+          <span class="win-tl-ack">ACK 4</span>
+          <div class="win-tl-bar" style="width: 100%;"><div class="win-tl-fill" style="width: 0%;"></div></div>
+          <span class="win-tl-val" style="color: #ef4444;">0 B</span>
+          <span class="win-tl-note">"STOP!"</span>
+        </div>
+        <div class="win-tl-row">
+          <span class="win-tl-ack">ACK 5</span>
+          <div class="win-tl-bar" style="width: 100%;"><div class="win-tl-fill" style="width: 67%; background: #10b981;"></div></div>
+          <span class="win-tl-val" style="color: #10b981;">4000 B</span>
+          <span class="win-tl-note">"App read data, room again"</span>
+        </div>
+      </div>
+
+      <h3>The Sliding Window</h3>
+      <p>
+        As ACKs arrive, the sender "slides" its window forward. Acknowledged data is discarded,
+        and new data enters the window.
+      </p>
+
+      <app-sliding-window />
+
+      <h3>Window Scaling</h3>
+      <p>
+        The Window Size field is only 16 bits — max <strong>65,535 bytes</strong>. That's nothing
+        for modern networks. The solution: <strong>Window Scaling</strong> (RFC 1323).
+      </p>
+
+      <div class="win-scale-demo">
+        <div class="win-scale-formula">
+          Actual Window = Window Size &times; 2<sup>scale factor</sup>
+        </div>
+        <div class="win-scale-example">
+          <div class="win-scale-row">
+            <span class="win-scale-label">Window Size in header</span>
+            <span class="win-scale-val">65,535</span>
+          </div>
+          <div class="win-scale-row">
+            <span class="win-scale-label">Scale factor</span>
+            <span class="win-scale-val">14</span>
+          </div>
+          <div class="win-scale-row win-scale-result">
+            <span class="win-scale-label">Actual Window</span>
+            <span class="win-scale-val">65,535 &times; 16,384 &asymp; 1 GB</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <strong>Important:</strong> Window scaling is negotiated <strong>only during the
+        handshake</strong>. If Wireshark misses the handshake, it can't calculate the actual
+        window size — you'll see "window size" vs "calculated window size" in captures.
+      </div>
+
+      <h3>Zero Window</h3>
+      <p>
+        When the receiver sends <code>Window = 0</code>, the sender must <strong>stop sending
+        data</strong>. It periodically sends tiny <strong>window probes</strong> to check if
+        the receiver has room again.
+      </p>
+
+      <h3>Without Flow Control (UDP)</h3>
+      <p>
+        UDP has no flow control built in. If you need it, you must implement it yourself:
+        application-level window negotiation, custom acknowledgments, your own buffering logic.
+        Or just assume your servers are "beefy enough" — risky with many clients.
+      </p>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> Flow control protects the receiver from being overwhelmed.
+        The receiver advertises its buffer capacity, and the sender respects that limit.
+        Without this, fast senders would constantly overflow slow receivers' buffers, causing
+        packet loss and retransmissions.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/5/2" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; TCP Segment</span>
+    </a>
+    <a routerLink="/section/5/4" class="nav-btn next">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">Congestion Control &rarr;</span>
+    </a>
+  </div>
+</div>

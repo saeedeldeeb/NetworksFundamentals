@@ -1,0 +1,395 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 05</span>
+    <h1>TCP (Transmission Control Protocol)</h1>
+    <p class="section-description">
+      The backbone of reliable internet communication — stateful, connection-oriented, and controlled
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 5</span>
+      <h2>Slow Start vs Congestion Avoidance (Deep Dive)</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        A detailed look at how TCP's two congestion control algorithms work together — probing
+        the network aggressively at first, then carefully, and resetting when things go wrong.
+      </p>
+
+      <h3>The Two Algorithms</h3>
+      <p>
+        TCP uses two distinct algorithms for congestion control. The <strong>slow start
+        threshold (ssthresh)</strong> determines which one is active:
+      </p>
+
+      <div class="algo-switch">
+        <div class="algo-switch-row">
+          <code>if cwnd &lt; ssthresh:</code>
+          <span class="algo-switch-tag" style="background: rgba(34, 211, 238, 0.12); color: #22d3ee;">Slow Start</span>
+          <span>Exponential growth</span>
+        </div>
+        <div class="algo-switch-row">
+          <code>if cwnd &ge; ssthresh:</code>
+          <span class="algo-switch-tag" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">Congestion Avoidance</span>
+          <span>Linear growth</span>
+        </div>
+      </div>
+
+      <h3>Slow Start: The Details</h3>
+      <p>
+        <strong>Why "slow"?</strong> We start from 1 MSS — a very slow beginning.
+        <strong>Why "fast"?</strong> We increase aggressively — exponentially.
+      </p>
+      <p>
+        <strong>The rule:</strong> For <strong>every ACK</strong> received, add 1 MSS to cwnd.
+      </p>
+
+      <div class="dd-rounds">
+        <div class="dd-round">
+          <span class="dd-round-num">1</span>
+          <div class="dd-round-body">
+            <span class="dd-round-send">Send <strong>1</strong></span>
+            <span class="dd-round-arrow">&rarr;</span>
+            <span class="dd-round-ack">1 ACK</span>
+            <span class="dd-round-arrow">&rarr;</span>
+            <span class="dd-round-result">+1 &rarr; cwnd = <strong>2</strong></span>
+          </div>
+        </div>
+        <div class="dd-round">
+          <span class="dd-round-num">2</span>
+          <div class="dd-round-body">
+            <span class="dd-round-send">Send <strong>2</strong></span>
+            <span class="dd-round-arrow">&rarr;</span>
+            <span class="dd-round-ack">2 ACKs</span>
+            <span class="dd-round-arrow">&rarr;</span>
+            <span class="dd-round-result">+2 &rarr; cwnd = <strong>4</strong></span>
+          </div>
+        </div>
+        <div class="dd-round">
+          <span class="dd-round-num">3</span>
+          <div class="dd-round-body">
+            <span class="dd-round-send">Send <strong>4</strong></span>
+            <span class="dd-round-arrow">&rarr;</span>
+            <span class="dd-round-ack">4 ACKs</span>
+            <span class="dd-round-arrow">&rarr;</span>
+            <span class="dd-round-result">+4 &rarr; cwnd = <strong>8</strong></span>
+          </div>
+        </div>
+        <div class="dd-round">
+          <span class="dd-round-num">4</span>
+          <div class="dd-round-body">
+            <span class="dd-round-send">Send <strong>8</strong></span>
+            <span class="dd-round-arrow">&rarr;</span>
+            <span class="dd-round-ack">8 ACKs</span>
+            <span class="dd-round-arrow">&rarr;</span>
+            <span class="dd-round-result">+8 &rarr; cwnd = <strong>16</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <p>
+        Every single acknowledgment adds 1 MSS. If you send 10 packets and get 10 ACKs,
+        you add 10 MSS. This is what makes growth <strong>exponential</strong> — more
+        packets means more ACKs means faster growth.
+      </p>
+
+      <h3>Congestion Avoidance: The Details</h3>
+      <p>
+        After cwnd reaches ssthresh, growth slows dramatically.
+        <strong>The rule:</strong> Add 1 MSS per <strong>complete round trip</strong>, not per ACK.
+      </p>
+
+      <div class="highlight-box">
+        <h3>What Is a Round Trip in TCP?</h3>
+        <p>
+          Send <code>cwnd</code> worth of segments, then wait for ACKs for <strong>all</strong>
+          of them. Only when all are acknowledged = 1 complete round trip.
+        </p>
+        <p class="note">
+          Application-level RTT: send request → get response. TCP-level RTT: send cwnd segments → get all ACKs back.
+        </p>
+      </div>
+
+      <div class="dd-ca-example">
+        <div class="dd-ca-header">Example: cwnd = 4 segments</div>
+        <div class="dd-ca-step">
+          <span class="dd-ca-label">Send</span>
+          <div class="dd-ca-segs">
+            <span class="dd-ca-seg">Seg 1</span>
+            <span class="dd-ca-seg">Seg 2</span>
+            <span class="dd-ca-seg">Seg 3</span>
+            <span class="dd-ca-seg">Seg 4</span>
+          </div>
+        </div>
+        <div class="dd-ca-step">
+          <span class="dd-ca-label">Wait</span>
+          <div class="dd-ca-acks">
+            <span class="dd-ca-ack">ACK 1</span>
+            <span class="dd-ca-ack">ACK 2</span>
+            <span class="dd-ca-ack">ACK 3</span>
+            <span class="dd-ca-ack">ACK 4</span>
+          </div>
+        </div>
+        <div class="dd-ca-result">All 4 acknowledged = 1 RTT &rarr; cwnd = <strong>5</strong> (+1 only)</div>
+      </div>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr"><span>Scenario</span><span>Slow Start</span><span>Congestion Avoidance</span></div>
+        <div class="tcp-compare-row"><span>4 packets sent, 4 ACKs</span><span class="tcp-val-good">+4 MSS (one per ACK)</span><span class="tcp-val-neutral">+1 MSS (one per RTT)</span></div>
+        <div class="tcp-compare-row"><span>10 packets sent, 10 ACKs</span><span class="tcp-val-good">+10 MSS</span><span class="tcp-val-neutral">+1 MSS</span></div>
+      </div>
+
+      <h3>Congestion Detection</h3>
+      <p>
+        How does TCP know there's congestion? It uses a <strong>retransmission timer</strong>:
+      </p>
+
+      <div class="detect-steps">
+        <div class="detect-step">
+          <span class="detect-num">1</span>
+          <span>Send a segment, start timer</span>
+        </div>
+        <div class="detect-step detect-ok">
+          <span class="detect-num">2</span>
+          <span>ACK arrives before timer expires &rarr; <strong>OK</strong></span>
+        </div>
+        <div class="detect-step detect-bad">
+          <span class="detect-num">3</span>
+          <span>Timer expires before ACK &rarr; <strong>Packet lost = Congestion assumed</strong></span>
+        </div>
+      </div>
+
+      <p>
+        The assumption: routers in the middle dropped the packet because their
+        <strong>buffers overflowed</strong>.
+      </p>
+
+      <h3>What Happens When Congestion Is Detected</h3>
+      <p>Two things happen:</p>
+
+      <div class="loss-steps">
+        <div class="loss-step">
+          <span class="loss-step-num">1</span>
+          <span>ssthresh = flight_size / 2 <em>(halve the in-flight data)</em></span>
+        </div>
+        <div class="loss-step">
+          <span class="loss-step-num">2</span>
+          <span>cwnd = 1 MSS <em>(reset to slow start)</em></span>
+        </div>
+      </div>
+
+      <h3>flight_size vs cwnd</h3>
+      <p>
+        A subtle but important distinction — the new threshold is based on <code>flight_size</code>,
+        <strong>not</strong> <code>cwnd</code>:
+      </p>
+
+      <div class="flight-compare">
+        <div class="flight-card">
+          <div class="flight-card-header" style="border-color: #22d3ee;">cwnd</div>
+          <div class="flight-card-body">Maximum you <strong>can</strong> send</div>
+        </div>
+        <div class="flight-vs">&ne;</div>
+        <div class="flight-card">
+          <div class="flight-card-header" style="border-color: #ec4899;">flight_size</div>
+          <div class="flight-card-body">What you actually <strong>have</strong> in flight (unacknowledged)</div>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <h3>Why the Distinction Matters</h3>
+        <div class="flight-example">
+          <div class="flight-ex-row">
+            <span class="flight-ex-label">cwnd</span>
+            <span class="flight-ex-val">10 MSS</span>
+            <span class="flight-ex-note">(you can send up to 10)</span>
+          </div>
+          <div class="flight-ex-row">
+            <span class="flight-ex-label">flight_size</span>
+            <span class="flight-ex-val">3 MSS</span>
+            <span class="flight-ex-note">(only 3 unacknowledged)</span>
+          </div>
+          <div class="flight-ex-divider"></div>
+          <div class="flight-ex-row flight-ex-wrong">
+            <span class="flight-ex-label">Wrong</span>
+            <span class="flight-ex-val">ssthresh = 10 / 2 = 5</span>
+          </div>
+          <div class="flight-ex-row flight-ex-right">
+            <span class="flight-ex-label">Right</span>
+            <span class="flight-ex-val">ssthresh = 3 / 2 &asymp; 2 MSS</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>Minimum Threshold</h3>
+      <p>
+        Can ssthresh keep decreasing to zero? <strong>No.</strong> There's a floor:
+      </p>
+
+      <div class="eff-window">
+        <div class="eff-formula">
+          ssthresh = max(<span class="eff-cwnd">flight_size / 2</span>, <span class="eff-rwnd">2 &times; MSS</span>)
+        </div>
+        <div class="eff-desc">
+          <div class="eff-item">
+            <span class="eff-tag" style="background: rgba(34, 211, 238, 0.15); color: #22d3ee;">floor</span>
+            <span>The slow start threshold can <strong>never</strong> go below 2 MSS</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>The Full Cycle</h3>
+      <p>
+        Watch the complete congestion control cycle: slow start ramps up exponentially until
+        ssthresh, then congestion avoidance grows linearly. When packet loss is detected,
+        cwnd crashes to 1 and the cycle restarts — but with a <strong>lower ssthresh</strong>
+        each time.
+      </p>
+
+      <app-congestion-cycle />
+
+      <div class="cycle-flow">
+        <div class="cycle-step">
+          <span class="cycle-num" style="background: #22d3ee;">1</span>
+          <div class="cycle-info">
+            <strong>Start: cwnd = 1 MSS</strong>
+            <span>Begin with slow start</span>
+          </div>
+        </div>
+        <div class="cycle-arrow">&darr;</div>
+        <div class="cycle-step">
+          <span class="cycle-num" style="background: #22d3ee;">2</span>
+          <div class="cycle-info">
+            <strong>Slow Start (exponential)</strong>
+            <span>+1 MSS per ACK — grows fast</span>
+          </div>
+        </div>
+        <div class="cycle-arrow">&darr;</div>
+        <div class="cycle-step">
+          <span class="cycle-num" style="background: #f59e0b;">3</span>
+          <div class="cycle-info">
+            <strong>Reach ssthresh</strong>
+            <span>Switch to congestion avoidance</span>
+          </div>
+        </div>
+        <div class="cycle-arrow">&darr;</div>
+        <div class="cycle-step">
+          <span class="cycle-num" style="background: #10b981;">4</span>
+          <div class="cycle-info">
+            <strong>Congestion Avoidance (linear)</strong>
+            <span>+1 MSS per complete RTT — gentle probing</span>
+          </div>
+        </div>
+        <div class="cycle-arrow">&darr;</div>
+        <div class="cycle-step">
+          <span class="cycle-num" style="background: #ef4444;">5</span>
+          <div class="cycle-info">
+            <strong>Packet loss detected!</strong>
+            <span>ssthresh = flight_size/2, cwnd = 1 MSS</span>
+          </div>
+        </div>
+        <div class="cycle-arrow cycle-loop">&darr; back to step 1 (repeat)</div>
+      </div>
+
+      <h3>Reading the Chart</h3>
+      <p>
+        Each cycle through the chart reveals a pattern: the <strong>ssthresh keeps
+        decreasing</strong>. You reach it faster, so you spend less time in slow start
+        and more time in congestion avoidance. Eventually ssthresh hits the minimum of 2 MSS.
+      </p>
+
+      <h3>Impact on Your Application</h3>
+
+      <div class="impact-demo">
+        <div class="impact-row">
+          <span class="impact-label impact-before">Before loss</span>
+          <span class="impact-val">cwnd = 1000 segments — sending fast</span>
+        </div>
+        <div class="impact-row">
+          <span class="impact-label impact-after">After loss</span>
+          <span class="impact-val">cwnd = 1 segment — sending slow</span>
+        </div>
+      </div>
+
+      <p>
+        Your app <strong>feels this</strong>. Downloads slow down, connections feel sluggish.
+        Then it ramps back up through slow start and congestion avoidance — the sawtooth
+        pattern repeats.
+      </p>
+
+      <h3>The Event Summary</h3>
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr"><span>Event</span><span>Action</span></div>
+        <div class="tcp-compare-row"><span>Connection starts</span><span>cwnd = 1 MSS, use Slow Start</span></div>
+        <div class="tcp-compare-row"><span>ACK received (Slow Start)</span><span class="tcp-val-good">cwnd += 1 MSS</span></div>
+        <div class="tcp-compare-row"><span>cwnd reaches ssthresh</span><span class="tcp-val-neutral">Switch to Congestion Avoidance</span></div>
+        <div class="tcp-compare-row"><span>ACK received (Cong. Avoidance)</span><span class="tcp-val-neutral">cwnd += MSS &times; (MSS/cwnd)</span></div>
+        <div class="tcp-compare-row"><span>Complete RTT (Cong. Avoidance)</span><span class="tcp-val-neutral">cwnd += 1 MSS (approx)</span></div>
+        <div class="tcp-compare-row"><span>Packet loss detected</span><span class="tcp-val-warn">ssthresh = flight_size/2, cwnd = 1</span></div>
+        <div class="tcp-compare-row"><span>Minimum ssthresh</span><span class="tcp-val-warn">2 &times; MSS</span></div>
+      </div>
+
+      <h3>Why This Design?</h3>
+
+      <div class="design-cards">
+        <div class="design-card">
+          <div class="design-icon" style="background: rgba(34, 211, 238, 0.12); color: #22d3ee;">SS</div>
+          <strong>Aggressive start</strong>
+          <span>Slow Start quickly finds available bandwidth</span>
+        </div>
+        <div class="design-card">
+          <div class="design-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">CA</div>
+          <strong>Conservative probe</strong>
+          <span>Congestion Avoidance carefully tests for more</span>
+        </div>
+        <div class="design-card">
+          <div class="design-icon" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">&times;</div>
+          <strong>Harsh punishment</strong>
+          <span>Reset on congestion prevents network collapse</span>
+        </div>
+        <div class="design-card">
+          <div class="design-icon" style="background: rgba(99, 102, 241, 0.12); color: #6366f1;">&uarr;</div>
+          <strong>Quick recovery</strong>
+          <span>Exponential ramp-up helps recover fast</span>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <h3>Fast Retransmit</h3>
+        <p>
+          There's another algorithm called <strong>Fast Retransmit</strong> that detects
+          congestion faster using duplicate ACKs instead of waiting for timeout. It's less
+          harsh — doesn't reset cwnd to 1. Not covered in detail here, but worth knowing
+          it exists.
+        </p>
+      </div>
+
+      <p class="note">
+        These algorithms are defined in <strong>RFC 5681</strong> (TCP Congestion Control).
+        The HOMA paper proposes reimagining TCP for data centers, redefining what congestion
+        means — worth reading after understanding these fundamentals.
+      </p>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> The congestion control algorithm is a continuous dance —
+        aggressively ramping up to find capacity, then backing off when hitting limits. Your
+        application's perceived speed depends heavily on this cycle. Understanding it helps
+        you diagnose why connections start slow, speed up, then occasionally stutter.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/5/4" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; Congestion Control</span>
+    </a>
+    <a routerLink="/section/5/5" class="nav-btn next disabled-nav">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">NAT &rarr;</span>
+    </a>
+  </div>
+</div>

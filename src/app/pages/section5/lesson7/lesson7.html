@@ -1,0 +1,245 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 05</span>
+    <h1>TCP (Transmission Control Protocol)</h1>
+    <p class="section-description">
+      The backbone of reliable internet communication — stateful, connection-oriented, and controlled
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 7</span>
+      <h2>TCP Connection States</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        TCP is stateful — connections go through a state machine with defined transitions.
+        Getting states wrong causes bugs, resource leaks, and security issues.
+      </p>
+
+      <h3>Why States Matter</h3>
+      <p>
+        Both client and server maintain state for every connection: window sizes, sequence numbers,
+        acknowledgment numbers, and the <strong>connection state</strong> itself — open, closing,
+        closed, waiting.
+      </p>
+
+      <h3>The Four-Way Close State Machine</h3>
+      <p>
+        Watch how states transition during a connection close. The
+        <strong>active closer</strong> (whoever sends the first FIN) goes through more states
+        and ends up in TIME_WAIT.
+      </p>
+
+      <app-tcp-states />
+
+      <h3>State Descriptions</h3>
+
+      <div class="state-grid">
+        <div class="state-card state-active">
+          <code class="state-name">ESTABLISHED</code>
+          <span class="state-who">Both</span>
+          <span class="state-desc">Connection open, data flowing normally</span>
+        </div>
+        <div class="state-card state-closer">
+          <code class="state-name">FIN_WAIT_1</code>
+          <span class="state-who">Active closer</span>
+          <span class="state-desc">Sent FIN, waiting for ACK</span>
+        </div>
+        <div class="state-card state-receiver">
+          <code class="state-name">CLOSE_WAIT</code>
+          <span class="state-who">Passive closer</span>
+          <span class="state-desc">Received FIN, sent ACK, preparing to close</span>
+        </div>
+        <div class="state-card state-closer">
+          <code class="state-name">FIN_WAIT_2</code>
+          <span class="state-who">Active closer</span>
+          <span class="state-desc">Got ACK for FIN, waiting for peer's FIN</span>
+        </div>
+        <div class="state-card state-receiver">
+          <code class="state-name">LAST_ACK</code>
+          <span class="state-who">Passive closer</span>
+          <span class="state-desc">Sent FIN, waiting for final ACK</span>
+        </div>
+        <div class="state-card state-warning">
+          <code class="state-name">TIME_WAIT</code>
+          <span class="state-who">Active closer</span>
+          <span class="state-desc">Sent final ACK, waiting ~4 minutes for old packets to expire</span>
+        </div>
+        <div class="state-card state-active">
+          <code class="state-name">CLOSED</code>
+          <span class="state-who">Both</span>
+          <span class="state-desc">Connection fully terminated</span>
+        </div>
+      </div>
+
+      <h3>TIME_WAIT: The Most Important State</h3>
+      <p>
+        After sending the final ACK, the active closer enters TIME_WAIT for
+        <strong>2 &times; MSL (Maximum Segment Lifetime) &asymp; 4 minutes</strong>.
+        This is the most discussed state in backend engineering.
+      </p>
+
+      <h4>Why TIME_WAIT Exists</h4>
+      <p>
+        The <strong>Two Generals' Problem</strong>: the client sends the final ACK, but there's
+        no ACK for the ACK. Did the server receive it? If we close immediately:
+      </p>
+
+      <div class="tw-problem">
+        <div class="tw-step">
+          <span class="tw-num">1</span>
+          <span>Final ACK might be lost</span>
+        </div>
+        <div class="tw-step">
+          <span class="tw-num">2</span>
+          <span>Server retransmits FIN</span>
+        </div>
+        <div class="tw-step">
+          <span class="tw-num">3</span>
+          <span>Client already closed &rarr; sends RST</span>
+        </div>
+        <div class="tw-step tw-step-bad">
+          <span class="tw-num">!</span>
+          <span>Connection terminated uncleanly</span>
+        </div>
+      </div>
+
+      <h4>The Security Reason</h4>
+      <p>
+        Without TIME_WAIT, a <strong>session resumption attack</strong> is possible:
+      </p>
+
+      <div class="tw-attack">
+        <div class="tw-atk-step">Connection A uses port 45678, then closes</div>
+        <div class="tw-atk-arrow">&darr;</div>
+        <div class="tw-atk-step">Attacker quickly opens new connection, gets port 45678</div>
+        <div class="tw-atk-arrow">&darr;</div>
+        <div class="tw-atk-step tw-atk-danger">Old delayed packets from A arrive &rarr; attacker receives data meant for A</div>
+      </div>
+
+      <p>
+        TIME_WAIT prevents this by ensuring old packets have time to expire before
+        the port can be reused.
+      </p>
+
+      <h3>Who Gets TIME_WAIT?</h3>
+
+      <div class="highlight-box">
+        <strong>Rule:</strong> Whoever sends the <strong>first FIN</strong> ends up in TIME_WAIT.
+        If the server initiates the close, the server gets TIME_WAIT. If the client initiates,
+        the client gets it.
+      </div>
+
+      <h3>The Backend Engineering Trick</h3>
+      <p>
+        <strong>Problem:</strong> Server has thousands of TIME_WAIT connections eating resources.
+        <strong>Why?</strong> Because the server is initiating closes.
+      </p>
+
+      <div class="tw-trick">
+        <div class="tw-trick-bad">
+          <div class="tw-trick-label tw-trick-label-bad">Bad for server</div>
+          <div class="tw-trick-flow">
+            Server &rarr; FIN &rarr; Client
+          </div>
+          <div class="tw-trick-result">Server ends up in TIME_WAIT</div>
+        </div>
+        <div class="tw-trick-good">
+          <div class="tw-trick-label tw-trick-label-good">Good for server</div>
+          <div class="tw-trick-flow">
+            Server &rarr; "please close" &rarr; Client &rarr; FIN &rarr; Server
+          </div>
+          <div class="tw-trick-result">Client ends up in TIME_WAIT</div>
+        </div>
+      </div>
+
+      <p>
+        <strong>Why this works:</strong> you have many clients but one server. Clients are
+        distributed and can handle TIME_WAIT. Server resources are precious and centralized.
+      </p>
+
+      <h3>Viewing Connection States</h3>
+
+      <div class="nat-console">
+        <div class="nat-console-bar">
+          <span class="nat-console-dot" style="background: #ef4444;"></span>
+          <span class="nat-console-dot" style="background: #f59e0b;"></span>
+          <span class="nat-console-dot" style="background: #10b981;"></span>
+          <span class="nat-console-title">$ netstat -an | grep tcp | sort by state | count</span>
+        </div>
+        <div class="nat-console-body">
+          <div class="st-netstat-row"><span class="st-ns-count">1234</span> <span class="st-ns-state st-ns-good">ESTABLISHED</span></div>
+          <div class="st-netstat-row"><span class="st-ns-count">5678</span> <span class="st-ns-state st-ns-warn">TIME_WAIT</span></div>
+          <div class="st-netstat-row"><span class="st-ns-count">  23</span> <span class="st-ns-state st-ns-bad">CLOSE_WAIT</span></div>
+          <div class="st-netstat-row"><span class="st-ns-count">   5</span> <span class="st-ns-state st-ns-neutral">FIN_WAIT_2</span></div>
+        </div>
+      </div>
+
+      <h3>Common Issues</h3>
+
+      <div class="st-issues">
+        <div class="st-issue">
+          <div class="st-issue-header">
+            <code class="st-issue-state st-issue-tw">TIME_WAIT</code>
+            <span>accumulation</span>
+          </div>
+          <div class="st-issue-body">
+            <div class="st-issue-row">
+              <span class="st-issue-label">Symptom</span>
+              <span>Port exhaustion, can't open new connections</span>
+            </div>
+            <div class="st-issue-row">
+              <span class="st-issue-label">Cause</span>
+              <span>Server closing many short-lived connections</span>
+            </div>
+            <div class="st-issue-row">
+              <span class="st-issue-label">Fix</span>
+              <span>Have clients close instead, use connection pooling, tune <code>tcp_tw_reuse</code></span>
+            </div>
+          </div>
+        </div>
+        <div class="st-issue">
+          <div class="st-issue-header">
+            <code class="st-issue-state st-issue-cw">CLOSE_WAIT</code>
+            <span>accumulation</span>
+          </div>
+          <div class="st-issue-body">
+            <div class="st-issue-row">
+              <span class="st-issue-label">Symptom</span>
+              <span>Connections stuck in CLOSE_WAIT forever</span>
+            </div>
+            <div class="st-issue-row">
+              <span class="st-issue-label">Cause</span>
+              <span>App received FIN but <strong>never called close()</strong></span>
+            </div>
+            <div class="st-issue-row">
+              <span class="st-issue-label">Fix</span>
+              <span>Application bug — always close sockets when done</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> TIME_WAIT is not a bug — it's a feature that ensures clean
+        connection termination and prevents security issues. But it can cause resource problems on
+        busy servers. The trick is to design your protocol so clients initiate the close, pushing
+        TIME_WAIT to the client side where it matters less.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/5/6" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; NAT</span>
+    </a>
+    <a routerLink="/section/5/8" class="nav-btn next disabled-nav">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">TCP Pros &amp; Cons &rarr;</span>
+    </a>
+  </div>
+</div>

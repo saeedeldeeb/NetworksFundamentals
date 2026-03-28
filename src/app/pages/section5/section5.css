@@ -523,6 +523,365 @@
 .design-card strong { font-size: 0.8125rem; color: var(--text-primary); }
 .design-card span { font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; }
 
+/* ===== NAT Solutions (Lesson 6) ===== */
+.nat-solutions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+}
+
+.nat-sol {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 0.875rem 1rem;
+  position: relative;
+}
+
+.nat-sol-badge {
+  font-family: var(--font-mono), monospace;
+  font-weight: 800;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.nat-sol-ipv6 .nat-sol-badge { background: rgba(99, 102, 241, 0.15); color: #6366f1; }
+.nat-sol-nat .nat-sol-badge { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+
+.nat-sol-text { flex: 1; font-size: 0.8125rem; color: var(--text-secondary); }
+.nat-sol-text strong { color: var(--text-primary); }
+
+.nat-sol-status {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.nat-sol-slow { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.nat-sol-active { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+
+/* ===== NAT Private Ranges (Lesson 6) ===== */
+.nat-ranges {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin: 1rem 0;
+}
+
+.nat-range {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.5rem 0.875rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.8125rem;
+}
+
+.nat-range-cidr {
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #22d3ee;
+  background: rgba(34, 211, 238, 0.08);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.nat-range-full { color: var(--text-muted); font-size: 0.75rem; }
+
+.nat-range-count {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* ===== NAT Translation Timeline (Lesson 6) ===== */
+.nat-timeline {
+  margin: 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.nat-tl-phase {
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.nat-tl-outgoing {
+  border-radius: 12px 12px 0 0;
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.03), transparent);
+}
+
+.nat-tl-return {
+  border-radius: 0 0 12px 12px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.03), transparent);
+}
+
+.nat-tl-phase-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.nat-tl-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.nat-tl-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.7rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.nat-tl-content strong {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.nat-tl-packet {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  background: #0f172a;
+  border-radius: 5px;
+  margin-bottom: 0.25rem;
+}
+
+.nat-tl-field {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.nat-tl-field code { font-size: 0.7rem; }
+
+.nat-tl-changed { color: var(--text-primary); }
+.nat-tl-changed code { color: #10b981; }
+
+.nat-tl-rewrite { border-left: 2px solid #f59e0b; }
+
+.nat-tl-arrow { color: var(--text-muted); font-size: 0.75rem; }
+
+.nat-tl-note {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.nat-tl-connector {
+  width: 1px;
+  height: 12px;
+  background: var(--border-color);
+  margin-left: 11px;
+}
+
+/* NAT table (between phases) */
+.nat-tl-table {
+  padding: 0.625rem 1.25rem;
+  background: rgba(245, 158, 11, 0.04);
+  border-left: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+}
+
+.nat-tl-table-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #f59e0b;
+  margin-bottom: 0.375rem;
+}
+
+.nat-tl-table-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.nat-tl-table-cell {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.nat-tl-cell-priv { background: rgba(34, 211, 238, 0.08); color: #22d3ee; }
+.nat-tl-cell-pub { background: rgba(16, 185, 129, 0.08); color: #10b981; }
+.nat-tl-cell-dst { background: rgba(99, 102, 241, 0.08); color: #6366f1; }
+
+.nat-tl-table-sep {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* ===== NAT Console (Lesson 6) ===== */
+.nat-console {
+  margin: 1.25rem 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.nat-console-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  background: #1a1a2e;
+}
+
+.nat-console-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.nat-console-title {
+  margin-left: 0.5rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.nat-console-body {
+  background: #0c1222;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.75rem;
+  line-height: 1.8;
+}
+
+.nat-console-hdr {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.5rem;
+  color: #475569;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding-bottom: 0.375rem;
+  border-bottom: 1px solid #1e293b;
+  margin-bottom: 0.25rem;
+}
+
+.nat-console-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.5rem;
+  padding: 0.125rem 0;
+}
+
+.nat-c-priv { color: #22d3ee; }
+.nat-c-pub { color: #10b981; }
+.nat-c-dst { color: #94a3b8; }
+
+.nat-console-footer {
+  margin-top: 0.375rem;
+  padding-top: 0.375rem;
+  border-top: 1px solid #1e293b;
+  color: #475569;
+  font-size: 0.65rem;
+}
+
+/* ===== NAT Use Cases (Lesson 6) ===== */
+.nat-use-cases {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1.25rem 0;
+}
+
+.nat-uc {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 0.875rem 1rem;
+}
+
+.nat-uc-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+
+.nat-uc-body { display: flex; flex-direction: column; gap: 0.125rem; }
+.nat-uc-body strong { font-size: 0.8125rem; color: var(--text-primary); }
+.nat-uc-body span { font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; }
+.nat-uc-body code { font-size: 0.7rem; }
+
+/* ===== NAT Limitations (Lesson 6) ===== */
+.nat-limits {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.nat-limit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.nat-limit-tag {
+  font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #f59e0b;
+}
+
 /* ===== Disabled Nav ===== */
 .disabled-nav { opacity: 0.4; pointer-events: none; }
 
@@ -547,6 +906,11 @@
   .dd-round-body { font-size: 0.75rem; }
   .router-chain { gap: 0.25rem; }
   .rc-node { font-size: 0.65rem; padding: 0.375rem 0.5rem; }
+  .nat-solutions { grid-template-columns: 1fr; }
+  .nat-range { grid-template-columns: 110px 1fr; }
+  .nat-range-count { display: none; }
+  .nat-limits { grid-template-columns: 1fr; }
+  .nat-console-row, .nat-console-hdr { font-size: 0.65rem; }
 }
 
 @media (max-width: 480px) {

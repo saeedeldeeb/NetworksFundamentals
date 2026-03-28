@@ -1,0 +1,292 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 05</span>
+    <h1>TCP (Transmission Control Protocol)</h1>
+    <p class="section-description">
+      The backbone of reliable internet communication — stateful, connection-oriented, and controlled
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 6</span>
+      <h2>NAT (Network Address Translation)</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        How billions of devices share the internet with only 4 billion IPv4 addresses.
+        NAT is the brilliant hack that extended IPv4's life by decades.
+      </p>
+
+      <h3>The Problem</h3>
+      <p>
+        IPv4 gives us ~4 billion addresses (32 bits = 2<sup>32</sup>). There are far
+        more devices than that. Two solutions exist:
+      </p>
+
+      <div class="nat-solutions">
+        <div class="nat-sol nat-sol-ipv6">
+          <div class="nat-sol-badge">IPv6</div>
+          <div class="nat-sol-text">
+            <strong>128-bit addresses</strong> — virtually unlimited
+          </div>
+          <div class="nat-sol-status nat-sol-slow">Adoption is slow</div>
+        </div>
+        <div class="nat-sol nat-sol-nat">
+          <div class="nat-sol-badge">NAT</div>
+          <div class="nat-sol-text">
+            <strong>Share one public IP</strong> among many private devices
+          </div>
+          <div class="nat-sol-status nat-sol-active">Used everywhere</div>
+        </div>
+      </div>
+
+      <h3>Private IP Ranges</h3>
+      <p>
+        Three address ranges are reserved for private networks. They are
+        <strong>not routable</strong> on the internet — routers drop them.
+      </p>
+
+      <div class="nat-ranges">
+        <div class="nat-range">
+          <code class="nat-range-cidr">10.0.0.0/8</code>
+          <span class="nat-range-full">10.0.0.0 — 10.255.255.255</span>
+          <span class="nat-range-count">16M addresses</span>
+        </div>
+        <div class="nat-range">
+          <code class="nat-range-cidr">172.16.0.0/12</code>
+          <span class="nat-range-full">172.16.0.0 — 172.31.255.255</span>
+          <span class="nat-range-count">1M addresses</span>
+        </div>
+        <div class="nat-range">
+          <code class="nat-range-cidr">192.168.0.0/16</code>
+          <span class="nat-range-full">192.168.0.0 — 192.168.255.255</span>
+          <span class="nat-range-count">65K addresses</span>
+        </div>
+      </div>
+
+      <h3>How NAT Works</h3>
+      <p>
+        Your entire household shares <strong>one public IP</strong>. The router rewrites
+        packet headers on the way out and reverses the translation on the way back.
+      </p>
+
+      <app-nat-flow />
+
+      <h3>The Translation Process</h3>
+
+      <div class="nat-timeline">
+        <div class="nat-tl-phase nat-tl-outgoing">
+          <div class="nat-tl-phase-label">Outgoing</div>
+          <div class="nat-tl-step">
+            <span class="nat-tl-num" style="background: #22d3ee; color: #0f172a;">1</span>
+            <div class="nat-tl-content">
+              <strong>Laptop sends packet</strong>
+              <div class="nat-tl-packet">
+                <span class="nat-tl-field">Src <code>192.168.1.20:8992</code></span>
+                <span class="nat-tl-arrow">&rarr;</span>
+                <span class="nat-tl-field">Dst <code>55.11.22.33:443</code></span>
+              </div>
+            </div>
+          </div>
+          <div class="nat-tl-connector"></div>
+          <div class="nat-tl-step">
+            <span class="nat-tl-num" style="background: #f59e0b; color: #0f172a;">2</span>
+            <div class="nat-tl-content">
+              <strong>Router rewrites source</strong>
+              <div class="nat-tl-packet nat-tl-rewrite">
+                <span class="nat-tl-field nat-tl-changed">Src <code>44.11.5.17:7777</code></span>
+                <span class="nat-tl-arrow">&rarr;</span>
+                <span class="nat-tl-field">Dst <code>55.11.22.33:443</code></span>
+              </div>
+              <span class="nat-tl-note">Private IP replaced with router's public IP + random port</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="nat-tl-table">
+          <div class="nat-tl-table-label">NAT Table Entry Created</div>
+          <div class="nat-tl-table-row">
+            <span class="nat-tl-table-cell nat-tl-cell-priv">192.168.1.20:8992</span>
+            <span class="nat-tl-table-sep">&harr;</span>
+            <span class="nat-tl-table-cell nat-tl-cell-pub">44.11.5.17:7777</span>
+            <span class="nat-tl-table-sep">&rarr;</span>
+            <span class="nat-tl-table-cell nat-tl-cell-dst">55.11.22.33:443</span>
+          </div>
+        </div>
+
+        <div class="nat-tl-phase nat-tl-return">
+          <div class="nat-tl-phase-label">Return</div>
+          <div class="nat-tl-step">
+            <span class="nat-tl-num" style="background: #6366f1;">3</span>
+            <div class="nat-tl-content">
+              <strong>Google responds to the router</strong>
+              <div class="nat-tl-packet">
+                <span class="nat-tl-field">Dst <code>44.11.5.17:7777</code></span>
+              </div>
+              <span class="nat-tl-note">Google has no idea a private device exists</span>
+            </div>
+          </div>
+          <div class="nat-tl-connector"></div>
+          <div class="nat-tl-step">
+            <span class="nat-tl-num" style="background: #10b981; color: #0f172a;">4</span>
+            <div class="nat-tl-content">
+              <strong>Router translates back</strong>
+              <div class="nat-tl-packet nat-tl-rewrite">
+                <span class="nat-tl-field nat-tl-changed">Dst <code>192.168.1.20:8992</code></span>
+              </div>
+              <span class="nat-tl-note">Looks up NAT table, restores original private address</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>NAT Is Stateful</h3>
+      <p>
+        The router must <strong>remember every active connection</strong>. Different devices
+        and ports create separate entries:
+      </p>
+
+      <div class="nat-console">
+        <div class="nat-console-bar">
+          <span class="nat-console-dot" style="background: #ef4444;"></span>
+          <span class="nat-console-dot" style="background: #f59e0b;"></span>
+          <span class="nat-console-dot" style="background: #10b981;"></span>
+          <span class="nat-console-title">router# show nat translations</span>
+        </div>
+        <div class="nat-console-body">
+          <div class="nat-console-hdr">
+            <span>PRIVATE</span><span>PUBLIC</span><span>DESTINATION</span>
+          </div>
+          <div class="nat-console-row">
+            <span class="nat-c-priv">192.168.1.20:8992</span>
+            <span class="nat-c-pub">44.11.5.17:7777</span>
+            <span class="nat-c-dst">55.11.22.33:443</span>
+          </div>
+          <div class="nat-console-row">
+            <span class="nat-c-priv">192.168.1.20:9001</span>
+            <span class="nat-c-pub">44.11.5.17:7778</span>
+            <span class="nat-c-dst">55.11.22.33:443</span>
+          </div>
+          <div class="nat-console-row">
+            <span class="nat-c-priv">192.168.1.30:5555</span>
+            <span class="nat-c-pub">44.11.5.17:7779</span>
+            <span class="nat-c-dst">88.99.11.22:80</span>
+          </div>
+          <div class="nat-console-row">
+            <span class="nat-c-priv">192.168.1.10:4444</span>
+            <span class="nat-c-pub">44.11.5.17:7780</span>
+            <span class="nat-c-dst">55.11.22.33:443</span>
+          </div>
+          <div class="nat-console-footer">4 active translations</div>
+        </div>
+      </div>
+
+      <h3>NAT Operates at Layer 3 AND Layer 4</h3>
+      <p>
+        A normal router only reads IP addresses (Layer 3). A NAT router must also
+        <strong>rewrite ports</strong> (Layer 4) — making it significantly more complex.
+      </p>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr">
+          <span>Feature</span>
+          <span>Normal Router</span>
+          <span>NAT Router</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>IP addresses</span>
+          <span class="tcp-val-neutral">Reads</span>
+          <span class="tcp-val-good">Reads AND rewrites</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Layers</span>
+          <span class="tcp-val-neutral">Layer 3 only</span>
+          <span class="tcp-val-good">Layer 3 + Layer 4</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Ports</span>
+          <span class="tcp-val-neutral">Doesn't touch</span>
+          <span class="tcp-val-good">Rewrites too</span>
+        </div>
+      </div>
+
+      <h3>Connection Limits</h3>
+      <p>
+        With source IP, destination IP, and destination port fixed, only the
+        <strong>source port</strong> varies — capping you at <strong>~65,535 connections</strong>
+        to the same server. These ports are shared across <strong>all devices</strong> on
+        your network.
+      </p>
+
+      <h3>NAT Applications</h3>
+
+      <div class="nat-use-cases">
+        <div class="nat-uc">
+          <div class="nat-uc-icon" style="background: rgba(34, 211, 238, 0.1); color: #22d3ee;">&#127760;</div>
+          <div class="nat-uc-body">
+            <strong>Private &rarr; Public</strong>
+            <span>The original purpose — billions of private devices share limited public IPv4 addresses</span>
+          </div>
+        </div>
+        <div class="nat-uc">
+          <div class="nat-uc-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">&#128268;</div>
+          <div class="nat-uc-body">
+            <strong>Port Forwarding</strong>
+            <span>Map external port 80 &rarr; internal <code>192.168.1.50:8080</code>. Run servers
+              as non-root, expose publicly on well-known ports</span>
+          </div>
+        </div>
+        <div class="nat-uc">
+          <div class="nat-uc-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">&#9878;</div>
+          <div class="nat-uc-body">
+            <strong>Layer 4 Load Balancing</strong>
+            <span>Rewrite destination IP to distribute traffic across servers (round robin).
+              Used by HAProxy. Client never knows which server handled the request</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>Limitations</h3>
+
+      <div class="nat-limits">
+        <div class="nat-limit">
+          <span class="nat-limit-tag">Port exhaustion</span>
+          <span>Only 65,535 ports per public IP per destination</span>
+        </div>
+        <div class="nat-limit">
+          <span class="nat-limit-tag">Stateful overhead</span>
+          <span>Must track every active connection in memory</span>
+        </div>
+        <div class="nat-limit">
+          <span class="nat-limit-tag">Breaks end-to-end</span>
+          <span>Server can't initiate a connection to the client</span>
+        </div>
+        <div class="nat-limit">
+          <span class="nat-limit-tag">P2P issues</span>
+          <span>Both sides behind NAT = complex traversal needed</span>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> NAT is a brilliant hack that extended IPv4's life by decades.
+        It lets your entire household share one public IP, enables port forwarding for servers,
+        and even powers some load balancing solutions. The tradeoff is complexity — NAT routers
+        must track state and operate at multiple layers, and some protocols (like peer-to-peer)
+        struggle with NAT's one-way nature.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/5/5" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; Slow Start Deep Dive</span>
+    </a>
+    <a routerLink="/section/5/7" class="nav-btn next disabled-nav">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">TCP Connection States &rarr;</span>
+    </a>
+  </div>
+</div>

@@ -81,6 +81,7 @@ export class App {
         { title: 'Flow Control', path: '/section/5/3' },
         { title: 'Congestion Control', path: '/section/5/4' },
         { title: 'Slow Start Deep Dive', path: '/section/5/5' },
+        { title: 'NAT', path: '/section/5/6' },
       ],
     },
     { id: 6, title: 'Protocols Overview', path: '/section/6', available: false },

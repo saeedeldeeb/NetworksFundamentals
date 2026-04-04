@@ -1,0 +1,227 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 05</span>
+    <h1>TCP (Transmission Control Protocol)</h1>
+    <p class="section-description">
+      The backbone of reliable internet communication — stateful, connection-oriented, and controlled
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 8</span>
+      <h2>TCP Pros and Cons</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        Every protocol has trade-offs. TCP's pros are essentially UDP's cons, and TCP's cons
+        explain why protocols like QUIC were invented.
+      </p>
+
+      <h3>TCP Pros</h3>
+
+      <div class="pros-grid">
+        <div class="pro-card">
+          <strong>Guaranteed delivery</strong>
+          <span>Retransmits lost segments automatically</span>
+        </div>
+        <div class="pro-card">
+          <strong>Connection required</strong>
+          <span>No data without handshake — prevents IP spoofing</span>
+        </div>
+        <div class="pro-card">
+          <strong>Flow control</strong>
+          <span>Receiver controls how much the sender can transmit</span>
+        </div>
+        <div class="pro-card">
+          <strong>Congestion control</strong>
+          <span>Prevents network collapse, fair bandwidth sharing</span>
+        </div>
+        <div class="pro-card">
+          <strong>Ordered packets</strong>
+          <span>No application-level reordering needed</span>
+        </div>
+        <div class="pro-card">
+          <strong>Harder to DoS</strong>
+          <span>Can't flood with spoofed packets — need valid connection</span>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <strong>Security note:</strong> TCP prevents <em>easy</em> spoofing because you need the
+        handshake. But TCP alone doesn't prove identity — you still need TLS certificates for that.
+      </div>
+
+      <h3>TCP Cons</h3>
+
+      <div class="cons-grid">
+        <div class="con-card">
+          <strong>Large header</strong>
+          <span>20–60 bytes vs UDP's 8 bytes</span>
+        </div>
+        <div class="con-card">
+          <strong>Stateful</strong>
+          <span>Each connection consumes memory (especially TIME_WAIT)</span>
+        </div>
+        <div class="con-card">
+          <strong>Higher latency</strong>
+          <span>Slow start, congestion control, ACKs add delay</span>
+        </div>
+        <div class="con-card">
+          <strong>Complexity</strong>
+          <span>Flow control, congestion control, retransmission machinery</span>
+        </div>
+        <div class="con-card con-card-hol">
+          <strong>Head-of-line blocking</strong>
+          <span>One lost segment blocks ALL subsequent data</span>
+        </div>
+      </div>
+
+      <h3>Head-of-Line Blocking: The Big Problem</h3>
+      <p>
+        TCP's most significant limitation — and the reason QUIC was invented. Multiple
+        independent HTTP requests share one TCP connection. If <strong>one</strong> segment
+        is lost, <strong>all</strong> requests behind it are blocked.
+      </p>
+
+      <app-hol-blocking />
+
+      <p>
+        Requests 2, 3, and 4 have <strong>nothing to do</strong> with request 1. They're
+        independent. But TCP only sees a stream of bytes that must be ordered — it doesn't
+        know about application-level boundaries.
+      </p>
+
+      <h3>Why QUIC Was Invented</h3>
+      <p>
+        QUIC (HTTP/3) solves head-of-line blocking by running over UDP with
+        <strong>multiple independent streams</strong>:
+      </p>
+
+      <div class="quic-vs-tcp">
+        <div class="qvt-col qvt-tcp">
+          <div class="qvt-header" style="border-color: #ef4444;">TCP Connection</div>
+          <div class="qvt-stream qvt-lost">Seg 1: /request1 &mdash; LOST</div>
+          <div class="qvt-stream qvt-waiting">Seg 2: /request2 &mdash; BLOCKED</div>
+          <div class="qvt-stream qvt-waiting">Seg 3: /request3 &mdash; BLOCKED</div>
+          <div class="qvt-stream qvt-waiting">Seg 4: /request4 &mdash; BLOCKED</div>
+        </div>
+        <div class="qvt-col qvt-quic">
+          <div class="qvt-header" style="border-color: #10b981;">QUIC Connection</div>
+          <div class="qvt-stream qvt-lost">Stream 1: /request1 &mdash; LOST</div>
+          <div class="qvt-stream qvt-ok">Stream 2: /request2 &mdash; Delivered</div>
+          <div class="qvt-stream qvt-ok">Stream 3: /request3 &mdash; Delivered</div>
+          <div class="qvt-stream qvt-ok">Stream 4: /request4 &mdash; Delivered</div>
+        </div>
+      </div>
+
+      <h3>Bad Patterns to Avoid</h3>
+
+      <div class="bad-patterns">
+        <div class="bad-pattern">
+          <div class="bad-pattern-header">Single TCP for multiple DB queries</div>
+          <div class="bad-pattern-body">
+            <p>
+              Query 3 finishes first, but its response waits for Query 1 and 2. Also: how do
+              you know which response belongs to which query without request IDs?
+            </p>
+            <span class="bad-pattern-fix">Fix: connection pooling or multiplexing protocol with IDs</span>
+          </div>
+        </div>
+        <div class="bad-pattern">
+          <div class="bad-pattern-header">TCP-over-TCP (VPNs)</div>
+          <div class="bad-pattern-body">
+            <p>
+              Two TCP stacks fight each other — both detect loss, both retransmit, both reduce
+              congestion window. System spirals into terrible performance.
+            </p>
+            <span class="bad-pattern-fix">Fix: VPNs should use UDP (like WireGuard)</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>When TCP's Overhead Hurts</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr">
+          <span>Scenario</span>
+          <span>Why TCP hurts</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>High-frequency trading</span>
+          <span class="tcp-val-neutral">Every microsecond counts; UDP often used</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Real-time gaming</span>
+          <span class="tcp-val-neutral">Old data is useless; fresh packets over retransmit</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Video streaming</span>
+          <span class="tcp-val-neutral">Late frames cause stutter; skip rather than wait</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Short-lived connections</span>
+          <span class="tcp-val-neutral">Handshake overhead dominates</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Multiplexed protocols</span>
+          <span class="tcp-val-neutral">Head-of-line blocking kills performance</span>
+        </div>
+      </div>
+
+      <h3>The Trade-off Summary</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr">
+          <span>Aspect</span>
+          <span>TCP Advantage</span>
+          <span>TCP Disadvantage</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Reliability</span>
+          <span class="tcp-val-good">Guaranteed delivery</span>
+          <span class="tcp-val-warn">Retransmission latency</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Ordering</span>
+          <span class="tcp-val-good">Automatic</span>
+          <span class="tcp-val-warn">Head-of-line blocking</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>State</span>
+          <span class="tcp-val-good">Connection security</span>
+          <span class="tcp-val-warn">Memory consumption</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Control</span>
+          <span class="tcp-val-good">Flow + congestion</span>
+          <span class="tcp-val-warn">Slow start delay</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Header</span>
+          <span class="tcp-val-good">Rich features</span>
+          <span class="tcp-val-warn">20–60 byte overhead</span>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> TCP tries to do a lot at Layer 4. For many modern use cases
+        (HTTP/2+, gaming, streaming), this "help" becomes a hindrance. QUIC moves these features
+        to Layer 7 where the application can make smarter decisions about what actually needs
+        ordering and reliability.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/5/7" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; Connection States</span>
+    </a>
+    <a routerLink="/section/5/9" class="nav-btn next disabled-nav">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">Sockets &amp; Kernel Queues &rarr;</span>
+    </a>
+  </div>
+</div>

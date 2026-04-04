@@ -1142,6 +1142,94 @@
   padding-top: 0.1rem;
 }
 
+/* ===== Pros / Cons Grid (Lesson 8) ===== */
+.pros-grid, .cons-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin: 1.25rem 0;
+}
+
+.pro-card, .con-card {
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: var(--bg-card);
+  border-left: 3px solid;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.pro-card { border-left-color: #10b981; }
+.con-card { border-left-color: #ef4444; }
+.con-card-hol { background: rgba(239, 68, 68, 0.04); }
+
+.pro-card strong, .con-card strong { font-size: 0.8125rem; color: var(--text-primary); }
+.pro-card span, .con-card span { font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; }
+
+/* ===== QUIC vs TCP (Lesson 8) ===== */
+.quic-vs-tcp {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+}
+
+.qvt-col {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.qvt-header {
+  padding: 0.5rem 0.75rem;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+  border-bottom: 2px solid;
+  text-align: center;
+}
+
+.qvt-stream {
+  padding: 0.375rem 0.75rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.qvt-stream:last-child { border-bottom: none; }
+.qvt-lost { color: #ef4444; }
+.qvt-waiting { color: var(--text-muted); background: rgba(239, 68, 68, 0.03); }
+.qvt-ok { color: #10b981; }
+
+/* ===== Bad Patterns (Lesson 8) ===== */
+.bad-patterns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+}
+
+.bad-pattern {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  overflow: hidden;
+  border-top: 3px solid #f59e0b;
+}
+
+.bad-pattern-header {
+  padding: 0.625rem 0.875rem;
+  background: var(--bg-card);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.bad-pattern-body { padding: 0.75rem 0.875rem; }
+.bad-pattern-body p { margin: 0 0 0.5rem; font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; }
+.bad-pattern-fix { font-size: 0.7rem; font-weight: 600; color: #10b981; }
+
 /* ===== Disabled Nav ===== */
 .disabled-nav { opacity: 0.4; pointer-events: none; }
 
@@ -1175,6 +1263,9 @@
   .st-issues { grid-template-columns: 1fr; }
   .tw-problem { flex-direction: column; }
   .state-grid { grid-template-columns: 1fr; }
+  .pros-grid, .cons-grid { grid-template-columns: 1fr 1fr; }
+  .quic-vs-tcp { grid-template-columns: 1fr; }
+  .bad-patterns { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {

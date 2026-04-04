@@ -83,6 +83,7 @@ export class App {
         { title: 'Slow Start Deep Dive', path: '/section/5/5' },
         { title: 'NAT', path: '/section/5/6' },
         { title: 'Connection States', path: '/section/5/7' },
+        { title: 'Pros & Cons', path: '/section/5/8' },
       ],
     },
     { id: 6, title: 'Protocols Overview', path: '/section/6', available: false },

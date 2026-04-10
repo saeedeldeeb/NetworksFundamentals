@@ -84,6 +84,7 @@ export class App {
         { title: 'NAT', path: '/section/5/6' },
         { title: 'Connection States', path: '/section/5/7' },
         { title: 'Pros & Cons', path: '/section/5/8' },
+        { title: 'Sockets & Kernel Queues', path: '/section/5/9' },
       ],
     },
     { id: 6, title: 'Protocols Overview', path: '/section/6', available: false },

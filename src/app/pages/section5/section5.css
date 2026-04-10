@@ -1230,6 +1230,123 @@
 .bad-pattern-body p { margin: 0 0 0.5rem; font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; }
 .bad-pattern-fix { font-size: 0.7rem; font-weight: 600; color: #10b981; }
 
+/* ===== Socket Types (Lesson 9) ===== */
+.socket-types {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+}
+
+.sock-type {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.sock-type-header {
+  padding: 0.625rem 0.875rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  border-bottom: 2px solid;
+  text-align: center;
+}
+
+.sock-type-body { padding: 0.75rem; }
+
+.sock-type-desc {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.sock-type-queues {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.sock-q {
+  padding: 0.25rem 0.5rem;
+  border-radius: 5px;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.sock-q-syn { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.sock-q-acc { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.sock-q-send { background: rgba(34, 211, 238, 0.1); color: #22d3ee; }
+.sock-q-recv { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+
+/* ===== Danger Box (Lesson 9) ===== */
+.danger-box {
+  margin: 1.25rem 0;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  border-left: 4px solid #ef4444;
+}
+
+.danger-header {
+  padding: 0.625rem 0.875rem;
+  background: rgba(239, 68, 68, 0.06);
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: #ef4444;
+  border-bottom: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.danger-body { padding: 0.75rem 0.875rem; }
+.danger-body p { font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: 0.5rem; line-height: 1.5; }
+.danger-fix { font-size: 0.75rem; font-weight: 700; color: #10b981; }
+
+/* ===== Sharding Compare (Lesson 9) ===== */
+.sharding-compare {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+}
+
+.shard-col {
+  flex: 1;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.shard-header {
+  padding: 0.5rem 0.75rem;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+  border-bottom: 2px solid;
+  text-align: center;
+}
+
+.shard-body {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.shard-detail {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.shard-vs {
+  font-weight: 700;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
 /* ===== Disabled Nav ===== */
 .disabled-nav { opacity: 0.4; pointer-events: none; }
 
@@ -1266,6 +1383,8 @@
   .pros-grid, .cons-grid { grid-template-columns: 1fr 1fr; }
   .quic-vs-tcp { grid-template-columns: 1fr; }
   .bad-patterns { grid-template-columns: 1fr; }
+  .socket-types { grid-template-columns: 1fr; }
+  .sharding-compare { flex-direction: column; }
 }
 
 @media (max-width: 480px) {

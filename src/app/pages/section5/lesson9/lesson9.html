@@ -1,0 +1,194 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 05</span>
+    <h1>TCP (Transmission Control Protocol)</h1>
+    <p class="section-description">
+      The backbone of reliable internet communication — stateful, connection-oriented, and controlled
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 9</span>
+      <h2>Sockets, Connections, and Kernel Queues</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        Understanding the kernel data structures behind TCP connections — sockets, queues, and
+        how the kernel manages the handshake before your application ever sees it.
+      </p>
+
+      <h3>What Is a Socket?</h3>
+      <p>
+        A socket is a <strong>file descriptor</strong> — a number your OS uses to represent a
+        network endpoint. There are two types:
+      </p>
+
+      <div class="socket-types">
+        <div class="sock-type">
+          <div class="sock-type-header" style="border-color: #f59e0b;">Listening Socket</div>
+          <div class="sock-type-body">
+            <div class="sock-type-desc">Represents the IP:Port you're accepting connections on</div>
+            <div class="sock-type-queues">
+              <span class="sock-q sock-q-syn">SYN Queue</span>
+              <span class="sock-q sock-q-acc">Accept Queue</span>
+            </div>
+          </div>
+        </div>
+        <div class="sock-type">
+          <div class="sock-type-header" style="border-color: #22d3ee;">Connection Socket</div>
+          <div class="sock-type-body">
+            <div class="sock-type-desc">Represents one established connection (has src + dst)</div>
+            <div class="sock-type-queues">
+              <span class="sock-q sock-q-send">Send Queue</span>
+              <span class="sock-q sock-q-recv">Recv Queue</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Listening on IP and Port</h3>
+      <p>
+        You must specify <strong>both</strong> an IP and a port. A machine can have multiple
+        network interfaces, each with its own IP. You choose which one to listen on.
+      </p>
+
+      <div class="danger-box">
+        <div class="danger-header">The Danger of <code>0.0.0.0</code></div>
+        <div class="danger-body">
+          <p>
+            <code>0.0.0.0</code> means <strong>listen on ALL interfaces</strong>. If one
+            interface has a public IP, your app is exposed to the internet.
+          </p>
+          <p>
+            This is how <strong>MongoDB and Elasticsearch breaches</strong> happened — databases
+            listening on <code>0.0.0.0</code>, deployed to cloud, attackers scan all IPv4 ranges.
+          </p>
+          <span class="danger-fix">Always specify the exact IP you intend to listen on.</span>
+        </div>
+      </div>
+
+      <h3>The Two Queues: SYN Queue &amp; Accept Queue</h3>
+      <p>
+        Every listening socket has two queues. The <strong>backlog</strong> parameter controls
+        their size limit — if they fill up, new connections are dropped.
+      </p>
+
+      <h3>Connection Establishment Flow</h3>
+      <p>
+        Watch how a connection moves through the kernel: the client's SYN enters the SYN Queue,
+        the handshake completes in the kernel, and the finished connection waits in the
+        Accept Queue until your app calls <code>accept()</code>.
+      </p>
+
+      <app-kernel-queues />
+
+      <h3>The SYN Flood Attack</h3>
+      <p>
+        An attacker sends many SYNs but <strong>never completes the handshake</strong> (never
+        sends the final ACK). The SYN Queue fills up and legitimate clients can't connect.
+      </p>
+
+      <app-syn-flood />
+
+      <h3>What Happens After accept()</h3>
+      <p>
+        When your app calls <code>accept()</code>, the connection is removed from the Accept Queue
+        and a <strong>new file descriptor</strong> is created with its own Send and Receive queues.
+      </p>
+
+      <h3>The Complete Picture</h3>
+      <p>
+        A backend process holds file descriptors for one listening socket and multiple connections.
+        The kernel manages all the queues underneath.
+      </p>
+
+      <app-socket-arch />
+
+      <h3>Scaling Connection Acceptance</h3>
+      <p>
+        A single process calling <code>accept()</code> becomes a bottleneck under load.
+        Two approaches exist to scale — <strong>Fork</strong> and <strong>SO_REUSEPORT</strong> —
+        and they work very differently.
+      </p>
+
+      <h4>Fork: Shared Socket</h4>
+      <p>
+        When a process forks, the child inherits the parent's file descriptors — including the
+        listening socket. Both processes call <code>accept()</code> on the <strong>same
+        socket</strong> with the <strong>same queues</strong>. The problem: all processes
+        compete for one Accept Queue (thundering herd).
+      </p>
+
+      <h4>SO_REUSEPORT: Separate Sockets</h4>
+      <p>
+        With <code>SO_REUSEPORT</code>, each process creates its <strong>own socket</strong>
+        on the same IP:Port. Each gets its own SYN and Accept queues. The kernel
+        <strong>load-balances</strong> incoming connections across the sockets — no contention.
+        Used by Nginx, Envoy, HAProxy.
+      </p>
+
+      <app-socket-sharding />
+
+      <div class="highlight-box">
+        <strong>Security:</strong> Without protection, any process could use <code>SO_REUSEPORT</code>
+        to hijack a port. Solution: the first process sets a key — others must know the key to share.
+      </div>
+
+      <h3>Problems with Connection Acceptance</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr">
+          <span>Problem</span>
+          <span>Cause</span>
+          <span>Effect</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Backend too slow</span>
+          <span class="tcp-val-neutral">Not calling accept() fast enough</span>
+          <span class="tcp-val-warn">Accept Queue fills up</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Clients don't ACK</span>
+          <span class="tcp-val-neutral">Malicious or broken clients</span>
+          <span class="tcp-val-warn">SYN Queue fills up</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Small backlog</span>
+          <span class="tcp-val-neutral">Default settings</span>
+          <span class="tcp-val-warn">Queues fill quickly</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Blocking accept</span>
+          <span class="tcp-val-neutral">accept() blocks if empty</span>
+          <span class="tcp-val-warn">Thread stuck waiting</span>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <strong>Why async I/O matters:</strong> <code>accept()</code> is a blocking call. If no
+        connections are ready, your process waits. This is why <code>epoll</code>, <code>kqueue</code>,
+        and <code>io_uring</code> exist — they let you handle connections without blocking.
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> Your application code lives far above where connections are
+        actually managed. The kernel handles the handshake, maintains queues, and creates data
+        structures. Understanding these internals helps you diagnose why connections fail, why
+        servers slow down under load, and how to scale connection acceptance.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/5/8" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; Pros &amp; Cons</span>
+    </a>
+    <a routerLink="/section/6" class="nav-btn next disabled-nav">
+      <span class="nav-btn-label">Next Section</span>
+      <span class="nav-btn-title">Protocols Overview &rarr;</span>
+    </a>
+  </div>
+</div>

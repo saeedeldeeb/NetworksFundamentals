@@ -1347,6 +1347,63 @@
   flex-shrink: 0;
 }
 
+/* ===== Overhead Demo (Lesson 10) ===== */
+.overhead-demo {
+  margin: 1.25rem 0;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 0.875rem 1rem;
+  background: var(--bg-card);
+}
+
+.overhead-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.3rem 0;
+}
+
+.overhead-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 90px;
+  flex-shrink: 0;
+}
+
+.overhead-bar-wrap {
+  flex: 1;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.overhead-bar {
+  height: 100%;
+  border-radius: 4px;
+  display: block;
+  min-width: 2px;
+}
+
+.overhead-bytes {
+  min-width: 60px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.overhead-total {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.overhead-total strong { color: #ef4444; }
+
 /* ===== Disabled Nav ===== */
 .disabled-nav { opacity: 0.4; pointer-events: none; }
 

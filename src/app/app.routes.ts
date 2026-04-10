@@ -143,5 +143,20 @@ export const routes: Routes = [
     path: 'section/5/9',
     loadComponent: () => import('./pages/section5/lesson9/lesson9').then((m) => m.Section5Lesson9),
   },
+  {
+    path: 'section/5/10',
+    loadComponent: () =>
+      import('./pages/section5/lesson10/lesson10').then((m) => m.Section5Lesson10),
+  },
+  {
+    path: 'section/5/11',
+    loadComponent: () =>
+      import('./pages/section5/lesson11/lesson11').then((m) => m.Section5Lesson11),
+  },
+  {
+    path: 'section/5/12',
+    loadComponent: () =>
+      import('./pages/section5/lesson12/lesson12').then((m) => m.Section5Lesson12),
+  },
   { path: '**', redirectTo: '' },
 ];

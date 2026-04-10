@@ -13,8 +13,8 @@ This project is based on **[Fundamentals of Network Engineering](https://www.ude
 | 1 | Introduction | Done |
 | 2 | Fundamentals | Done |
 | 3 | Internet Protocol (IP) | Done |
-| 4 | UDP | In Progress |
-| 5 | TCP | Planned |
+| 4 | UDP | Done |
+| 5 | TCP | Done |
 | 6 | Protocols Overview | Planned |
 | 7 | Network Performance | Planned |
 | 8 | Routing | Planned |

@@ -1,0 +1,281 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 05</span>
+    <h1>TCP (Transmission Control Protocol)</h1>
+    <p class="section-description">
+      The backbone of reliable internet communication — stateful, connection-oriented, and controlled
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 12</span>
+      <h2>Capturing TCP Segments with tcpdump</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        Watching TCP on the wire makes every concept concrete. A single HTTP request to
+        <code>example.com</code> produces 10 packets — three to say hello, four to exchange
+        data, and three to say goodbye.
+      </p>
+
+      <h3>Setup</h3>
+      <p>
+        <code>tcpdump</code> captures raw packets on a network interface. Run it as root while
+        a browser fetches a page over plain HTTP (port 80) so you can see the TCP layer clearly.
+      </p>
+      <app-code-block lang="Bash" filename="Terminal" [code]="tcpdumpCmd" />
+
+      <h3>The Full Exchange</h3>
+      <p>
+        Scroll through the complete lifecycle — handshake, request, response, and teardown — as
+        packets appear in the order they arrive on the wire.
+      </p>
+
+      <app-packet-timeline />
+
+      <h3>Breaking Down Each Phase</h3>
+
+      <h4>Phase 1 — Handshake (3 packets, 176 B, zero user data)</h4>
+
+      <p>The SYN packet carries the client's initial options:</p>
+      <app-code-block lang="Output" filename="Packet 1: SYN (Client → Server)" [code]="synPacket" />
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr">
+          <span>Field</span>
+          <span>Value</span>
+          <span>Meaning</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>Flags [S]</code></span>
+          <span class="tcp-val-good">SYN</span>
+          <span class="tcp-val-neutral">Starting handshake</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>flags [DF]</code></span>
+          <span class="tcp-val-neutral">Don't Fragment</span>
+          <span class="tcp-val-neutral">Path MTU Discovery</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>mss 1460</code></span>
+          <span class="tcp-val-neutral">Max Segment Size</span>
+          <span class="tcp-val-neutral">MTU(1500) − IP(20) − TCP(20)</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>wscale 6</code></span>
+          <span class="tcp-val-neutral">Window Scale</span>
+          <span class="tcp-val-neutral">Multiply window by 2^6 = 64</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>length 0</code></span>
+          <span class="tcp-val-warn">No data</span>
+          <span class="tcp-val-neutral">Just handshake overhead</span>
+        </div>
+      </div>
+
+      <p>The server replies with its own sequence number and window scale:</p>
+      <app-code-block lang="Output" filename="Packet 2: SYN-ACK (Server → Client)" [code]="synAckPacket" />
+
+      <div class="highlight-box">
+        <strong>Notice:</strong> Server uses <code>wscale 9</code> (×512) vs client's
+        <code>wscale 6</code> (×64) — the server is ready to receive more data in flight,
+        signaling higher throughput capacity. Also, the server sets no <code>[DF]</code>
+        flag — different OS defaults.
+      </div>
+
+      <h4>Phase 2 — Data Transfer (4 packets)</h4>
+      <app-code-block lang="Output" filename="Packet 4: HTTP GET (Client → Server)" [code]="dataPacket" />
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr">
+          <span>Field</span>
+          <span>Value</span>
+          <span>Meaning</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>Flags [P.]</code></span>
+          <span class="tcp-val-good">PUSH + ACK</span>
+          <span class="tcp-val-neutral">Send immediately, don't buffer</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>seq 1:361</code></span>
+          <span class="tcp-val-neutral">Sequence range</span>
+          <span class="tcp-val-neutral">360 bytes of request data</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>length 412</code></span>
+          <span class="tcp-val-neutral">IP packet total</span>
+          <span class="tcp-val-neutral">Headers (52 B) + data (360 B)</span>
+        </div>
+      </div>
+
+      <app-code-block lang="Output" filename="Packet 6: HTTP 200 (Server → Client)" [code]="responsePacket" />
+
+      <h4>Phase 3 — Teardown (3 packets, 156 B)</h4>
+      <p>
+        Safari's idle connection timeout is <strong>30 seconds</strong> — discoverable just by
+        watching the wire. The client sends FIN, the server echoes FIN back, the client
+        confirms with the final ACK.
+      </p>
+      <app-code-block lang="Output" filename="Packets 8–10: Teardown" [code]="teardownPackets" />
+
+      <h3>TCP Flag Reference</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr">
+          <span>Symbol</span>
+          <span>Flag</span>
+          <span>Meaning</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>[S]</code></span>
+          <span class="tcp-val-good">SYN</span>
+          <span class="tcp-val-neutral">Synchronize — start connection</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>[.]</code></span>
+          <span class="tcp-val-neutral">ACK</span>
+          <span class="tcp-val-neutral">Acknowledgment</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>[S.]</code></span>
+          <span class="tcp-val-good">SYN + ACK</span>
+          <span class="tcp-val-neutral">Combined SYN and ACK</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>[P.]</code></span>
+          <span class="tcp-val-good">PUSH + ACK</span>
+          <span class="tcp-val-neutral">Send data immediately</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>[F.]</code></span>
+          <span class="tcp-val-warn">FIN + ACK</span>
+          <span class="tcp-val-neutral">Finish — close connection</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>[R]</code></span>
+          <span class="tcp-val-warn">RST</span>
+          <span class="tcp-val-neutral">Reset — abort connection immediately</span>
+        </div>
+      </div>
+
+      <h3>Key Observations</h3>
+
+      <div class="hs-steps">
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(239,68,68,0.2); color: #ef4444;">1</div>
+          <div class="hs-step-body">
+            <strong>Handshake is expensive</strong>
+            <p>
+              176 bytes across 3 packets — zero user data. This is why
+              <strong>TCP Fast Open</strong> and <strong>QUIC</strong> were invented: they
+              send data inside the handshake itself.
+            </p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(245,158,11,0.2); color: #f59e0b;">2</div>
+          <div class="hs-step-body">
+            <strong>Empty ACKs add up</strong>
+            <p>
+              Every 52-byte ACK carries zero data. In a busy stream, pure ACKs consume
+              bandwidth and CPU. TCP's delayed ACK (200ms wait) batches acknowledgments
+              to reduce this.
+            </p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(34,211,238,0.2); color: #22d3ee;">3</div>
+          <div class="hs-step-body">
+            <strong>NAT translation is invisible here</strong>
+            <p>
+              tcpdump captures before NAT, so you see your private IP
+              (<code>192.168.x.x</code>). The server never sees it — your router rewrites
+              the source IP to its public address before forwarding.
+            </p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(16,185,129,0.2); color: #10b981;">4</div>
+          <div class="hs-step-body">
+            <strong>Application behavior is in the packets</strong>
+            <p>
+              Safari's 30-second idle timeout is directly visible — the FIN arrives
+              exactly 30s after the last data packet. Packet captures let you reverse-engineer
+              application behavior without any source code.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <h3>The Overhead in Numbers</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr">
+          <span>Phase</span>
+          <span>Packets</span>
+          <span>Total / User Data</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Handshake</span>
+          <span class="tcp-val-neutral">3</span>
+          <span class="tcp-val-warn">176 B / 0 B</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>HTTP Request</span>
+          <span class="tcp-val-neutral">1</span>
+          <span class="tcp-val-good">412 B / 360 B</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Server ACK</span>
+          <span class="tcp-val-neutral">1</span>
+          <span class="tcp-val-warn">52 B / 0 B</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>HTTP Response</span>
+          <span class="tcp-val-neutral">1</span>
+          <span class="tcp-val-good">1074 B / 1022 B</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Client ACK</span>
+          <span class="tcp-val-neutral">1</span>
+          <span class="tcp-val-warn">52 B / 0 B</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Teardown</span>
+          <span class="tcp-val-neutral">3</span>
+          <span class="tcp-val-warn">156 B / 0 B</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><strong>Total</strong></span>
+          <span class="tcp-val-neutral"><strong>10</strong></span>
+          <span class="tcp-val-good"><strong>1922 B / 1382 B (72%)</strong></span>
+        </div>
+      </div>
+
+      <h3>Saving and Replaying Captures</h3>
+      <app-code-block lang="Bash" filename="Terminal" [code]="saveCmd" />
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> Packet captures are a debugging superpower. You can
+        see handshake timing, window sizes, retransmissions, idle timeouts, and OS-level
+        differences — all without touching application code. Any production network issue
+        that can't be diagnosed from logs alone can usually be understood by watching the wire.
+        This is why network engineers reach for tcpdump and Wireshark first.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/5/11" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; TCP Server with C</span>
+    </a>
+    <a routerLink="/section/6" class="nav-btn next disabled-nav">
+      <span class="nav-btn-label">Next Section</span>
+      <span class="nav-btn-title">Protocols Overview &rarr;</span>
+    </a>
+  </div>
+</div>

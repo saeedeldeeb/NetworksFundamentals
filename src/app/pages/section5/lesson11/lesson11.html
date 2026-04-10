@@ -1,0 +1,259 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 05</span>
+    <h1>TCP (Transmission Control Protocol)</h1>
+    <p class="section-description">
+      The backbone of reliable internet communication — stateful, connection-oriented, and controlled
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 11</span>
+      <h2>TCP Server with C</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        Building a TCP server in C exposes every syscall that high-level languages hide.
+        Seeing the raw steps — <code>socket()</code>, <code>bind()</code>, <code>listen()</code>,
+        <code>accept()</code> — makes the kernel's role concrete.
+      </p>
+
+      <h3>The Complete Server</h3>
+      <app-code-block lang="C" filename="tcp_server.c" [code]="cServerCode" />
+
+      <h3>TCP vs UDP: Two Extra Steps</h3>
+      <p>
+        TCP requires <code>listen()</code> and <code>accept()</code> — UDP has neither.
+        These are the calls that create the kernel queues and block waiting for clients.
+      </p>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr">
+          <span>Step</span>
+          <span>UDP</span>
+          <span>TCP</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Create socket</span>
+          <span class="tcp-val-neutral">SOCK_DGRAM</span>
+          <span class="tcp-val-neutral">SOCK_STREAM</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Bind</span>
+          <span class="tcp-val-good">Yes</span>
+          <span class="tcp-val-good">Yes</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Listen</span>
+          <span class="tcp-val-warn">No</span>
+          <span class="tcp-val-good">Yes — creates SYN/Accept Queues</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Accept</span>
+          <span class="tcp-val-warn">No</span>
+          <span class="tcp-val-good">Yes — blocks, returns new fd</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Per-client fd</span>
+          <span class="tcp-val-warn">No — one socket for all</span>
+          <span class="tcp-val-good">Yes — new fd per connection</span>
+        </div>
+      </div>
+
+      <h3>The Syscall Sequence</h3>
+      <p>
+        Watch each syscall step by step — what it does, what fd it creates, and what the kernel
+        sets up underneath.
+      </p>
+
+      <app-c-syscalls />
+
+      <h3>Step-by-Step Breakdown</h3>
+
+      <div class="hs-steps">
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: #22d3ee;">1</div>
+          <div class="hs-step-body">
+            <strong>socket(AF_INET, SOCK_STREAM, 0)</strong>
+            <p>
+              Creates a TCP socket file descriptor (<code>socket_fd = 3</code>).
+              <code>SOCK_STREAM</code> = TCP. Use <code>SOCK_DGRAM</code> for UDP.
+              Nothing is bound yet — just a socket that exists.
+            </p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: #f59e0b;">2</div>
+          <div class="hs-step-body">
+            <strong>bind(socket_fd, &amp;server_addr, sizeof(server_addr))</strong>
+            <p>
+              Tells the kernel which IP and port this socket owns. <code>INADDR_ANY</code>
+              means all interfaces (<code>0.0.0.0</code>) — use a specific IP in production.
+              <code>htons(PORT)</code> converts to network byte order.
+            </p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: #6366f1;">3</div>
+          <div class="hs-step-body">
+            <strong>listen(socket_fd, 5)</strong>
+            <p>
+              Enables the TCP handshake machinery. Creates the SYN Queue and Accept Queue.
+              The second argument — the <strong>backlog</strong> — caps how many connections
+              can wait in the Accept Queue. Too small = connections dropped under load.
+            </p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: #10b981;">4</div>
+          <div class="hs-step-body">
+            <strong>new_socket = accept(socket_fd, &amp;client_addr, &amp;addr_len)</strong>
+            <p>
+              <strong>Blocks</strong> until a connection is ready in the Accept Queue.
+              Returns a brand-new file descriptor (<code>new_socket = 4</code>) for this
+              specific connection. <code>client_addr</code> holds the client's IP and port.
+              <code>socket_fd</code> continues listening.
+            </p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: #ec4899;">5</div>
+          <div class="hs-step-body">
+            <strong>send(new_socket, buffer, strlen(buffer), 0)</strong>
+            <p>
+              Writes data to the connection socket — always <code>new_socket</code>, not
+              <code>socket_fd</code>. You manage the buffer manually: <code>strcpy()</code>
+              the data in, pass the length explicitly.
+            </p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: #ef4444;">6</div>
+          <div class="hs-step-body">
+            <strong>close(new_socket) + close(socket_fd)</strong>
+            <p>
+              <code>close(new_socket)</code> triggers the four-way FIN handshake with the
+              client. <code>close(socket_fd)</code> stops the listening socket.
+              Forgetting either call leaks file descriptors — a common C server bug.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <h3>The Backlog Problem</h3>
+      <p>
+        If your application is slow to call <code>accept()</code>, the Accept Queue fills up
+        and new connections are silently dropped.
+      </p>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr">
+          <span>Event</span>
+          <span>Accept Queue</span>
+          <span>Result</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Client 1 connects</span>
+          <span class="tcp-val-neutral">[1]</span>
+          <span class="tcp-val-good">Queued, waiting</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Clients 2–5 connect</span>
+          <span class="tcp-val-neutral">[1, 2, 3, 4, 5]</span>
+          <span class="tcp-val-warn">Queue full (backlog=5)</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Client 6 sends SYN</span>
+          <span class="tcp-val-neutral">[full]</span>
+          <span class="tcp-val-warn">No SYN-ACK — connection times out</span>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <strong>Solutions:</strong> Increase backlog size, call <code>accept()</code> in a tight
+        loop, use a thread pool (main thread accepts, workers handle connections), or switch to
+        async I/O (<code>epoll</code>, <code>kqueue</code>).
+      </div>
+
+      <h3>Handling Multiple Connections</h3>
+      <p>
+        This server accepts one connection and exits. Real servers loop forever, spawning a
+        thread or process per connection.
+      </p>
+      <app-code-block lang="C" filename="multi-client loop (pseudocode)" [code]="multiThreadCode" />
+
+      <p>
+        Node.js handles this automatically — each callback in <code>createServer()</code> gets
+        its own socket closure and is driven by libuv's event loop without blocking.
+      </p>
+
+      <h3>Running It</h3>
+      <app-code-block lang="Bash" filename="Compile &amp; run" [code]="compileCode" />
+      <app-code-block lang="Output" filename="Server" [code]="serverOutput" />
+      <app-code-block lang="Bash" filename="Client terminal" [code]="clientCode" />
+      <app-code-block lang="Output" filename="Client receives" [code]="clientOutput" />
+
+      <h3>C vs Node.js</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr">
+          <span>Aspect</span>
+          <span>C</span>
+          <span>Node.js</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Socket creation</span>
+          <span class="tcp-val-neutral">Manual socket()</span>
+          <span class="tcp-val-good">Hidden in createServer()</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>listen()</span>
+          <span class="tcp-val-neutral">Explicit, set backlog</span>
+          <span class="tcp-val-good">Automatic</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>accept()</span>
+          <span class="tcp-val-neutral">Explicit, blocks thread</span>
+          <span class="tcp-val-good">Automatic (callback per connection)</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Multiple clients</span>
+          <span class="tcp-val-neutral">Manual fork/threads</span>
+          <span class="tcp-val-good">Event loop handles it</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Memory management</span>
+          <span class="tcp-val-neutral">Manual buffers, strcpy()</span>
+          <span class="tcp-val-good">Automatic</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span>Lines for basic server</span>
+          <span class="tcp-val-warn">~50 lines</span>
+          <span class="tcp-val-good">~10 lines</span>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> High-level languages hide enormous complexity.
+        The <code>net.createServer()</code> callback that "just works" is backed by
+        decades of systems programming: efficient accept loops, memory management,
+        threading models, and async I/O. Understanding the C version makes you appreciate
+        what's happening underneath — and helps you diagnose performance issues when
+        the abstraction breaks down.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/5/10" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; TCP Server with Node.js</span>
+    </a>
+    <a routerLink="/section/5/12" class="nav-btn next">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">Capturing TCP with tcpdump &rarr;</span>
+    </a>
+  </div>
+</div>

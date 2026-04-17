@@ -111,31 +111,44 @@
 .resolver-name { font-size: 0.8125rem; font-weight: 600; color: var(--text-primary); }
 .resolver-desc { font-size: 0.75rem; color: var(--text-muted); }
 
-/* ===== Domain structure display ===== */
-.domain-parts {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
+
+/* ===== Domain display ===== */
+.domain-display {
   margin: 1.25rem 0;
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 10px;
-  overflow: hidden;
+  padding: 1.25rem 1.5rem 0.875rem;
+}
+
+.domain-display-text {
   font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.625rem;
 }
 
-.domain-part {
-  flex: 1;
-  padding: 0.875rem 1rem;
+.domain-sub  { color: #22d3ee; }
+.domain-name { color: #a78bfa; }
+.domain-tld  { color: #10b981; }
+.domain-dot  { color: #475569; }
+
+.domain-display-labels {
   display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-  border-right: 1px solid var(--border-color);
+  gap: 2.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding-bottom: 0.25rem;
 }
 
-.domain-part:last-child { border-right: none; }
-.domain-part-label { font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
-.domain-part-value { font-size: 1rem; font-weight: 700; }
-.domain-sep { display: flex; align-items: center; padding: 0 0.25rem; font-size: 1.25rem; color: var(--text-muted); font-weight: 300; }
+.domain-display-label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.domain-display-arrow { font-size: 0.625rem; }
 
 /* ===== TLS RTT cost display ===== */
 .rtt-stack {

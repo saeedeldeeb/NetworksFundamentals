@@ -1,0 +1,288 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 06</span>
+    <h1>Protocols Overview</h1>
+    <p class="section-description">
+      High-level overview of common protocols — each built on the foundational layers we've already covered
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 02</span>
+      <h2>DNS (Domain Name System)</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        Every URL you type triggers a DNS query — one of the most frequently used protocols on the
+        internet, yet almost entirely invisible to users. Without it, you'd be memorizing IP addresses
+        to visit websites.
+      </p>
+
+      <h3>Why DNS Exists</h3>
+      <p>
+        IP addresses change frequently, servers use load balancing across many IPs, and nobody wants
+        to remember <code>142.250.80.46</code> for Google. DNS maps human-readable names to IP addresses
+        and abstracts all of that complexity away.
+      </p>
+
+      <p>
+        Every addressing system in networking needs a mapping layer — DNS is the internet-wide version
+        of what ARP does on a local network:
+      </p>
+
+      <div class="tcp-compare" style="max-width: 560px;">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Protocol</span>
+          <span>Maps</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><code>ARP</code></span>
+          <span class="tcp-val-neutral">IP address → MAC address (local)</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><code>DNS</code></span>
+          <span class="tcp-val-neutral">Domain name → IP address (internet)</span>
+        </div>
+      </div>
+
+      <h3>Domain Structure</h3>
+
+      <div class="domain-display">
+        <div class="domain-display-text">
+          <span class="domain-sub">www</span><span class="domain-dot">.</span><span class="domain-name">example</span><span class="domain-dot">.</span><span class="domain-tld">com</span>
+        </div>
+        <div class="domain-display-labels">
+          <div class="domain-display-label" style="color: #22d3ee;">
+            <span class="domain-display-arrow">&#8593;</span>
+            <span>Subdomain</span>
+          </div>
+          <div class="domain-display-label domain-display-label--mid" style="color: #a78bfa;">
+            <span class="domain-display-arrow">&#8593;</span>
+            <span>Domain</span>
+          </div>
+          <div class="domain-display-label domain-display-label--right" style="color: #10b981;">
+            <span class="domain-display-arrow">&#8593;</span>
+            <span>TLD</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>DNS Basics</h3>
+
+      <div class="tcp-compare" style="max-width: 480px;">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Property</span>
+          <span>Value</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>Transport</span>
+          <span class="tcp-val-warn">UDP</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>Port</span>
+          <span class="tcp-val-neutral">53</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>Query type</span>
+          <span class="tcp-val-neutral">Request / Response</span>
+        </div>
+      </div>
+
+      <h3>DNS Record Types</h3>
+
+      <div class="tcp-compare dns-record-table">
+        <div class="tcp-compare-row tcp-compare-hdr">
+          <span>Record</span>
+          <span>Purpose</span>
+          <span>Example</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>A</code></span>
+          <span class="tcp-val-neutral">IPv4 address</span>
+          <span class="tcp-val-neutral">google.com → 142.250.80.46</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>AAAA</code></span>
+          <span class="tcp-val-neutral">IPv6 address</span>
+          <span class="tcp-val-neutral">google.com → 2607:f8b0:…</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>CNAME</code></span>
+          <span class="tcp-val-neutral">Alias to another domain</span>
+          <span class="tcp-val-neutral">www.example.com → example.com</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>MX</code></span>
+          <span class="tcp-val-neutral">Mail server</span>
+          <span class="tcp-val-neutral">gmail.com → mail.google.com</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>TXT</code></span>
+          <span class="tcp-val-neutral">Text / verification / SPF</span>
+          <span class="tcp-val-neutral">"v=spf1 include:_spf.google.com"</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>NS</code></span>
+          <span class="tcp-val-neutral">Authoritative name servers</span>
+          <span class="tcp-val-neutral">google.com → ns1.google.com</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>SRV</code></span>
+          <span class="tcp-val-neutral">Service location (port + priority)</span>
+          <span class="tcp-val-neutral">_sip._tcp.example.com</span>
+        </div>
+      </div>
+
+      <h3>What DNS Abstraction Buys You</h3>
+
+      <div class="hs-steps">
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(34,211,238,0.2); color: #22d3ee;">1</div>
+          <div class="hs-step-body">
+            <strong>Load Balancing</strong>
+            <p>One domain can return multiple IPs in round-robin. Clients pick one. Netflix used this for
+            client-side load balancing in their early architecture.</p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(167,139,250,0.2); color: #a78bfa;">2</div>
+          <div class="hs-step-body">
+            <strong>IP Transparency</strong>
+            <p>Server IP changes? Update the DNS record. Clients keep using the same domain — no
+            reconfiguration needed on their end.</p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(16,185,129,0.2); color: #10b981;">3</div>
+          <div class="hs-step-body">
+            <strong>Geo DNS / CDNs</strong>
+            <p>Cloudflare, Fastly, and CDNs serve different IPs based on client location. A user in India
+            gets a nearby server; a user in the US gets a different one. Lower latency for everyone.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3>How Resolution Works</h3>
+      <p>
+        DNS is a distributed, hierarchical system — not one giant database. Resolution walks down the
+        hierarchy: Root servers know TLD servers, TLD servers know authoritative servers, and authoritative
+        servers know the actual IP.
+      </p>
+
+      <app-dns-resolution />
+
+      <h3>DNS Resolvers</h3>
+      <p>
+        When you connect to a network, you get a resolver (usually your router). Popular public resolvers
+        are hardcoded by IP — they <em>must</em> be, since using a domain would cause an infinite loop.
+      </p>
+
+      <div class="resolver-cards">
+        <div class="resolver-card">
+          <span class="resolver-ip" style="color: #f97316;">1.1.1.1</span>
+          <span class="resolver-name">Cloudflare</span>
+          <span class="resolver-desc">Fast, privacy-focused, doesn't log queries</span>
+        </div>
+        <div class="resolver-card">
+          <span class="resolver-ip" style="color: #22d3ee;">8.8.8.8</span>
+          <span class="resolver-name">Google</span>
+          <span class="resolver-desc">Reliable, globally distributed, logs queries</span>
+        </div>
+        <div class="resolver-card">
+          <span class="resolver-ip" style="color: #a78bfa;">9.9.9.9</span>
+          <span class="resolver-name">Quad9</span>
+          <span class="resolver-desc">Security-focused, blocks malicious domains</span>
+        </div>
+      </div>
+
+      <h3>Security Problems</h3>
+
+      <div class="highlight-box">
+        <strong>DNS is plaintext by default.</strong> Every domain you visit is sent unencrypted over
+        UDP port 53. Your ISP sees every DNS query — they can log all domains you visit, block access
+        to specific sites, or redirect queries entirely. HTTPS encrypts the content, but the DNS query
+        revealing which domain you're visiting remains visible.
+      </div>
+
+      <div class="hs-steps">
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(239,68,68,0.2); color: #ef4444;">!</div>
+          <div class="hs-step-body">
+            <strong>DNS Hijacking</strong>
+            <p>An attacker becomes a fake authoritative server and responds with malicious IPs, redirecting
+            users to phishing sites.</p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(239,68,68,0.2); color: #ef4444;">!</div>
+          <div class="hs-step-body">
+            <strong>Cache Poisoning</strong>
+            <p>An attacker floods the resolver with fake responses, guessing the transaction ID. If
+            successful, the resolver caches the attacker's IP — and all future queries return it.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3>Encrypted DNS</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr four-col">
+          <span>Protocol</span>
+          <span>Name</span>
+          <span>Port</span>
+          <span>Notes</span>
+        </div>
+        <div class="tcp-compare-row four-col">
+          <span><code>DoT</code></span>
+          <span class="tcp-val-neutral">DNS over TLS</span>
+          <span class="tcp-val-neutral">853 (TCP)</span>
+          <span class="tcp-val-neutral">Identifiable, admin-friendly</span>
+        </div>
+        <div class="tcp-compare-row four-col">
+          <span><code>DoH</code></span>
+          <span class="tcp-val-neutral">DNS over HTTPS</span>
+          <span class="tcp-val-neutral">443 (HTTPS)</span>
+          <span class="tcp-val-neutral">Blends with web traffic, controversial</span>
+        </div>
+      </div>
+
+      <p>
+        DoH looks like normal HTTPS traffic — network admins can't distinguish DNS from web requests,
+        which sparked debate about privacy vs. control. DoT uses a dedicated port (853) so it's easier
+        to identify and manage, yet still encrypted. Adoption is around 20%.
+      </p>
+
+      <div class="highlight-box">
+        <strong>Centralization risk:</strong> DNS is "decentralized" at the root/TLD level, but
+        <em>highly centralized</em> at authoritative servers. When Facebook's authoritative name servers
+        went down in 2021, their entire suite of services — Instagram, WhatsApp, Messenger — became
+        unreachable worldwide, even though root and TLD servers were perfectly healthy.
+      </div>
+
+      <h3>Practical Tools</h3>
+
+      <app-code-block lang="Bash" filename="nslookup" [code]="nslookupCmd" />
+      <app-code-block lang="Bash" filename="dig" [code]="digCmd" />
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> DNS adds 7–8 UDP round trips before you can even start the TCP
+        handshake. That's why DNS caching matters so much, why TTLs are carefully tuned, and why
+        Node.js performs DNS lookups asynchronously via libuv — blocking on DNS would devastate
+        throughput in a server handling thousands of connections.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/6/1" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; Introduction</span>
+    </a>
+    <a routerLink="/section/6/3" class="nav-btn next">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">TLS &rarr;</span>
+    </a>
+  </div>
+</div>

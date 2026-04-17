@@ -1,0 +1,135 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 06</span>
+    <h1>Protocols Overview</h1>
+    <p class="section-description">
+      High-level overview of common protocols — each built on the foundational layers we've already covered
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 01</span>
+      <h2>Introduction</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        Now that you understand IP, TCP, and UDP, you can see how every higher-level protocol is just
+        a set of rules for formatting data that rides on those foundations. This section is a map of
+        the landscape — enough to know what each protocol does and where it fits.
+      </p>
+
+      <h3>The Protocol Stack</h3>
+      <p>
+        Every protocol you use daily sits on top of the layers below it. Protocols don't reinvent
+        the wheel — they delegate routing to IP, reliability to TCP, and speed to UDP.
+      </p>
+
+      <app-protocol-stack />
+
+      <h3>Common Protocols and Their Transport</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr">
+          <span>Protocol</span>
+          <span>Transport</span>
+          <span>Why?</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>HTTP/1.1, HTTP/2</code></span>
+          <span class="tcp-val-good">TCP</span>
+          <span class="tcp-val-neutral">Needs reliability and ordering</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>HTTP/3</code></span>
+          <span class="tcp-val-warn">QUIC (UDP)</span>
+          <span class="tcp-val-neutral">Avoids TCP head-of-line blocking</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>DNS</code></span>
+          <span class="tcp-val-warn">UDP</span>
+          <span class="tcp-val-neutral">Small queries, speed matters</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>SSH</code></span>
+          <span class="tcp-val-good">TCP</span>
+          <span class="tcp-val-neutral">Reliable encrypted tunnel</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>TLS</code></span>
+          <span class="tcp-val-good">TCP</span>
+          <span class="tcp-val-neutral">Encryption layer, protocol-agnostic</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>WebSocket</code></span>
+          <span class="tcp-val-good">TCP</span>
+          <span class="tcp-val-neutral">Persistent bidirectional connection</span>
+        </div>
+        <div class="tcp-compare-row">
+          <span><code>QUIC</code></span>
+          <span class="tcp-val-warn">UDP</span>
+          <span class="tcp-val-neutral">Builds its own reliability, avoids TCP issues</span>
+        </div>
+      </div>
+
+      <h3>How to Reason About Any Protocol</h3>
+
+      <div class="hs-steps">
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(34,211,238,0.2); color: #22d3ee;">1</div>
+          <div class="hs-step-body">
+            <strong>Needs reliability?</strong>
+            <p>Probably uses TCP — or QUIC, which reimplements TCP-like guarantees on UDP.</p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(167,139,250,0.2); color: #a78bfa;">2</div>
+          <div class="hs-step-body">
+            <strong>Speed matters more than reliability?</strong>
+            <p>Probably uses UDP — DNS queries, video streaming, gaming protocols.</p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(16,185,129,0.2); color: #10b981;">3</div>
+          <div class="hs-step-body">
+            <strong>Needs encryption?</strong>
+            <p>TLS is somewhere in the stack. HTTPS = HTTP + TLS. Even QUIC has built-in encryption.</p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(245,158,11,0.2); color: #f59e0b;">4</div>
+          <div class="hs-step-body">
+            <strong>Remember the overhead budget.</strong>
+            <p>Every layer adds headers. TCP (20 B) + IP (20 B) + TLS + your protocol's own header — it all adds up on top of the 8-byte UDP or 20-byte TCP base you already know.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <strong>Why brief overviews?</strong> Each protocol here deserves hours of deep-dive
+        content — rich history, complex specs, security considerations. This section provides
+        <em>honorable mentions</em>: enough to understand what each protocol does and where it fits,
+        so you can confidently talk about the networking stack and know where to dig deeper.
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> Once you understand the transport layer (TCP/UDP) and network
+        layer (IP), every new protocol becomes easier to learn. You already know the foundations they
+        build on. Each protocol is just a set of rules for formatting and interpreting the data that
+        rides on those segments and packets.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/5/12" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; Capturing with tcpdump</span>
+    </a>
+    <a routerLink="/section/6/2" class="nav-btn next">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">DNS &rarr;</span>
+    </a>
+  </div>
+</div>

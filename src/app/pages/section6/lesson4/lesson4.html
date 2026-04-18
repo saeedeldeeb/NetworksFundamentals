@@ -1,0 +1,172 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 06</span>
+    <h1>Protocols Overview</h1>
+    <p class="section-description">
+      High-level overview of common protocols — each built on the foundational layers we've already covered
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 04</span>
+      <h2>HTTPS, Certificates &amp; Trust Chains</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        TLS encrypts the connection — but how does your browser know it's actually talking to
+        <em>google.com</em> and not an impostor? That's the job of certificates and the trust chain.
+        It's one of the most elegant systems in networking, and one of the most breakable.
+      </p>
+
+      <h3>What HTTPS Really Means</h3>
+
+      <div class="highlight-box">
+        <strong>HTTPS = HTTP + TLS.</strong> But encryption only goes to the <em>first destination</em>.
+        If you're using a CDN like Cloudflare, your traffic is decrypted at the CDN edge, inspected
+        and cached, then re-encrypted to the backend. The CDN sees your plaintext request — by design.
+        HTTPS doesn't mean end-to-end privacy across the entire path.
+      </div>
+
+      <h3>Two Uses of Asymmetric Encryption</h3>
+
+      <div class="tls-enc-cards">
+        <div class="tls-enc-card tls-enc-card--sym">
+          <div class="tls-enc-card-header">Encryption — Proving the Recipient</div>
+          <div class="tls-enc-card-body">
+            <div class="tls-enc-row">
+              <span class="tls-enc-label">How</span>
+              <span>Encrypt with public key → only private key owner can decrypt</span>
+            </div>
+            <div class="tls-enc-row">
+              <span class="tls-enc-label">Use</span>
+              <span>Send a secret only the intended recipient can read</span>
+            </div>
+          </div>
+        </div>
+        <div class="tls-enc-card tls-enc-card--asym">
+          <div class="tls-enc-card-header">Signatures — Proving the Sender</div>
+          <div class="tls-enc-card-body">
+            <div class="tls-enc-row">
+              <span class="tls-enc-label">How</span>
+              <span>Sign with private key → anyone with public key can verify</span>
+            </div>
+            <div class="tls-enc-row">
+              <span class="tls-enc-label">Use</span>
+              <span>Prove the message came from you and wasn't tampered with</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p>
+        Certificates use <strong>signatures</strong>. A Certificate Authority (CA) signs your
+        certificate with their private key. Anyone can verify that signature using the CA's
+        public key — proving the cert is genuine and hasn't been modified.
+      </p>
+
+      <h3>What Is a Certificate?</h3>
+      <p>
+        An X.509 certificate is a public key with metadata attached, signed by someone the
+        browser already trusts:
+      </p>
+
+      <div class="tcp-compare" style="max-width: 620px;">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Field</span>
+          <span>Contents</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><code>Subject</code></span>
+          <span class="tcp-val-neutral">Who this cert belongs to (domain / org)</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><code>SAN</code></span>
+          <span class="tcp-val-neutral">Subject Alternative Names — all valid domains</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><code>Issuer</code></span>
+          <span class="tcp-val-neutral">Who signed this cert (the CA)</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><code>Validity</code></span>
+          <span class="tcp-val-neutral">Not-before / not-after dates</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><code>Public Key</code></span>
+          <span class="tcp-val-neutral">The server's actual public key</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><code>Signature</code></span>
+          <span class="tcp-val-neutral">Hash of all the above, encrypted with the issuer's private key</span>
+        </div>
+      </div>
+
+      <h3>Certificate Chain Verification</h3>
+      <p>
+        No CA signs a leaf certificate directly with the root — they use an intermediate CA.
+        This limits exposure: the root private key stays offline, and only the intermediate
+        key is used day-to-day. Watch the browser walk the chain:
+      </p>
+
+      <app-cert-chain />
+
+      <h3>Self-Signed vs CA-Signed</h3>
+
+      <div class="tcp-compare" style="max-width: 620px;">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Type</span>
+          <span>Characteristics</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Self-Signed</strong></span>
+          <span class="tcp-val-neutral">Signed with your own private key — free, instant, but browsers show a warning. Fine for internal/dev use.</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>CA-Signed</strong></span>
+          <span class="tcp-val-neutral">CA verifies you own the domain, then signs. Browsers trust it. Required for production. Let's Encrypt is free.</span>
+        </div>
+      </div>
+
+      <h3>The Kazakhstan Attack — When Trust Breaks</h3>
+      <p>
+        The entire trust system rests on one assumption: only legitimate CAs are in the trust store.
+        What happens when a government forces devices to install their own root CA?
+      </p>
+
+      <app-mitm-ca />
+
+      <h3>Generating Keys and Certificates</h3>
+
+      <app-code-block lang="Bash" filename="OpenSSL" [code]="opensslKey" />
+
+      <h3>HTTPS Server in Node.js</h3>
+
+      <app-code-block lang="JavaScript" filename="server.mjs" [code]="httpsServer" />
+
+      <h3>Testing with curl</h3>
+
+      <app-code-block lang="Bash" filename="Terminal" [code]="curlTest" />
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> Certificates are the foundation of internet trust. The entire
+        system depends on three things: (1) keeping private keys private, (2) trusting a small set
+        of root CAs pre-installed in your OS, and (3) correctly verifying the chain. When any of
+        these break — Heartbleed leaking private keys, a CA getting compromised, or a government
+        installing their own root CA — the whole security model collapses.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/6/3" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; TLS</span>
+    </a>
+    <a routerLink="/section/7" class="nav-btn next disabled-nav">
+      <span class="nav-btn-label">Next Section</span>
+      <span class="nav-btn-title">Network Performance &rarr;</span>
+    </a>
+  </div>
+</div>

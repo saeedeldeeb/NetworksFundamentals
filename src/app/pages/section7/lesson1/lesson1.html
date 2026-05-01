@@ -1,0 +1,122 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 07</span>
+    <h1>Network Performance</h1>
+    <p class="section-description">
+      The bridge between theory and practice — how the fundamentals you know directly impact
+      the speed, reliability, and scalability of the systems you build
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 01</span>
+      <h2>Introduction</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        You now understand how data moves across networks at every layer — from Ethernet frames
+        to TCP segments to TLS handshakes. This section answers the question that comes next:
+        <em>so what?</em> How does that knowledge change the way you write code?
+      </p>
+
+      <h3>From Theory to Practice</h3>
+      <p>
+        Every concept in the previous six sections has a direct performance implication.
+        IP fragmentation wastes bandwidth. TCP's slow start adds latency. TLS handshakes cost RTTs.
+        This section maps each mechanism to a concrete engineering decision you'll actually make.
+      </p>
+
+      <app-bridge-flow />
+
+      <h3>Who This Section Is For</h3>
+
+      <div class="dev-cards">
+        <div class="dev-card">
+          <div class="dev-card-label" style="color: #22d3ee;">Backend Developers</div>
+          <div class="dev-card-title">Server-side performance</div>
+          <ul class="dev-card-items">
+            <li>Design APIs with latency in mind</li>
+            <li>Tune TCP socket options</li>
+            <li>Understand connection pooling</li>
+            <li>Handle concurrent connections</li>
+          </ul>
+        </div>
+        <div class="dev-card">
+          <div class="dev-card-label" style="color: #a78bfa;">Frontend Developers</div>
+          <div class="dev-card-title">Client-side performance</div>
+          <ul class="dev-card-items">
+            <li>Minimize round trips</li>
+            <li>Optimize resource loading order</li>
+            <li>Leverage HTTP/2 &amp; HTTP/3</li>
+            <li>Understand browser connection limits</li>
+          </ul>
+        </div>
+        <div class="dev-card">
+          <div class="dev-card-label" style="color: #10b981;">Full-Stack / Architects</div>
+          <div class="dev-card-title">System-level decisions</div>
+          <ul class="dev-card-items">
+            <li>Choose the right transport</li>
+            <li>Design for network partitions</li>
+            <li>Pick protocols with intent</li>
+            <li>Measure before optimizing</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>What You'll Learn</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Topic</span>
+          <span>Why It Matters</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>MSS / MTU / PMTUD</strong></span>
+          <span class="tcp-val-neutral">One segment vs. fragmented — the difference between minimum and hidden latency</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Nagle's Algorithm</strong></span>
+          <span class="tcp-val-neutral">Why your app has mysterious delays and how <code>TCP_NODELAY</code> fixes them</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Delayed ACK</strong></span>
+          <span class="tcp-val-neutral">How Nagle + Delayed ACK combine to create a 200ms trap</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Connection Management</strong></span>
+          <span class="tcp-val-neutral">Connection pooling, keep-alive, and the cost of setup/teardown</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Head-of-Line Blocking</strong></span>
+          <span class="tcp-val-neutral">Why HTTP/1.1 stalls and how HTTP/2 &amp; HTTP/3 solve it differently</span>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <strong>The key shift:</strong> Most developers treat networking as a black box —
+        data goes in, data comes out. After this section, you'll see the latency budget, the
+        protocol overhead, and the tuning knobs. You'll stop guessing and start measuring.
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> The fundamentals you learned in sections 1–6 aren't just
+        theory — they're the <em>reason</em> performance problems happen. Every unexplained delay,
+        every bandwidth cap, every connection timeout has a root cause in the layers you now
+        understand. This section shows you how to connect those dots.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/6/4" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; HTTPS &amp; Certificates</span>
+    </a>
+    <a routerLink="/section/7/2" class="nav-btn next disabled-nav">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">MSS / MTU / PMTUD &rarr;</span>
+    </a>
+  </div>
+</div>

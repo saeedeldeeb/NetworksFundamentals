@@ -107,7 +107,10 @@ export class App {
       title: 'Network Performance',
       path: '/section/7',
       available: true,
-      lessons: [{ title: 'Introduction', path: '/section/7/1' }],
+      lessons: [
+        { title: 'Introduction', path: '/section/7/1' },
+        { title: 'MSS, MTU & PMTUD', path: '/section/7/2' },
+      ],
     },
     { id: 8, title: 'Routing', path: '/section/8', available: false },
     { id: 9, title: 'Wireshark Analysis', path: '/section/9', available: false },

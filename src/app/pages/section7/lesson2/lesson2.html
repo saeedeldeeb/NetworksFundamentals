@@ -1,0 +1,212 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 07</span>
+    <h1>Network Performance</h1>
+    <p class="section-description">
+      The bridge between theory and practice — how the fundamentals you know directly impact
+      the speed, reliability, and scalability of the systems you build
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 02</span>
+      <h2>MSS, MTU &amp; PMTUD</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        Every byte you send must fit inside an Ethernet frame. The frame size sets a hard
+        ceiling for everything above it — and when you understand that ceiling, you can design
+        data flows that hit it perfectly instead of fragmenting across multiple frames.
+      </p>
+
+      <h3>The Frame Breakdown</h3>
+      <p>
+        An Ethernet frame carries an IP packet, which carries a TCP segment, which carries
+        your application data. Each layer adds its own header — and those headers eat into
+        the space available for actual data. Watch the numbers reveal themselves:
+      </p>
+
+      <app-mtu-stack />
+
+      <h3>MTU vs MSS — What Each One Is</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr three-col">
+          <span>Concept</span>
+          <span>Layer</span>
+          <span>Definition</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>MTU</strong><br><small>Maximum Transmission Unit</small></span>
+          <span class="tcp-val-warn">L2 — Data Link</span>
+          <span class="tcp-val-neutral">Max IP packet size the link can carry. Ethernet default = 1500B. A property of the network interface.</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>MSS</strong><br><small>Maximum Segment Size</small></span>
+          <span class="tcp-val-good">L4 — Transport</span>
+          <span class="tcp-val-neutral">Max TCP payload per segment = MTU − IP header (20B) − TCP header (20B) = 1460B. Negotiated during TCP handshake.</span>
+        </div>
+      </div>
+
+      <h3>The Magic Number: 1460</h3>
+
+      <div class="highlight-box">
+        <strong>1460 bytes</strong> is the standard MSS — the largest chunk of application data
+        that fits in a single TCP segment without fragmentation. If your data is &le;1460 bytes,
+        it travels in <em>one segment</em>: one network operation, minimum latency, minimum overhead.
+        Every byte over 1460 forces a second segment — adding another 40 bytes of IP+TCP header
+        tax on top of the extra data.
+      </div>
+
+      <div class="hs-steps">
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(16,185,129,0.2); color: #10b981;">1</div>
+          <div class="hs-step-body">
+            <strong>HTTP responses under 1460B ship in one segment</strong>
+            <p>Small JSON APIs, health check endpoints, short HTML — design for this and you minimize round-trip latency.</p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(249,115,22,0.2); color: #f97316;">2</div>
+          <div class="hs-step-body">
+            <strong>Compress client-side before sending</strong>
+            <p>gzip or brotli a 3KB payload down to &lt;1460B and you've eliminated a segment — and the overhead that comes with it.</p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(167,139,250,0.2); color: #a78bfa;">3</div>
+          <div class="hs-step-body">
+            <strong>7 segments = 280 bytes wasted on headers alone</strong>
+            <p>Every IP+TCP header costs 40 bytes. Seven segments to send 10KB of data pays 280B just for headers. Fewer segments = less tax.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3>Jumbo Frames</h3>
+      <p>
+        Some networks — particularly private cloud infrastructure — use jumbo frames with an
+        MTU of 9000 bytes, giving an MSS of 8960B. More data per frame means fewer frames,
+        less header overhead, and higher throughput. But this only works when <em>every hop</em>
+        on the path supports the larger MTU.
+      </p>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr three-col">
+          <span>Frame Size</span>
+          <span>Pros</span>
+          <span>Cons</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Standard</strong><br><code>MTU = 1500</code></span>
+          <span class="tcp-val-good">Works everywhere on the internet</span>
+          <span class="tcp-val-neutral">More frames for large transfers, higher header overhead</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Jumbo</strong><br><code>MTU = 9000</code></span>
+          <span class="tcp-val-good">Fewer frames, less overhead, great for bulk transfers</span>
+          <span class="tcp-val-bad">Any bit flip corrupts a 9KB packet. All hops must agree. Not for the internet.</span>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <strong>AWS, GCP, Azure</strong> likely use jumbo frames internally between their own
+        machines — they own every hop in the path and run stable hardware. You benefit from
+        this when your EC2 instances talk to RDS within the same VPC, even without configuring anything.
+      </div>
+
+      <h3>IP Fragmentation — What Happens When the Packet Doesn't Fit</h3>
+      <p>
+        If an IP packet is larger than the MTU of an intermediate link and the <strong>Don't
+        Fragment (DF)</strong> flag is not set, the router splits it into multiple fragments.
+        The destination reassembles them. This sounds fine — until you realize the costs:
+      </p>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Problem</span>
+          <span>Impact</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>Reassembly overhead at destination</span>
+          <span class="tcp-val-warn">CPU work to reconstruct the original packet</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>One lost fragment = retransmit entire packet</span>
+          <span class="tcp-val-bad">No partial reassembly — everything must arrive</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>Fragmentation-based attacks</span>
+          <span class="tcp-val-bad">Exploits use overlapping fragments to bypass firewalls</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>Modern TCP avoids fragmentation entirely</span>
+          <span class="tcp-val-good">Sets DF flag + uses PMTUD to stay within path MTU</span>
+        </div>
+      </div>
+
+      <h3>Path MTU Discovery (PMTUD)</h3>
+      <p>
+        Your client may have an MTU of 9000, but a router somewhere in the middle might only
+        handle 512-byte packets. PMTUD is the mechanism TCP uses to automatically discover
+        the smallest MTU across the entire path — so it can size its segments to fit without
+        fragmentation. Watch the discovery in action:
+      </p>
+
+      <app-pmtud-flow />
+
+      <h3>Checking MTU in the Terminal</h3>
+
+      <app-code-block lang="Bash" filename="Terminal" [code]="mtuCmd" />
+
+      <h3>Jumbo Frame Configuration</h3>
+
+      <app-code-block lang="Bash" filename="Terminal" [code]="jumboCmd" />
+
+      <h3>Summary</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr three-col">
+          <span>Concept</span>
+          <span>Layer</span>
+          <span>Default</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>MTU</strong></span>
+          <span class="tcp-val-warn">L2</span>
+          <span class="tcp-val-neutral">1500B — max IP packet carried by one Ethernet frame</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>MSS</strong></span>
+          <span class="tcp-val-good">L4</span>
+          <span class="tcp-val-neutral">1460B — TCP payload = MTU − 40B headers</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>PMTUD</strong></span>
+          <span class="tcp-val-orange">L3/ICMP</span>
+          <span class="tcp-val-neutral">Auto-discovers lowest MTU across path. Requires ICMP not be blocked by firewalls.</span>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> 1460 is the sweet spot for internet TCP — one segment,
+        zero fragmentation, minimum overhead. Every extra segment adds 40 bytes of header tax.
+        Design your payloads with awareness of this limit: compress aggressively, batch wisely,
+        and let PMTUD handle the rest. When PMTUD breaks (blocked ICMP), connections mysteriously
+        stall — always keep ICMP open on your firewalls.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/7/1" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; Introduction</span>
+    </a>
+    <a routerLink="/section/7/3" class="nav-btn next disabled-nav">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">Nagle's Algorithm &rarr;</span>
+    </a>
+  </div>
+</div>

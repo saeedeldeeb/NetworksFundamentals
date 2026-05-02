@@ -1,0 +1,217 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 07</span>
+    <h1>Network Performance</h1>
+    <p class="section-description">
+      The bridge between theory and practice — how the fundamentals you know directly impact
+      the speed, reliability, and scalability of the systems you build
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 04</span>
+      <h2>Delayed Acknowledgment</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        Nagle's algorithm delays sending from the <em>sender</em>. Delayed ACK delays sending
+        from the <em>receiver</em>. Each one alone causes minor inefficiency. Together, they
+        create a deadlock that can freeze data transfer for 400ms — invisible in your code,
+        silent in your logs, and maddening to debug.
+      </p>
+
+      <h3>What Is Delayed ACK?</h3>
+      <p>
+        By default, a TCP receiver doesn't acknowledge every segment immediately. Instead, it
+        waits briefly — hoping either another segment arrives (so one ACK covers both) or that
+        it has data to send back (so the ACK can piggyback on an outgoing segment). This reduces
+        ACK traffic at the cost of acknowledgment latency.
+      </p>
+
+      <div class="tcp-compare" style="max-width: 580px;">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Mode</span>
+          <span>Behavior</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Without Delayed ACK</strong></span>
+          <span class="tcp-val-neutral">5 segments → 5 ACKs. Each ACK is its own packet. Accurate but generates traffic.</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>With Delayed ACK</strong><br><small>(default)</small></span>
+          <span class="tcp-val-warn">5 segments → 1 ACK. Wait up to 200ms, then batch-acknowledge everything received so far.</span>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <strong>The RFC recommendation:</strong> wait at most 500ms before sending an ACK,
+        and send an ACK for every second full-size segment. Linux and most OSes use 40ms as the
+        minimum timer and 200ms as the maximum — but these values vary by OS and kernel version.
+      </div>
+
+      <h3>Why It Was Designed</h3>
+
+      <div class="hs-steps">
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(99,102,241,0.2); color: #818cf8;">1</div>
+          <div class="hs-step-body">
+            <strong>Reduce ACK traffic</strong>
+            <p>An empty ACK packet is 40 bytes of IP+TCP headers for zero bytes of useful data.
+            Batching ACKs reduces the ratio of overhead packets on the network.</p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(99,102,241,0.2); color: #818cf8;">2</div>
+          <div class="hs-step-body">
+            <strong>Piggyback ACKs on outgoing data</strong>
+            <p>In bidirectional protocols (like HTTP/1.1 request-response), the receiver often
+            has data to send back anyway. The ACK rides in the header of that response for free.</p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(99,102,241,0.2); color: #818cf8;">3</div>
+          <div class="hs-step-body">
+            <strong>Reduce CPU interrupts</strong>
+            <p>Every packet triggers a kernel interrupt. Fewer ACK packets means fewer interrupts,
+            which matters at the thousands-of-connections scale.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3>The Deadly Combination — Nagle + Delayed ACK</h3>
+      <p>
+        Both algorithms were designed in the same era for the same goal: reduce unnecessary packets.
+        The designers didn't anticipate what happens when both run simultaneously on opposite ends
+        of the same connection. The result is a true deadlock:
+      </p>
+
+      <app-delayed-ack />
+
+      <h3>The 400ms Breakdown</h3>
+
+      <div class="tcp-compare" style="max-width: 560px;">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Component</span>
+          <span>Time Added</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>Delayed ACK timer</span>
+          <span class="tcp-val-bad">~200ms (RFC recommendation, varies by OS)</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>Nagle's waiting period</span>
+          <span class="tcp-val-warn">Variable — waits indefinitely until ACK or MSS</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>Network RTT</span>
+          <span class="tcp-val-warn">1ms (same DC) to 300ms+ (cross-continent)</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Total potential delay</strong></span>
+          <span class="tcp-val-bad"><strong>200ms to 400ms+ per partial segment</strong></span>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <strong>This is non-deterministic.</strong> The delay depends on the Delayed ACK timer
+        value (varies by kernel), the RTT, and whether any other segments arrive to trigger an
+        early ACK. You might see 40ms in development and 350ms in production — the same code,
+        different OS tuning.
+      </div>
+
+      <h3>Nagle vs Delayed ACK — Side by Side</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr" style="grid-template-columns: 1fr 1fr 1fr;">
+          <span>Aspect</span>
+          <span>Nagle's Algorithm</span>
+          <span>Delayed ACK</span>
+        </div>
+        <div class="tcp-compare-row" style="grid-template-columns: 1fr 1fr 1fr;">
+          <span>Acts on</span>
+          <span class="tcp-val-warn">Sender side</span>
+          <span class="tcp-val-orange">Receiver side</span>
+        </div>
+        <div class="tcp-compare-row" style="grid-template-columns: 1fr 1fr 1fr;">
+          <span>Delays</span>
+          <span class="tcp-val-neutral">Sending small segments</span>
+          <span class="tcp-val-neutral">Sending ACKs</span>
+        </div>
+        <div class="tcp-compare-row" style="grid-template-columns: 1fr 1fr 1fr;">
+          <span>Socket option</span>
+          <span class="tcp-val-good"><code>TCP_NODELAY</code></span>
+          <span class="tcp-val-good"><code>TCP_QUICKACK</code> (Linux)</span>
+        </div>
+        <div class="tcp-compare-row" style="grid-template-columns: 1fr 1fr 1fr;">
+          <span>Goal</span>
+          <span class="tcp-val-neutral">Fill segments before sending</span>
+          <span class="tcp-val-neutral">Batch ACKs to reduce traffic</span>
+        </div>
+        <div class="tcp-compare-row" style="grid-template-columns: 1fr 1fr 1fr;">
+          <span>Together</span>
+          <span class="tcp-val-bad" style="grid-column: span 2;">Deadlock — both waiting on each other — up to 400ms delay</span>
+        </div>
+      </div>
+
+      <h3>The Solution</h3>
+
+      <div class="tcp-compare" style="max-width: 580px;">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Problem</span>
+          <span>Fix</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>Nagle delays sending partial segment</span>
+          <span class="tcp-val-good">Set <code>TCP_NODELAY = 1</code> on sender</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>Delayed ACK holds back acknowledgment</span>
+          <span class="tcp-val-good">Set <code>TCP_QUICKACK = 1</code> on receiver (Linux)</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>Both enabled → deadlock</span>
+          <span class="tcp-val-good">Disable at least one. Prefer both disabled for latency-sensitive apps.</span>
+        </div>
+      </div>
+
+      <h3>Code: Disabling Delayed ACK</h3>
+
+      <app-code-block lang="C" filename="socket.c" [code]="quickackC" />
+      <app-code-block lang="JavaScript" filename="note.js" [code]="quickackNode" />
+
+      <h3>Diagnosing the 200ms Trap</h3>
+
+      <app-code-block lang="Bash" filename="Terminal" [code]="debugCmd" />
+
+      <div class="highlight-box">
+        <strong>Real-world pattern:</strong> You see a request that takes 250ms even though
+        your server processes it in 2ms. You check CPU, memory, database — all fine.
+        The culprit is the Nagle + Delayed ACK deadlock on the final segment of the response.
+        The fix: <code>setNoDelay(true)</code> on the server socket. Zero other code changes.
+        250ms drops to 3ms.
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> Nagle and Delayed ACK are both individually reasonable
+        optimizations for high-latency, bandwidth-constrained 1980s networks. In 2024, bandwidth
+        is cheap and the internet is fast. The 40-byte ACK savings cost you 200ms of latency —
+        a terrible trade. Most high-performance servers, HTTP clients, and database drivers now
+        disable both by default. If you're building a latency-sensitive system and haven't
+        explicitly set <code>TCP_NODELAY</code>, you're probably leaving performance on the table.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/7/3" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; Nagle's Algorithm</span>
+    </a>
+    <a routerLink="/section/7/5" class="nav-btn next disabled-nav">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">Connection Cost &rarr;</span>
+    </a>
+  </div>
+</div>

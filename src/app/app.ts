@@ -110,6 +110,8 @@ export class App {
       lessons: [
         { title: 'Introduction', path: '/section/7/1' },
         { title: 'MSS, MTU & PMTUD', path: '/section/7/2' },
+        { title: "Nagle's Algorithm", path: '/section/7/3' },
+        { title: 'Delayed ACK', path: '/section/7/4' },
       ],
     },
     { id: 8, title: 'Routing', path: '/section/8', available: false },

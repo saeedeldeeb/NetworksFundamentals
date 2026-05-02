@@ -1,0 +1,194 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 07</span>
+    <h1>Network Performance</h1>
+    <p class="section-description">
+      The bridge between theory and practice — how the fundamentals you know directly impact
+      the speed, reliability, and scalability of the systems you build
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 03</span>
+      <h2>Nagle's Algorithm</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        Your network is fine. Your server responds instantly. But something is adding a mysterious
+        50–200ms delay to certain operations and you can't find it in your code or your logs.
+        The culprit is inside the TCP stack itself — and it's been there since 1984.
+      </p>
+
+      <h3>Why It Was Invented — The Telnet Problem</h3>
+      <p>
+        In 1984, John Nagle noticed that interactive Telnet sessions were flooding the network
+        with tiny packets. A user typing <code>ls</code> would generate three separate TCP
+        segments — one for <code>l</code>, one for <code>s</code>, one for <code>\n</code>.
+        Each one: 1 byte of data, 40 bytes of IP+TCP headers.
+      </p>
+
+      <div class="tcp-compare" style="max-width: 560px;">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Packet</span>
+          <span>Breakdown</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>1 byte of data</span>
+          <span class="tcp-val-bad">40B of IP+TCP headers — 97.6% overhead</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>3 characters typed</span>
+          <span class="tcp-val-bad">3 packets × 41B = 123B sent for 3B of data (2.4% efficiency)</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>With Nagle: buffered</span>
+          <span class="tcp-val-good">1 packet: 40B headers + 3B data = 43B (7% overhead instead of 97.6%)</span>
+        </div>
+      </div>
+
+      <p>
+        Nagle's solution: <strong>don't send small segments if there's already unacknowledged
+        data in flight</strong>. Buffer them until either the segment fills to MSS, or an ACK
+        arrives for the outstanding data. Problem solved — for 1984 Telnet.
+      </p>
+
+      <h3>Nagle's Three Rules</h3>
+
+      <div class="hs-steps">
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(16,185,129,0.2); color: #10b981;">1</div>
+          <div class="hs-step-body">
+            <strong>No unacknowledged data in flight → send immediately</strong>
+            <p>First write always goes out right away. Nothing in flight means no risk of flooding.</p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(16,185,129,0.2); color: #10b981;">2</div>
+          <div class="hs-step-body">
+            <strong>Segment is full (≥ MSS bytes) → send immediately</strong>
+            <p>Full segments ship regardless. No buffering needed — the efficiency goal is already met.</p>
+          </div>
+        </div>
+        <div class="hs-step-card">
+          <div class="hs-step-num" style="background: rgba(245,158,11,0.2); color: #f59e0b;">3</div>
+          <div class="hs-step-body">
+            <strong>Otherwise → buffer and wait</strong>
+            <p>If the segment is partial AND there's unacked data, Nagle holds the bytes until the
+            segment fills to MSS <em>or</em> an ACK arrives unlocking the buffer.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3>The Catch — When Nagle Hurts You</h3>
+      <p>
+        Rule 3 is the problem. When you send 5000 bytes, three full segments (3 × 1460B) fire
+        immediately — but the last 620 bytes get stuck. There's unacked data in flight,
+        and 620 &lt; 1460, so Nagle buffers it. The only way out is to wait for an ACK.
+        That wait is exactly one round-trip time — non-deterministic, invisible, and hard to debug.
+      </p>
+
+      <app-nagle-compare />
+
+      <h3>The Solution: <code>TCP_NODELAY</code></h3>
+
+      <div class="highlight-box">
+        <strong>TCP_NODELAY = 1</strong> tells the OS kernel: <em>"bypass Nagle's algorithm entirely.
+        Send every write immediately, no buffering, no waiting."</em>
+        It trades a tiny amount of bandwidth efficiency for predictable, low-latency behavior.
+        For almost every modern application, this trade is worth it.
+      </div>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Setting</span>
+          <span>Behavior</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><code>TCP_NODELAY = 0</code><br><small>(default)</small></span>
+          <span class="tcp-val-warn">Nagle on — buffers partial segments. Good for bulk throughput, bad for latency.</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><code>TCP_NODELAY = 1</code></span>
+          <span class="tcp-val-good">Nagle off — every write exits the kernel immediately. Predictable latency.</span>
+        </div>
+      </div>
+
+      <h3>Code: Setting TCP_NODELAY</h3>
+
+      <app-code-block lang="JavaScript" filename="server.js" [code]="nodeNoDelay" />
+      <app-code-block lang="C" filename="socket.c" [code]="codeC" />
+      <app-code-block lang="Python" filename="socket.py" [code]="codePython" />
+
+      <h3>The curl Story (2016)</h3>
+      <p>
+        Even curl — one of the most battle-tested networking tools in existence — shipped with
+        Nagle enabled by default until 2016. The creator spent hours debugging TLS handshake
+        stalls before tracing it to a missing <code>TCP_NODELAY</code> call:
+      </p>
+
+      <app-code-block lang="Bash" filename="curl history" [code]="curlStory" />
+
+      <h3>When to Disable Nagle's Algorithm</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Scenario</span>
+          <span>Recommendation</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>Real-time apps (games, chat, video)</span>
+          <span class="tcp-val-good">Disable — latency is the metric, not throughput</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>Interactive protocols (SSH, terminals)</span>
+          <span class="tcp-val-good">Disable — every keystroke must feel immediate</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>HTTP APIs (REST, GraphQL)</span>
+          <span class="tcp-val-good">Disable — request headers + body rarely align perfectly to 1460B</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>TLS handshakes</span>
+          <span class="tcp-val-good">Disable — handshake messages are small; Nagle causes stalls</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>Bulk file transfers</span>
+          <span class="tcp-val-warn">Optional — full segments fire regardless; Nagle only affects the tail</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>High-latency links</span>
+          <span class="tcp-val-good">Disable — higher RTT = longer wait for partial segments</span>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <strong>Where to set it:</strong> The sender sets <code>TCP_NODELAY</code>.
+        For an HTTP server, that's the server side. For a database client, that's the client
+        library (most modern drivers like pg, mysql2, and redis clients enable it by default).
+        For a custom protocol: both sides may benefit.
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> Nagle's algorithm solved a real 1984 problem — today,
+        bandwidth is cheap and latency is the bottleneck. Most modern applications benefit from
+        <code>TCP_NODELAY</code>. The 40-byte header "waste" per small segment is irrelevant
+        compared to adding 50–200ms of unpredictable delay to every partial write. The next
+        lesson covers Delayed ACK — Nagle's sibling, and when combined with it, the source
+        of the famous "400ms trap."
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/7/2" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; MSS, MTU &amp; PMTUD</span>
+    </a>
+    <a routerLink="/section/7/4" class="nav-btn next">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">Delayed ACK &rarr;</span>
+    </a>
+  </div>
+</div>

@@ -198,5 +198,9 @@ export const routes: Routes = [
     path: 'section/7/4',
     loadComponent: () => import('./pages/section7/lesson4/lesson4').then((m) => m.Section7Lesson4),
   },
+  {
+    path: 'section/7/5',
+    loadComponent: () => import('./pages/section7/lesson5/lesson5').then((m) => m.Section7Lesson5),
+  },
   { path: '**', redirectTo: '' },
 ];

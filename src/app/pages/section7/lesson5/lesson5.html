@@ -1,0 +1,276 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 07</span>
+    <h1>Network Performance</h1>
+    <p class="section-description">
+      The bridge between theory and practice — how the fundamentals you know directly impact
+      the speed, reliability, and scalability of the systems you build
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 05</span>
+      <h2>Cost of Connection Establishment</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        Opening a TCP connection looks free — one line of code, <code>connect()</code>, done.
+        But before a single byte of your data moves, the connection has already spent round-trips,
+        ramped up a congestion window, and committed kernel memory on both ends. Understanding
+        that cost is what separates an app that scales from one that mysteriously crawls.
+      </p>
+
+      <h3>Everything Has a Cost</h3>
+
+      <div class="highlight-box">
+        <em>"If I learned anything in 17 years — everything has a cost. Only when I understand
+        the cost do I feel comfortable using something."</em><br />
+        A TCP connection is not free. It is an investment that pays off only if you reuse it.
+      </div>
+
+      <h3>The Six Costs of a TCP Connection</h3>
+      <p>
+        Establishing — and later tearing down — a connection triggers a chain of mechanisms you
+        met across sections 3–6. Each one adds latency or limits throughput:
+      </p>
+
+      <div class="tcp-compare" style="max-width: 620px;">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Cost</span>
+          <span>What It Adds</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>1. Three-way handshake</strong></span>
+          <span class="tcp-val-bad">1.5 RTT before any data — up to 450ms on long links</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>2. Slow start</strong></span>
+          <span class="tcp-val-warn">Can't send at full speed — window ramps over several RTTs</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>3. Congestion control</strong></span>
+          <span class="tcp-val-warn">Caps throughput based on perceived network capacity</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>4. Flow control</strong></span>
+          <span class="tcp-val-neutral">Receiver's advertised window further limits in-flight data</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>5. Nagle + Delayed ACK</strong></span>
+          <span class="tcp-val-warn">Up to 400ms of extra delay on partial segments</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>6. Connection teardown</strong></span>
+          <span class="tcp-val-neutral">4-way handshake (FIN/ACK) + lingering TIME_WAIT socket</span>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <strong>The compounding effect:</strong> these costs stack. A fresh connection pays the
+        handshake, <em>then</em> crawls through slow start, <em>then</em> may hit a Nagle stall —
+        all before reaching steady-state throughput. The first request on a cold connection is
+        always the slowest request your system will serve.
+      </div>
+
+      <h3>Distance Decides Everything</h3>
+      <p>
+        The handshake is three one-way trips across the wire. Its cost is bounded by physics —
+        the speed of light through fiber — plus every router, firewall, and inspection hop along
+        the path. You cannot code your way around the distance between two machines.
+      </p>
+
+      <div class="tcp-compare" style="max-width: 560px;">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Scenario</span>
+          <span>Handshake Latency</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>Same machine (loopback)</span>
+          <span class="tcp-val-good">&lt; 1 ms</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>Same data center</span>
+          <span class="tcp-val-good">1–5 ms</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>Same region</span>
+          <span class="tcp-val-warn">10–50 ms</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>Cross-continent (California → China)</span>
+          <span class="tcp-val-bad">150–300 ms per trip → ~450 ms handshake</span>
+        </div>
+      </div>
+
+      <p>
+        Watch the handshake play out across the Pacific. Each arrow is a one-way trip — and the
+        clock keeps running while the connection is still being <em>set up</em>:
+      </p>
+
+      <app-handshake-cost />
+
+      <h3>The Solution: Connection Pooling</h3>
+      <p>
+        If the cost of a connection is fixed, the answer isn't to make connections cheaper —
+        it's to <strong>pay for them less often</strong>. A connection pool keeps a set of
+        connections warm and open. Requests <em>borrow</em> a connection, use it, and
+        <em>return</em> it — they never open or close one. The handshake and slow start happen
+        once, at startup, and every request afterward rides a connection that's already at speed.
+      </p>
+
+      <app-connection-pool />
+
+      <h3>Where Connection Pooling Lives</h3>
+      <p>
+        You're already using connection pools — most infrastructure components pool connections
+        internally so you don't have to think about it:
+      </p>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Component</span>
+          <span>How It Uses Pooling</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Database clients</strong></span>
+          <span class="tcp-val-neutral">A fixed pool of DB connections; queries borrow one and return it</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Reverse proxies</strong></span>
+          <span class="tcp-val-neutral">Pre-established keep-alive connections to the backend fleet</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>HTTP clients</strong></span>
+          <span class="tcp-val-neutral">Keep-alive reuses one connection for many sequential requests</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Message queue clients</strong></span>
+          <span class="tcp-val-neutral">Long-lived persistent connections held open to the brokers</span>
+        </div>
+      </div>
+
+      <h3>Eager vs Lazy Loading</h3>
+      <p>
+        A pool can warm its connections <strong>eagerly</strong> — at startup — or
+        <strong>lazily</strong> — on first use. The trade is simply <em>who pays the cost</em>:
+        the operator at deploy time, or the first user to hit the endpoint.
+      </p>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr three-col">
+          <span>Aspect</span>
+          <span>Eager Loading</span>
+          <span>Lazy Loading</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span>Connections open</span>
+          <span class="tcp-val-neutral">On startup</span>
+          <span class="tcp-val-neutral">On first request</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span>Startup time</span>
+          <span class="tcp-val-warn">Slower — warming up</span>
+          <span class="tcp-val-good">Fast — nothing to do</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span>First request</span>
+          <span class="tcp-val-good">Fast — pool already warm</span>
+          <span class="tcp-val-bad">Slow — must establish</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span>Resource usage</span>
+          <span class="tcp-val-warn">Higher upfront</span>
+          <span class="tcp-val-good">Lower until needed</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span>Best for</span>
+          <span class="tcp-val-neutral">Production, high traffic</span>
+          <span class="tcp-val-neutral">Development, testing</span>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <strong>Rule of thumb:</strong> eager-load in production so no real user is the one
+        warming your pool — lazy-load in dev and tests where a fast startup matters more than a
+        fast first request.
+      </div>
+
+      <h3>Code: Pool vs No Pool</h3>
+      <p>
+        The anti-pattern is seductive because it works in development — one local request, sub-millisecond
+        loopback handshake, no visible cost. It only falls apart under real traffic and real distance:
+      </p>
+
+      <app-code-block lang="JavaScript" filename="anti-pattern.js" [code]="antiPattern" />
+      <app-code-block lang="JavaScript" filename="pooled.js" [code]="poolCode" />
+
+      <h3>The Warm-up Technique</h3>
+      <p>
+        Pooling removes the handshake cost — but a freshly opened connection still has a tiny
+        congestion window. Some systems take it a step further and deliberately push dummy
+        traffic through new connections to force slow start to ramp before real requests arrive.
+      </p>
+
+      <div class="highlight-box">
+        <strong>Warm-up data (controversial):</strong> on startup, the backend opens its pooled
+        connections and sends throwaway bytes through each one. Slow start ramps the congestion
+        window; the receiver discards the dummy data. The connection is now at full speed before
+        the first real request.<br /><br />
+        <strong>Pro:</strong> connections run at full throughput immediately.
+        <strong>Con:</strong> wastes bandwidth and adds operational complexity — most teams skip
+        it and simply accept that the first few requests on a new connection are slightly slower.
+      </div>
+
+      <h3>Best Practices</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Practice</span>
+          <span>Why</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Use connection pools</strong></span>
+          <span class="tcp-val-good">Amortize the handshake + slow-start cost across many requests</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Keep connections open</strong></span>
+          <span class="tcp-val-good">Memory is cheap; re-establishing latency is not</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Pre-warm pools in production</strong></span>
+          <span class="tcp-val-good">The first real client shouldn't pay the cold-start price</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Don't close unless necessary</strong></span>
+          <span class="tcp-val-warn">Closing means paying the full cost again on the next reopen</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Lazy-load in dev/test</strong></span>
+          <span class="tcp-val-neutral">Faster iteration; cold start doesn't matter locally</span>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> the first client to hit a cold connection pays the full
+        price — handshake, slow start, congestion avoidance. Connection pooling doesn't make that
+        cost disappear; it <em>moves</em> it to startup, where no user is waiting, and then spreads
+        it across every request that follows. The next lesson looks at TCP Fast Open — a protocol
+        extension that attacks the handshake cost itself, letting data ride along with the very
+        first SYN.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/7/4" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; Delayed ACK</span>
+    </a>
+    <a routerLink="/section/7/6" class="nav-btn next disabled-nav">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">TCP Fast Open &rarr;</span>
+    </a>
+  </div>
+</div>

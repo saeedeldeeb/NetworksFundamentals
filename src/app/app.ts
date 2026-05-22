@@ -113,6 +113,7 @@ export class App {
         { title: "Nagle's Algorithm", path: '/section/7/3' },
         { title: 'Delayed ACK', path: '/section/7/4' },
         { title: 'Connection Establishment Cost', path: '/section/7/5' },
+        { title: 'TCP Fast Open', path: '/section/7/6' },
       ],
     },
     { id: 8, title: 'Routing', path: '/section/8', available: false },

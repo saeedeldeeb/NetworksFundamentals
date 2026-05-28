@@ -114,6 +114,8 @@ export class App {
         { title: 'Delayed ACK', path: '/section/7/4' },
         { title: 'Connection Establishment Cost', path: '/section/7/5' },
         { title: 'TCP Fast Open', path: '/section/7/6' },
+        { title: 'Listening Servers', path: '/section/7/7' },
+        { title: 'TCP Head-of-Line Blocking', path: '/section/7/8' },
       ],
     },
     { id: 8, title: 'Routing', path: '/section/8', available: false },

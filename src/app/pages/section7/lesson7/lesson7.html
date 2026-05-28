@@ -1,0 +1,308 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 07</span>
+    <h1>Network Performance</h1>
+    <p class="section-description">
+      The bridge between theory and practice — how the fundamentals you know directly impact
+      the speed, reliability, and scalability of the systems you build
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 07</span>
+      <h2>Listening Servers</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        Every server you write begins with a single line: <code>listen(port, address)</code>. That
+        innocent-looking <em>address</em> argument decides whether your service is reachable from
+        the same process, from your laptop, from the LAN, or from the entire public internet. Get
+        it wrong on a misconfigured box and you'll find your unauthenticated admin panel on a
+        breach-data site within hours.
+      </p>
+
+      <h3>What "Listening" Really Means</h3>
+      <p>
+        A listening socket is identified by <strong>two</strong> things — not just the port:
+      </p>
+
+      <div class="tcp-compare" style="max-width: 620px;">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>You pick</span>
+          <span>What it controls</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>An IP address</strong></span>
+          <span class="tcp-val-neutral">Which network interface the kernel will accept packets on</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>A port</strong></span>
+          <span class="tcp-val-neutral">Which specific service on that interface</span>
+        </div>
+      </div>
+
+      <p>
+        Your machine almost always has multiple IP addresses at once — and the address you bind
+        to is the one (and only one) that incoming connections can reach:
+      </p>
+
+      <div class="tcp-compare" style="max-width: 660px;">
+        <div class="tcp-compare-row tcp-compare-hdr three-col">
+          <span>Interface</span>
+          <span>Typical IP</span>
+          <span>Reachable from</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Loopback (IPv4)</strong></span>
+          <span><code>127.0.0.1</code></span>
+          <span class="tcp-val-good">Same machine only</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Loopback (IPv6)</strong></span>
+          <span><code>::1</code></span>
+          <span class="tcp-val-good">Same machine only</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>LAN / WiFi adapter</strong></span>
+          <span><code>192.168.x.x</code></span>
+          <span class="tcp-val-warn">Same local network</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Docker bridge</strong></span>
+          <span><code>172.17.x.x</code></span>
+          <span class="tcp-val-neutral">Container network</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>All interfaces</strong></span>
+          <span><code>0.0.0.0</code> / <code>::</code></span>
+          <span class="tcp-val-bad">Everything reachable — including public</span>
+        </div>
+      </div>
+
+      <h3>Bind to Loopback vs. Bind to Everything</h3>
+      <p>
+        Watch the same server bound two different ways. On the left, only the same machine can
+        reach it. On the right, every interface — including a public one — accepts connections:
+      </p>
+
+      <app-interface-binding />
+
+      <div class="highlight-box">
+        <strong>Real-world incident pattern:</strong> Elasticsearch, MongoDB, and Redis defaults
+        used to bind to <code>0.0.0.0</code> with no authentication. Operators ran them on cloud
+        VMs with public IPs, no firewall rules, and assumed "it's only the dev port." Internet-wide
+        scanners found tens of thousands of unauthenticated databases — that's how the recurring
+        "10 million records leaked" headlines happen.
+      </div>
+
+      <h3>Listening Scenarios — Who Can Reach You</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Listen address</span>
+          <span>Who can connect</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><code>127.0.0.1:8080</code></span>
+          <span class="tcp-val-good">Only the same machine (IPv4)</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><code>[::1]:8080</code></span>
+          <span class="tcp-val-good">Only the same machine (IPv6)</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><code>192.168.1.10:8080</code></span>
+          <span class="tcp-val-warn">Only via that specific interface</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><code>0.0.0.0:8080</code></span>
+          <span class="tcp-val-bad">Anyone who can reach ANY interface</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><code>[::]:8080</code></span>
+          <span class="tcp-val-bad">IPv6 equivalent of 0.0.0.0 — everywhere</span>
+        </div>
+      </div>
+
+      <h3>IPv4 vs IPv6 Loopback Are Different Addresses</h3>
+      <p>
+        A server bound to <code>127.0.0.1</code> will <em>refuse</em> a connection to <code>[::1]</code>,
+        even though both are "loopback." They live on separate sockets:
+      </p>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr three-col">
+          <span>Server bound to</span>
+          <span>Client connects to</span>
+          <span>Result</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><code>127.0.0.1:8080</code></span>
+          <span><code>http://127.0.0.1:8080</code></span>
+          <span class="tcp-val-good">&#10003; Works</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><code>127.0.0.1:8080</code></span>
+          <span><code>http://[::1]:8080</code></span>
+          <span class="tcp-val-bad">&#215; Connection refused</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><code>::1:8080</code></span>
+          <span><code>http://[::1]:8080</code></span>
+          <span class="tcp-val-good">&#10003; Works</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><code>::1:8080</code></span>
+          <span><code>http://127.0.0.1:8080</code></span>
+          <span class="tcp-val-bad">&#215; Connection refused</span>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <strong>"It works in curl but not in my browser":</strong> that's almost always this.
+        <code>localhost</code> is a DNS label — your OS may resolve it to either <code>127.0.0.1</code>
+        or <code>::1</code> depending on <code>/etc/hosts</code> and resolver order. If your server
+        only listens on one of the two, the other resolution silently fails. <strong>Always
+        bind explicitly</strong> — <code>127.0.0.1</code> or <code>::1</code> — instead of trusting
+        the label.
+      </div>
+
+      <h3>IPv6 URL Syntax</h3>
+      <p>
+        IPv6 addresses contain colons, which collide with the <code>host:port</code> separator.
+        URLs solve this with square brackets:
+      </p>
+
+      <div class="tcp-compare" style="max-width: 520px;">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Family</span>
+          <span>URL form</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>IPv4</span>
+          <span><code>http://192.168.1.10:8080</code></span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span>IPv6</span>
+          <span><code>http://[::1]:8080</code> — brackets required</span>
+        </div>
+      </div>
+
+      <h3>The Socket Identity: (IP, Port) Pair</h3>
+      <p>
+        A listening socket is uniquely identified by the <em>pair</em>, not the port alone. That
+        means the same port can be used by multiple processes — as long as each one binds to a
+        different IP. But two processes can't share the exact same pair, and the kernel will say
+        so loudly:
+      </p>
+
+      <app-port-binding />
+
+      <h3>The Exception: SO_REUSEPORT</h3>
+      <p>
+        High-throughput servers like nginx and HAProxy <em>need</em> many worker processes
+        listening on the same port. The kernel offers an opt-in socket option,
+        <code>SO_REUSEPORT</code>, that lets multiple processes share one (IP, Port) pair. The
+        kernel then hashes the connection's 4-tuple (source IP, source port, dest IP, dest port)
+        to pick which worker handles each new connection — load balancing for free, in kernel space.
+      </p>
+
+      <div class="highlight-box">
+        <strong>Watch the failure mode:</strong> if a worker dies, the hash table shrinks and
+        active connection ownership may shift to a different worker. The connections that were
+        in progress on the dead worker are gone — and any state that wasn't shared (sticky
+        sessions, in-memory caches) goes with them. SO_REUSEPORT is a load balancer, not a
+        cluster manager.
+      </div>
+
+      <h3>Code: Listening in Node.js</h3>
+
+      <app-code-block lang="JavaScript" filename="server.js" [code]="nodeListenExample" />
+      <app-code-block lang="JavaScript" filename="bind-examples.js" [code]="bindExamples" />
+
+      <h3>Best Practices — Where to Bind</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Scenario</span>
+          <span>Listen on</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Solo development</strong></span>
+          <span class="tcp-val-good"><code>127.0.0.1</code> — keeps the cafe Wi-Fi out of your dev server</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Team development on LAN</strong></span>
+          <span class="tcp-val-warn">Specific LAN IP, or <code>0.0.0.0</code> with caution</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Admin / debug interfaces</strong></span>
+          <span class="tcp-val-good"><code>127.0.0.1</code> ONLY — never public, regardless of "auth"</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Public services</strong></span>
+          <span class="tcp-val-neutral">Specific interface, or <code>0.0.0.0</code> behind a firewall</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Container processes</strong></span>
+          <span class="tcp-val-neutral"><code>0.0.0.0</code> inside the container — isolation lives at the container boundary</span>
+        </div>
+      </div>
+
+      <h3>Summary</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Concept</span>
+          <span>Description</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>(IP, Port) pair</strong></span>
+          <span class="tcp-val-neutral">The real identity of a listening socket</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong><code>0.0.0.0</code></strong></span>
+          <span class="tcp-val-bad">All interfaces — dangerous default for anything sensitive</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong><code>127.0.0.1</code></strong></span>
+          <span class="tcp-val-good">IPv4 loopback — same machine only</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong><code>::1</code></strong></span>
+          <span class="tcp-val-good">IPv6 loopback — same machine only</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong><code>localhost</code></strong></span>
+          <span class="tcp-val-warn">DNS label — may resolve to IPv4 OR IPv6 depending on OS</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>SO_REUSEPORT</strong></span>
+          <span class="tcp-val-neutral">Lets multiple processes share one port; kernel hashes the 4-tuple</span>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> "listen on everything" is the kind of default that's
+        convenient in development and catastrophic in production. The right question is never
+        "which port?" — it's <em>"which interface?"</em>. Pick the narrowest one that lets the
+        callers you actually want reach you. Every data-leak headline about an exposed
+        database starts with someone binding to <code>0.0.0.0</code> and assuming nobody would
+        notice.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/7/6" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; TCP Fast Open</span>
+    </a>
+    <a routerLink="/section/7/8" class="nav-btn next">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">TCP Head-of-Line Blocking &rarr;</span>
+    </a>
+  </div>
+</div>

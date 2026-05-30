@@ -1,0 +1,309 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 07</span>
+    <h1>Network Performance</h1>
+    <p class="section-description">
+      The bridge between theory and practice — how the fundamentals you know directly impact
+      the speed, reliability, and scalability of the systems you build
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 09</span>
+      <h2>Proxies &amp; Reverse Proxies</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        A proxy and a reverse proxy are the same machine pointed in opposite directions. The
+        thing that changes is <em>which identity is hidden</em>: a forward proxy hides the
+        client, a reverse proxy hides the server. Once you see them that way, every term in
+        modern infrastructure — CDN, load balancer, API gateway, service mesh — clicks into
+        place.
+      </p>
+
+      <h3>The Core Difference, in One Table</h3>
+
+      <div class="tcp-compare" style="max-width: 620px;">
+        <div class="tcp-compare-row tcp-compare-hdr three-col">
+          <span>Type</span>
+          <span>Client knows the destination?</span>
+          <span>Server knows the client?</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Forward proxy</strong></span>
+          <span class="tcp-val-good">Yes — picked it on purpose</span>
+          <span class="tcp-val-bad">No — sees the proxy's IP</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Reverse proxy</strong></span>
+          <span class="tcp-val-bad">No — sees the proxy as the server</span>
+          <span class="tcp-val-good">Yes — receives client info</span>
+        </div>
+      </div>
+
+      <h3>Side by Side</h3>
+      <p>
+        Same three boxes, same direction of traffic — but which side is "hidden" flips:
+      </p>
+
+      <app-proxy-vs-reverse />
+
+      <h3>What a Forward Proxy Is For</h3>
+      <p>
+        A forward proxy is something the client <em>opts into</em>. It's configured in the
+        browser, on the OS, or in a corporate device policy. Once configured, every outbound
+        request goes through it before reaching the real destination.
+      </p>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Use case</span>
+          <span>What it gives you</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Anonymity</strong></span>
+          <span class="tcp-val-neutral">Hide the client's IP from the destination</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Caching</strong></span>
+          <span class="tcp-val-neutral">Corporate proxy serves common responses without re-fetching</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Logging</strong></span>
+          <span class="tcp-val-neutral">Audit every outbound request the org makes</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Blocking</strong></span>
+          <span class="tcp-val-neutral">Drop requests to disallowed hosts at the perimeter</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Debugging</strong></span>
+          <span class="tcp-val-neutral">Fiddler / Charles intercept and rewrite HTTP for inspection</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Service mesh</strong></span>
+          <span class="tcp-val-neutral">Envoy / Linkerd sidecars proxy every microservice call</span>
+        </div>
+      </div>
+
+      <h3>The Layer 4 vs Layer 7 View</h3>
+      <p>
+        At Layer 4, a proxy is just two TCP connections — one with the client, one with the
+        upstream — that pass bytes between them. At Layer 7, it actually parses the HTTP and
+        decides what to do based on the request:
+      </p>
+
+      <div class="highlight-box">
+        <strong>Forward proxy example:</strong><br />
+        <strong>L4:</strong> <code>client &harr; proxy</code> and then <code>proxy &harr; google.com</code>
+        — two independent TCP connections.<br />
+        <strong>L7:</strong> client says "take me to google.com" → proxy translates that into
+        its own <code>GET /</code> upstream.<br /><br />
+        The "two connections, one logical conversation" model is what makes everything else in
+        this lesson possible.
+      </div>
+
+      <h3>What a Reverse Proxy Is For</h3>
+      <p>
+        A reverse proxy lives on the <em>server</em> side. The client thinks it's talking to
+        the real service; the reverse proxy is the public face of a fleet behind it. Almost
+        every public website on the internet sits behind one.
+      </p>
+
+      <app-reverse-proxy-jobs />
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Use case</span>
+          <span>What it gives you</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Load balancing</strong></span>
+          <span class="tcp-val-good">Spread requests across many identical backends</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>CDN</strong></span>
+          <span class="tcp-val-good">Cache content at edge POPs close to users</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>API gateway</strong></span>
+          <span class="tcp-val-good">Route <code>/posts</code> to Posts svc, <code>/users</code> to Users svc</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>TLS termination</strong></span>
+          <span class="tcp-val-good">Decrypt once at the edge; backends speak plain HTTP</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Canary / blue-green</strong></span>
+          <span class="tcp-val-good">Send 10% of traffic to a new version, 90% to the old</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Authentication</strong></span>
+          <span class="tcp-val-good">Verify tokens at the gate; backends trust the proxy</span>
+        </div>
+      </div>
+
+      <h3>The Sidecar Pattern (Both at Once)</h3>
+      <p>
+        Modern service meshes (Envoy, Linkerd) attach a proxy to every microservice. It acts as
+        a <em>forward</em> proxy for the app's outbound calls and a <em>reverse</em> proxy for
+        the app's inbound calls — and it handles mTLS, retries, tracing, and metrics
+        transparently. The app code talks to <code>localhost</code>; the sidecar deals with the
+        network.
+      </p>
+
+      <div class="highlight-box">
+        That's why a service mesh feels like magic: it gives every service free observability
+        and zero-trust networking without changing application code. The cost is one more hop on
+        every request — and a control plane to keep all those sidecars configured.
+      </div>
+
+      <h3>Proxy vs VPN — Often Confused</h3>
+
+      <div class="tcp-compare" style="max-width: 660px;">
+        <div class="tcp-compare-row tcp-compare-hdr three-col">
+          <span>Aspect</span>
+          <span>Proxy</span>
+          <span>VPN</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Layer</strong></span>
+          <span>L4 / L7 (per protocol)</span>
+          <span>L3 (every IP packet)</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Protocol-aware</strong></span>
+          <span class="tcp-val-good">Yes — speaks the protocol</span>
+          <span class="tcp-val-neutral">No — opaque tunnel</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Sees content</strong></span>
+          <span class="tcp-val-warn">Yes (unless TLS-tunneled)</span>
+          <span class="tcp-val-good">No — encrypted end to end</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>DNS</strong></span>
+          <span class="tcp-val-neutral">Often terminated at the proxy</span>
+          <span class="tcp-val-good">Sent through the tunnel too</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Best for "anonymity"</strong></span>
+          <span class="tcp-val-warn">Limited — proxy sees plaintext</span>
+          <span class="tcp-val-good">Stronger — full encryption</span>
+        </div>
+      </div>
+
+      <h3>HTTP CONNECT — The Dumb-Pipe Tunnel</h3>
+      <p>
+        When a forward proxy sees an <code>HTTPS</code> URL, it can't decrypt the traffic
+        (that's the whole point). So it falls back to a tunnel: the client sends
+        <code>CONNECT host:443</code>, the proxy opens a TCP connection to the server, replies
+        <code>200 Connection Established</code>, and from that point on just shovels bytes back
+        and forth without inspecting them.
+      </p>
+
+      <div class="highlight-box">
+        <strong>Why this matters:</strong> CONNECT preserves end-to-end TLS through a proxy.
+        The proxy still sees the destination hostname (it has to, to open the upstream socket),
+        but the body of the conversation stays opaque to it. That's the foundation HTTPS
+        depends on when corporate proxies are in the middle.
+      </div>
+
+      <h3>Who's Who in the Real World</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr three-col">
+          <span>Software</span>
+          <span>Type</span>
+          <span>Typical job</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Squid</strong></span>
+          <span>Forward</span>
+          <span class="tcp-val-neutral">Corporate web caching proxy</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Fiddler / Charles</strong></span>
+          <span>Forward</span>
+          <span class="tcp-val-neutral">Local HTTP debugging proxy</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Envoy</strong></span>
+          <span>Both (sidecar)</span>
+          <span class="tcp-val-neutral">Service mesh data plane</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>nginx</strong></span>
+          <span>Reverse</span>
+          <span class="tcp-val-neutral">Web server + load balancer</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>HAProxy</strong></span>
+          <span>Reverse</span>
+          <span class="tcp-val-neutral">High-performance load balancer</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Cloudflare</strong></span>
+          <span>Reverse</span>
+          <span class="tcp-val-neutral">CDN, DDoS protection, edge compute</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Kong / API Gateway</strong></span>
+          <span>Reverse</span>
+          <span class="tcp-val-neutral">Path-based routing, auth, rate limiting</span>
+        </div>
+      </div>
+
+      <h3>Summary</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr three-col">
+          <span>Concept</span>
+          <span>Forward proxy</span>
+          <span>Reverse proxy</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Client knows destination?</strong></span>
+          <span class="tcp-val-good">Yes</span>
+          <span class="tcp-val-bad">No</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Server knows client?</strong></span>
+          <span class="tcp-val-bad">No</span>
+          <span class="tcp-val-good">Yes</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Configured by</strong></span>
+          <span>The client</span>
+          <span>The server / infra team</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Primary benefit</strong></span>
+          <span class="tcp-val-neutral">Privacy, caching, control of outbound traffic</span>
+          <span class="tcp-val-neutral">Scaling, routing, security at the edge</span>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> a load balancer is a reverse proxy, but not every reverse
+        proxy is a load balancer. A CDN is a reverse proxy. An API gateway is a reverse proxy.
+        A service mesh sidecar is both, fused. Once you stop thinking in product names and
+        start thinking in "who's hidden — client or server?", most of the modern stack stops
+        looking like alphabet soup.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/7/8" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; TCP Head-of-Line Blocking</span>
+    </a>
+    <a routerLink="/section/7/10" class="nav-btn next disabled-nav">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">L4 vs L7 Load Balancing &rarr;</span>
+    </a>
+  </div>
+</div>

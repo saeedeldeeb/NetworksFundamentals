@@ -116,6 +116,7 @@ export class App {
         { title: 'TCP Fast Open', path: '/section/7/6' },
         { title: 'Listening Servers', path: '/section/7/7' },
         { title: 'TCP Head-of-Line Blocking', path: '/section/7/8' },
+        { title: 'Proxies & Reverse Proxies', path: '/section/7/9' },
       ],
     },
     { id: 8, title: 'Routing', path: '/section/8', available: false },

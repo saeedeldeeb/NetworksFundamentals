@@ -1,0 +1,362 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 07</span>
+    <h1>Network Performance</h1>
+    <p class="section-description">
+      The bridge between theory and practice — how the fundamentals you know directly impact
+      the speed, reliability, and scalability of the systems you build
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 11</span>
+      <h2>Network Access Control for Databases</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        Almost every database leak that makes the news has the same root cause: somebody left the
+        database reachable from anywhere on the internet, with no network-level filter in front of
+        it. The password becomes the only thing between attackers and your data — and the password
+        is never the strongest link.
+      </p>
+
+      <h3>The Problem in One Sentence</h3>
+      <p>
+        Database engines have great authentication. What they don't have, out of the box, is a
+        guarantee about <em>who can even speak to the port</em>. That's a network problem, not an
+        auth problem — and it needs network-layer answers.
+      </p>
+
+      <div class="highlight-box">
+        <strong>Headlines you've seen:</strong>
+        &ldquo;Elasticsearch cluster leaks tens of millions of users.&rdquo;
+        &ldquo;700 MongoDB instances exposed, terabytes downloaded.&rdquo;
+        Almost always: <code>bindIp = 0.0.0.0</code>, no IP allowlist, no firewall in front.
+      </div>
+
+      <h3>Defense in Depth — Two Walls, Not One</h3>
+      <p>
+        A well-configured database has <em>two</em> independent network-level controls. Either one
+        alone can save you; together they're how production databases are supposed to be deployed.
+      </p>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr three-col">
+          <span>Layer</span>
+          <span>Question it answers</span>
+          <span>Where it lives</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>1 &mdash; listen addresses</strong></span>
+          <span class="tcp-val-good">Which NICs does the DB bind to?</span>
+          <span class="tcp-val-neutral">postgresql.conf, mongod.conf, my.cnf, redis.conf</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>2 &mdash; host-based auth</strong></span>
+          <span class="tcp-val-good">Which client IPs are allowed?</span>
+          <span class="tcp-val-neutral">pg_hba.conf, user&#64;host grants, bindIpAll</span>
+        </div>
+      </div>
+
+      <app-db-defense-in-depth/>
+
+      <div class="highlight-box">
+        Wall 1 is about <em>reachability</em>: a packet from a wrong-NIC source never even arrives.
+        Wall 2 is about <em>authorisation</em>: even if the packet arrives, the DB checks whose IP
+        it's from before reading the username. Misconfigure one — the other still blocks the attack.
+      </div>
+
+      <h3>PostgreSQL: <code>pg_hba.conf</code></h3>
+      <p>
+        Postgres reads this file top-to-bottom and uses the first matching rule. Each row is a
+        small policy: who's connecting, how (TCP or unix socket), from where, and how they should
+        authenticate:
+      </p>
+
+      <app-code-block lang="pg_hba.conf" filename="pg_hba.conf" [code]="pgHbaExample"/>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Column</span>
+          <span>What it controls</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>TYPE</strong></span>
+          <span
+            class="tcp-val-neutral"><code>local</code> = unix socket &middot; <code>host</code> = TCP &middot; <code>hostssl</code> = TCP w/ TLS only</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>DATABASE / USER</strong></span>
+          <span class="tcp-val-neutral">Limit a rule to specific DBs or roles (or <code>all</code>)</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>ADDRESS</strong></span>
+          <span class="tcp-val-good">CIDR like <code>10.0.0.0/24</code> — the network-level allowlist</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>METHOD</strong></span>
+          <span
+            class="tcp-val-neutral"><code>scram-sha-256</code>, <code>md5</code>, <code>cert</code>, <code>peer</code>, <code>trust</code>, <code>reject</code></span>
+        </div>
+      </div>
+
+      <h3>Local Unix Socket vs Loopback</h3>
+      <p>
+        Two different things people often conflate — both stay on the same machine, but they go
+        through different parts of the kernel:
+      </p>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr three-col">
+          <span>Connection</span>
+          <span>Path</span>
+          <span>Cost</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong><code>local</code> &mdash; unix socket</strong></span>
+          <span class="tcp-val-good">Direct IPC, no TCP stack at all</span>
+          <span class="tcp-val-good">Fastest possible</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong><code>host 127.0.0.1</code> &mdash; loopback</strong></span>
+          <span class="tcp-val-neutral">Full TCP stack, just routed to lo</span>
+          <span class="tcp-val-neutral">Same-machine but with TCP overhead</span>
+        </div>
+      </div>
+
+      <h3>CIDR Notation — Reading the Allowlist</h3>
+      <p>
+        The <code>/N</code> suffix is the heart of the allowlist. It says "the first <em>N</em>
+        bits must match this address; the rest can be anything." Same rule, three very different
+        attack surfaces:
+      </p>
+
+      <app-cidr-match/>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr three-col">
+          <span>CIDR</span>
+          <span>Matches</span>
+          <span>How big</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong><code>127.0.0.1/32</code></strong></span>
+          <span class="tcp-val-good">Exactly one host</span>
+          <span class="tcp-val-good">1 IP</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong><code>10.0.0.0/24</code></strong></span>
+          <span class="tcp-val-good">A /24 subnet</span>
+          <span class="tcp-val-good">256 IPs</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong><code>10.0.0.0/16</code></strong></span>
+          <span class="tcp-val-warn">A /16 — large internal network</span>
+          <span class="tcp-val-warn">65,536 IPs</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong><code>0.0.0.0/0</code></strong></span>
+          <span class="tcp-val-bad">Every IPv4 address that exists</span>
+          <span class="tcp-val-bad">~4.3 billion</span>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <strong>IPv4 vs IPv6 loopback are different addresses.</strong> <code>127.0.0.1/32</code>
+        only covers IPv4; if anything on the host connects via <code>::1</code> you also need
+        <code>::1/128</code>. The string <code>localhost</code> can resolve to either, so be
+        explicit in the config rather than trusting DNS.
+      </div>
+
+      <h3>Listen Addresses — Wall 1 in Practice</h3>
+      <p>
+        Where the database <em>binds</em> matters as much as who you allow. A DB that's not bound
+        to a public NIC is invisible from the public internet even if a firewall rule slips:
+      </p>
+
+      <app-code-block lang="postgresql.conf" filename="postgresql.conf" [code]="listenAddressesExample"/>
+
+      <h3>Common Mistakes</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Mistake</span>
+          <span>Consequence</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong><code>listen_addresses = '*'</code> in prod</strong></span>
+          <span class="tcp-val-bad">DB reachable from every NIC, including public ones</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong><code>host all all 0.0.0.0/0</code></strong></span>
+          <span class="tcp-val-bad">Allowlist becomes "the entire internet"</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>"Just testing" with <code>trust</code></strong></span>
+          <span class="tcp-val-bad">No password at all — and configs always ship</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Copying dev config to prod</strong></span>
+          <span class="tcp-val-warn">Loose dev rules leak into production</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Weak password + open allowlist</strong></span>
+          <span class="tcp-val-bad">Bots find you in hours, not days</span>
+        </div>
+      </div>
+
+      <h3>The Attack Timeline</h3>
+      <p>
+        Whatever the database is, every breach follows the same three steps. Your job is to make
+        sure the attacker fails at step 1 or step 2 — because if they make it to step 3, the only
+        thing left is a password, and bots try common pairs (<code>postgres/postgres</code>,
+        <code>admin/admin</code>) at industrial speed:
+      </p>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Step</span>
+          <span>What stops it</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>1. Scan internet for open port 5432</strong></span>
+          <span class="tcp-val-good">listen_addresses (Wall 1) — port not even bound</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>2. Open TCP connection, send startup packet</strong></span>
+          <span class="tcp-val-good">pg_hba.conf (Wall 2) — IP not on allowlist</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>3. Guess passwords until one works</strong></span>
+          <span class="tcp-val-bad">Only password strength &mdash; <em>this is where breaches happen</em></span>
+        </div>
+      </div>
+
+      <h3>Best Practices</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Practice</span>
+          <span>Why</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Bind to the smallest set of NICs</strong></span>
+          <span class="tcp-val-good">Cuts off most of the attack surface for free</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Allowlist by <code>/32</code> for known hosts</strong></span>
+          <span class="tcp-val-good">No subnet drift, no surprises</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Use <code>/24</code> for cohort of app servers</strong></span>
+          <span class="tcp-val-good">Lets autoscaling work without per-instance edits</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Default deny &mdash; let the implicit reject catch the rest</strong></span>
+          <span class="tcp-val-good">Anything not explicitly allowed is blocked</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Separate dev / staging / prod configs</strong></span>
+          <span class="tcp-val-good">Loose dev rules never reach prod by copy-paste</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Audit the allowlist regularly</strong></span>
+          <span class="tcp-val-good">Old hosts and decommissioned subnets pile up</span>
+        </div>
+      </div>
+
+      <h3>It's the Same Idea Everywhere</h3>
+      <p>
+        Different engines, same two walls — different setting names:
+      </p>
+
+      <app-code-block lang="config" filename="other-databases.conf" [code]="otherDbExample"/>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr three-col">
+          <span>Engine</span>
+          <span>Wall 1 (listen)</span>
+          <span>Wall 2 (allow)</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>PostgreSQL</strong></span>
+          <span class="tcp-val-neutral"><code>listen_addresses</code></span>
+          <span class="tcp-val-neutral"><code>pg_hba.conf</code></span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>MySQL</strong></span>
+          <span class="tcp-val-neutral"><code>bind-address</code></span>
+          <span class="tcp-val-neutral">User grants with <code>'user'&#64;'host'</code></span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>MongoDB</strong></span>
+          <span class="tcp-val-neutral"><code>net.bindIp</code> / <code>bindIpAll</code></span>
+          <span class="tcp-val-neutral">Role-based + IP whitelist (Atlas)</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Redis</strong></span>
+          <span class="tcp-val-neutral"><code>bind</code></span>
+          <span class="tcp-val-neutral"><code>protected-mode</code>, ACLs</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Elasticsearch</strong></span>
+          <span class="tcp-val-neutral"><code>network.host</code></span>
+          <span class="tcp-val-neutral">X-Pack security / API keys</span>
+        </div>
+      </div>
+
+      <h3>Summary</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Control</span>
+          <span>What it does</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>listen addresses</strong></span>
+          <span class="tcp-val-good">Decides which NICs the DB binds to</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>pg_hba ADDRESS (CIDR)</strong></span>
+          <span class="tcp-val-good">Decides which source IPs may attempt to authenticate</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong><code>/32</code> suffix</strong></span>
+          <span class="tcp-val-good">Exact-host rule — recommended for known servers</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong><code>/24</code> suffix</strong></span>
+          <span class="tcp-val-good">Subnet rule — sensible for a cohort</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong><code>reject</code> method</strong></span>
+          <span class="tcp-val-good">Explicit block above a broader allow rule</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Implicit final rule</strong></span>
+          <span class="tcp-val-good">Anything not matched is denied</span>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> Database breaches don't usually happen because someone broke
+        the crypto. They happen because a "just testing" configuration shipped to production and
+        the database accepted connections from the entire internet. Configure both walls — what
+        you listen on, and who can connect — and the password never has to do the hard work alone.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/7/10" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; Layer 4 vs Layer 7</span>
+    </a>
+    <a routerLink="/section/7" class="nav-btn next disabled-nav">
+      <span class="nav-btn-label">Section Complete</span>
+      <span class="nav-btn-title">More Coming Soon &rarr;</span>
+    </a>
+  </div>
+</div>

@@ -118,6 +118,7 @@ export class App {
         { title: 'TCP Head-of-Line Blocking', path: '/section/7/8' },
         { title: 'Proxies & Reverse Proxies', path: '/section/7/9' },
         { title: 'Layer 4 vs Layer 7 Load Balancing', path: '/section/7/10' },
+        { title: 'Network Access Control for Databases', path: '/section/7/11' },
       ],
     },
     { id: 8, title: 'Routing', path: '/section/8', available: false },

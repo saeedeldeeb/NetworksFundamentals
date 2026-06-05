@@ -1,0 +1,318 @@
+<div class="section">
+  <div class="section-header">
+    <span class="section-number">Section 07</span>
+    <h1>Network Performance</h1>
+    <p class="section-description">
+      The bridge between theory and practice — how the fundamentals you know directly impact
+      the speed, reliability, and scalability of the systems you build
+    </p>
+  </div>
+
+  <article class="lesson">
+    <div class="lesson-header">
+      <span class="lesson-badge">Lesson 10</span>
+      <h2>Layer 4 vs Layer 7 Load Balancing</h2>
+    </div>
+
+    <div class="lesson-content">
+      <p class="lead">
+        Every load balancer is a reverse proxy, but not every load balancer reads what it's
+        forwarding. The choice between Layer 4 and Layer 7 is a single question with a huge
+        downstream impact: <em>do you want to understand the bytes flowing through?</em>
+      </p>
+
+      <h3>Where in the Stack?</h3>
+      <p>
+        The OSI layer names are the giveaway. A <strong>Layer 4</strong> balancer works at the
+        transport layer — it only sees IPs, ports, and TCP segments. A <strong>Layer 7</strong>
+        balancer works at the application layer — it parses HTTP requests, reads headers, looks at
+        paths and cookies, and routes on what it finds.
+      </p>
+
+      <div class="highlight-box">
+        Same physical role (sit between client and backend), totally different mental model. L4 is
+        a smart wire. L7 is a polite waiter who reads the order, decides which kitchen handles it,
+        and walks it over.
+      </div>
+
+      <h3>Per-Connection vs Per-Request Routing</h3>
+      <p>
+        The biggest behavioural difference: <strong>L4 picks a backend once per connection</strong>
+        — every segment after that follows the same path. <strong>L7 picks a backend once per
+        request</strong> — the same client connection can fan out to many different services:
+      </p>
+
+      <app-l4-vs-l7-routing />
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr three-col">
+          <span>Aspect</span>
+          <span>Layer 4</span>
+          <span>Layer 7</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Sees</strong></span>
+          <span class="tcp-val-neutral">IP, port, segments</span>
+          <span class="tcp-val-good">Full HTTP request</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Routing unit</strong></span>
+          <span class="tcp-val-neutral">Connection</span>
+          <span class="tcp-val-good">Request</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Sticky?</strong></span>
+          <span class="tcp-val-warn">Per connection</span>
+          <span class="tcp-val-good">No — per request</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>TLS</strong></span>
+          <span class="tcp-val-good">Passes through</span>
+          <span class="tcp-val-warn">Must terminate</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Protocol aware?</strong></span>
+          <span class="tcp-val-bad">No</span>
+          <span class="tcp-val-good">Yes</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Caching</strong></span>
+          <span class="tcp-val-bad">No</span>
+          <span class="tcp-val-good">Yes</span>
+        </div>
+      </div>
+
+      <h3>How L4 Actually Forwards</h3>
+      <p>
+        L4 doesn't reassemble anything — it just rewrites the IP/port headers and forwards the raw
+        segment. It keeps a mapping table so return traffic finds its way home:
+      </p>
+
+      <div class="tcp-compare" style="max-width: 620px;">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Direction</span>
+          <span>Header rewrite</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Client &rarr; LB</strong></span>
+          <span class="tcp-val-neutral">src: 1.2.3.4 &middot; dst: <em>LB</em> (44.1.2)</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>LB &rarr; Backend</strong></span>
+          <span class="tcp-val-neutral">src: 44.1.2 &middot; dst: <em>backend</em> (44.1.3) &middot; bytes unchanged</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>Backend &rarr; LB</strong></span>
+          <span class="tcp-val-neutral">Reverse path &mdash; LB consults mapping table</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>LB &rarr; Client</strong></span>
+          <span class="tcp-val-neutral">src: 44.1.2 &middot; dst: 1.2.3.4 &middot; bytes unchanged</span>
+        </div>
+      </div>
+
+      <h3>How L7 Actually Forwards</h3>
+      <p>
+        L7 has to <em>understand</em> what's coming in, which means it has to buffer enough bytes
+        to see a complete request before it can decide anything:
+      </p>
+
+      <ol>
+        <li><strong>Receive segments</strong> &mdash; collect TCP segments from the client</li>
+        <li><strong>Buffer until complete</strong> &mdash; wait for an HTTP request boundary (the blank line after headers)</li>
+        <li><strong>Parse and inspect</strong> &mdash; method, path, host, auth header, cookies</li>
+        <li><strong>Route</strong> &mdash; <code>/posts/*</code> &rarr; Posts service, <code>/users/*</code> &rarr; Users service</li>
+        <li><strong>Forward</strong> &mdash; send the request over a (possibly pooled) backend connection</li>
+      </ol>
+
+      <div class="highlight-box">
+        L7 buffering is the source of both its power and its cost. It can route, cache, and
+        authenticate at the edge precisely because it reads everything — but reading everything
+        means CPU, memory, and a brief stall before the bytes can flow.
+      </div>
+
+      <h3>Backend Connection Efficiency</h3>
+      <p>
+        This is the under-appreciated win for L7. Because L4 ties one client connection to one
+        backend connection, every active client occupies a backend slot. L7 can <em>multiplex</em>
+        many client requests over a shared pool of backend connections — far better utilisation
+        when the backend's per-connection cost is high (databases, slow handshakes):
+      </p>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr two-col">
+          <span>Model</span>
+          <span>Effect</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>L4 — 1:1</strong></span>
+          <span class="tcp-val-warn">N clients = N backend connections (depletion risk)</span>
+        </div>
+        <div class="tcp-compare-row two-col">
+          <span><strong>L7 — N:M pool</strong></span>
+          <span class="tcp-val-good">Many clients share a small backend pool</span>
+        </div>
+      </div>
+
+      <h3>TLS Termination — The Other Big Divider</h3>
+      <p>
+        L4 can't read the bytes if it wanted to — they're encrypted, and the LB doesn't have the
+        key. L7 must have the key, because it has to read the request to route it. That places the
+        TLS certificate in two very different homes:
+      </p>
+
+      <app-tls-termination />
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr three-col">
+          <span>Property</span>
+          <span>L4 (pass-through)</span>
+          <span>L7 (terminate)</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Where cert lives</strong></span>
+          <span class="tcp-val-neutral">On every backend</span>
+          <span class="tcp-val-good">Only on LB</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>What LB sees</strong></span>
+          <span class="tcp-val-neutral">Encrypted bytes</span>
+          <span class="tcp-val-warn">Plaintext request</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Backend CPU for TLS</strong></span>
+          <span class="tcp-val-bad">Per-backend cost</span>
+          <span class="tcp-val-good">Zero (plain HTTP internally)</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Cert rotation</strong></span>
+          <span class="tcp-val-bad">Every backend</span>
+          <span class="tcp-val-good">One place</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Privacy from LB op</strong></span>
+          <span class="tcp-val-good">LB can't read traffic</span>
+          <span class="tcp-val-warn">LB sees everything</span>
+        </div>
+      </div>
+
+      <h3>WebSocket: The Sneaky Downgrade</h3>
+      <p>
+        An L7 LB happily routes <code>Upgrade: websocket</code> — but the moment the upgrade
+        completes, the connection becomes a long-lived bidirectional byte stream that the LB
+        can't parse anymore. From that point on it's <em>de facto</em> L4: any auth, rate-limit,
+        or path rule the LB enforced for HTTP requests no longer applies.
+      </p>
+
+      <div class="key-insight">
+        <strong>Watch out:</strong> if your security model depends on L7 rules at the edge, an
+        attacker who can convince the LB to upgrade can run anything they like over the resulting
+        tunnel. Enforce auth on the upgrade request <em>before</em> it succeeds, or apply backend
+        checks after.
+      </div>
+
+      <h3>When to Use Which</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr three-col">
+          <span>Use case</span>
+          <span>L4</span>
+          <span>L7</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Plain TCP services (databases, custom protocols)</strong></span>
+          <span class="tcp-val-good">&#10003;</span>
+          <span>&mdash;</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>End-to-end encryption required</strong></span>
+          <span class="tcp-val-good">&#10003;</span>
+          <span>&mdash;</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Maximum throughput / minimum latency</strong></span>
+          <span class="tcp-val-good">&#10003;</span>
+          <span>&mdash;</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>HTTP APIs, path-based routing</strong></span>
+          <span>&mdash;</span>
+          <span class="tcp-val-good">&#10003;</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>API gateway, auth at the edge</strong></span>
+          <span>&mdash;</span>
+          <span class="tcp-val-good">&#10003;</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Caching, response rewriting</strong></span>
+          <span>&mdash;</span>
+          <span class="tcp-val-good">&#10003;</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Few backend connections, many clients</strong></span>
+          <span>&mdash;</span>
+          <span class="tcp-val-good">&#10003;</span>
+        </div>
+      </div>
+
+      <h3>Summary</h3>
+
+      <div class="tcp-compare">
+        <div class="tcp-compare-row tcp-compare-hdr three-col">
+          <span>Aspect</span>
+          <span>Layer 4</span>
+          <span>Layer 7</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Understands</strong></span>
+          <span class="tcp-val-neutral">TCP segments</span>
+          <span class="tcp-val-good">HTTP requests</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Routes by</strong></span>
+          <span class="tcp-val-neutral">Connection (5-tuple)</span>
+          <span class="tcp-val-good">Request (path, headers, cookies)</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>TLS handling</strong></span>
+          <span class="tcp-val-good">Pass-through</span>
+          <span class="tcp-val-warn">Termination required</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Backend conns</strong></span>
+          <span class="tcp-val-warn">1:1 with clients</span>
+          <span class="tcp-val-good">Pooled, multiplexed</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Overhead</strong></span>
+          <span class="tcp-val-good">Minimal — just forward</span>
+          <span class="tcp-val-warn">Parse, decrypt, route</span>
+        </div>
+        <div class="tcp-compare-row three-col">
+          <span><strong>Best fit</strong></span>
+          <span class="tcp-val-neutral">Any protocol, raw speed</span>
+          <span class="tcp-val-neutral">HTTP, smart routing</span>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <strong>Key insight:</strong> Layer 4 treats data as opaque — fast, secure, dumb. Layer 7
+        understands the protocol — powerful, smart, but must hold the keys and pay the CPU.
+        The L4 vs L7 choice is really about how much intelligence you want at the edge: a smart
+        wire, or an opinionated gateway.
+      </div>
+    </div>
+  </article>
+
+  <div class="section-nav">
+    <a routerLink="/section/7/9" class="nav-btn prev">
+      <span class="nav-btn-label">Previous Lesson</span>
+      <span class="nav-btn-title">&larr; Proxies &amp; Reverse Proxies</span>
+    </a>
+    <a routerLink="/section/7/11" class="nav-btn next disabled-nav">
+      <span class="nav-btn-label">Next Lesson</span>
+      <span class="nav-btn-title">Coming Soon &rarr;</span>
+    </a>
+  </div>
+</div>
